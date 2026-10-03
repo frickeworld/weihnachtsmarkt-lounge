@@ -1,6 +1,14 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
+import { addDays, MOCK_SETTINGS, mockSupabase, type MockOptions } from './support/mockSupabase';
+
+const firstFreeDay = (page: Page) => page.locator('#buchen table button:not([disabled])').first();
+const slots = (page: Page) => page.getByRole('group', { name: 'Zeitfenster' }).locator('button');
 
 test.describe('One-Pager', () => {
+  test.beforeEach(async ({ page }) => {
+    await mockSupabase(page);
+  });
+
   test('zeigt Gesamtpreis groß und ohne Kaminfeuer-Versprechen', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('#preis')).toContainText('178,50 €');
@@ -22,13 +30,8 @@ test.describe('One-Pager', () => {
 
   test('Buchungs-UI: Tag, Zeitfenster, Formular mit Validierung', async ({ page }) => {
     await page.goto('/#buchen');
-    const day = page.locator('#buchen table button:not([disabled])').first();
-    await day.click();
-    const slot = page
-      .getByRole('group', { name: 'Zeitfenster' })
-      .locator('button:not([disabled])')
-      .first();
-    await slot.click();
+    await firstFreeDay(page).click();
+    await slots(page).first().click();
 
     const submit = page.getByRole('button', { name: /Zahlungspflichtig buchen – 178,50 €/ });
     await submit.click();
@@ -50,11 +53,10 @@ test.describe('One-Pager', () => {
     await page.getByLabel('Straße und Hausnummer').fill('Schloßplatz 1');
     await page.getByLabel('PLZ').fill('32756');
     await page.getByLabel('Ort').fill('Detmold');
-    const newsletter = page.getByLabel(/STUDIO\/F-Newsletter/);
-    await expect(newsletter).not.toBeChecked();
+    await expect(page.getByLabel(/STUDIO\/F-Newsletter/)).not.toBeChecked();
     await page.getByLabel(/Ich akzeptiere die/).check();
     await submit.click();
-    await expect(page.getByRole('status')).toContainText('Online-Zahlung wird gerade eingerichtet');
+    await expect(page.getByRole('status').filter({ hasText: 'Online-Zahlung' })).toBeVisible();
   });
 
   test('Rechtsseiten und 404 erreichbar', async ({ page }) => {
@@ -71,9 +73,103 @@ test.describe('One-Pager', () => {
   });
 });
 
+test.describe('Echte Verfügbarkeit (Phase 2)', () => {
+  test('Kalender zeigt nur Saisontage; belegt, gesperrt, geschlossen nicht wählbar', async ({
+    page,
+  }) => {
+    const start = MOCK_SETTINGS.season_start;
+    const opts: MockOptions = {
+      overrides: {
+        // Tag 1: beide belegt → ausgebucht
+        ...Object.fromEntries(
+          ['17:00', '17:30', '19:00', '19:30'].map((t) => [`${start} ${t}`, 'taken']),
+        ),
+        // Tag 2: geschlossen
+        ...Object.fromEntries(
+          ['17:00', '17:30', '19:00', '19:30'].map((t) => [`${addDays(start, 1)} ${t}`, 'closed']),
+        ),
+      },
+    };
+    await mockSupabase(page, opts);
+    await page.goto('/#buchen');
+
+    const dayBtn = (d: string) =>
+      page
+        .locator('#buchen table button', { hasText: new RegExp(`^${Number(d.slice(8))}$`) })
+        .first();
+
+    // Ein Tag vor Saisonbeginn ist nicht wählbar (sofern im selben Monat).
+    const before = addDays(start, -1);
+    if (before.slice(0, 7) === start.slice(0, 7)) await expect(dayBtn(before)).toBeDisabled();
+    await expect(dayBtn(start)).toBeDisabled();
+    await expect(dayBtn(start)).toHaveAccessibleName(/ausgebucht/);
+    await expect(dayBtn(addDays(start, 1))).toHaveAccessibleName(/geschlossen/);
+  });
+
+  test('Tag mit einem belegten Zeitfenster: nur das freie ist wählbar', async ({ page }) => {
+    const d = addDays(MOCK_SETTINGS.season_start, 3);
+    await mockSupabase(page, {
+      overrides: Object.fromEntries(['17:00', '17:30'].map((t) => [`${d} ${t}`, 'taken'])),
+    });
+    await page.goto('/#buchen');
+    const btn = page
+      .locator('#buchen table button', { hasText: new RegExp(`^${Number(d.slice(8))}$`) })
+      .first();
+    await expect(btn).toHaveAccessibleName(/nur noch 1 Zeitfenster/);
+    await btn.click();
+    await expect(slots(page).first()).toBeDisabled();
+    await expect(slots(page).nth(1)).toBeEnabled();
+  });
+
+  test('Zeitfenster wird während der Auswahl vergeben → Hinweis', async ({ page }) => {
+    const opts: MockOptions = { overrides: {} };
+    await mockSupabase(page, opts);
+    await page.goto('/#buchen');
+    await firstFreeDay(page).click();
+    const label = (await slots(page).first().innerText()).slice(0, 5);
+    const day = MOCK_SETTINGS.season_start;
+    opts.overrides![`${day} ${label}`] = 'taken';
+    await slots(page).first().click();
+    await expect(
+      page.getByText('Dieser Termin wurde gerade gebucht. Bitte wähle einen anderen.'),
+    ).toBeVisible();
+    await expect(page.getByLabel('Vorname')).toHaveCount(0);
+  });
+
+  test('Fehler beim Laden: freundliche Meldung mit „Erneut versuchen“', async ({ page }) => {
+    const opts: MockOptions = { failAvailability: true };
+    await mockSupabase(page, opts);
+    await page.goto('/#buchen');
+    await expect(
+      page.getByText('Die freien Termine können gerade nicht geladen werden.', { exact: false }),
+    ).toBeVisible();
+    opts.failAvailability = false;
+    await page.getByRole('button', { name: 'Erneut versuchen' }).click();
+    await expect(firstFreeDay(page)).toBeEnabled();
+  });
+
+  test('Tracking: page_view beim Laden, book_click bei „Jetzt Lounge buchen“', async ({
+    page,
+    isMobile,
+  }) => {
+    const tracked: { event_type: string; device: string }[] = [];
+    await mockSupabase(page, { tracked });
+    await page.goto('/');
+    await expect.poll(() => tracked.filter((t) => t.event_type === 'page_view').length).toBe(1);
+    await page.getByRole('link', { name: 'Jetzt Lounge buchen' }).click();
+    await expect.poll(() => tracked.filter((t) => t.event_type === 'book_click').length).toBe(1);
+    expect(tracked.every((t) => t.device === (isMobile ? 'mobile' : 'desktop'))).toBe(true);
+    const cookies = await page.context().cookies();
+    expect(cookies).toHaveLength(0);
+    const storage = await page.evaluate(() => Object.keys(localStorage).length);
+    expect(storage).toBe(0);
+  });
+});
+
 test.describe('Bewegung reduzieren', () => {
   test.use({ reducedMotion: 'reduce' });
   test('kein Schnee-Canvas', async ({ page }) => {
+    await mockSupabase(page);
     await page.goto('/');
     await expect(page.locator('canvas')).toHaveCount(0);
   });
@@ -82,6 +178,7 @@ test.describe('Bewegung reduzieren', () => {
 test.describe('Mobile Buchungsleiste', () => {
   test('erscheint nach dem Hero und verschwindet bei #buchen', async ({ page, isMobile }) => {
     test.skip(!isMobile, 'nur mobil');
+    await mockSupabase(page);
     await page.goto('/');
     const bar = page.getByRole('link', { name: 'Lounge buchen · 178,50 €' });
     await expect(bar).toHaveCount(0);

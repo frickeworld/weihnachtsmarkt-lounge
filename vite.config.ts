@@ -44,6 +44,8 @@ function preloadFonts(patterns: RegExp[]): Plugin {
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), 'VITE_');
+  // Für absolute URLs in index.html (og:image). Ohne Angabe relativ.
+  process.env.VITE_PUBLIC_SITE_URL ??= env.VITE_PUBLIC_SITE_URL ?? '';
   return {
     plugins: [
       react(),

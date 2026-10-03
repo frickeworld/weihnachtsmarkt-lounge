@@ -1,4 +1,9 @@
 import { expect, test } from '@playwright/test';
+import { mockSupabase } from './support/mockSupabase';
+
+test.beforeEach(async ({ page }) => {
+  await mockSupabase(page);
+});
 
 test('Startseite lädt mit Titel, Logo und ohne seitliches Scrollen', async ({ page }) => {
   await page.goto('/');

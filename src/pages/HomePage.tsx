@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { LightString } from '@/components/LightString';
@@ -11,10 +12,22 @@ import { Hero } from '@/sections/Hero';
 import { HowItWorks } from '@/sections/HowItWorks';
 import { Occasions } from '@/sections/Occasions';
 import { Pricing } from '@/sections/Pricing';
+import { trackPageView } from '@/lib/track';
 
 const Divider = () => <LightString variant="divider" className="opacity-80" />;
 
 export function HomePage() {
+  useEffect(trackPageView, []);
+
+  // Direktlinks wie /#buchen: Der Browser springt vor dem Rendern ins Leere, daher hier nachholen.
+  useEffect(() => {
+    const id = decodeURIComponent(window.location.hash.slice(1));
+    if (!id) return;
+    requestAnimationFrame(() =>
+      document.getElementById(id)?.scrollIntoView({ behavior: 'instant' }),
+    );
+  }, []);
+
   return (
     <>
       <a

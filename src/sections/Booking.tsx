@@ -1,10 +1,9 @@
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
-import { SectionHeading } from '@/components/SectionHeading';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Reveal } from '@/components/Reveal';
-import { groupByDate } from '@/lib/availability';
+import { SectionHeading } from '@/components/SectionHeading';
 import { addDays, formatLongDate, parseIsoDate, todayInBerlin, type IsoDate } from '@/lib/dates';
 import { useSettings } from '@/lib/settingsContext';
-import { sampleAvailability } from '@/lib/slots';
+import { useAvailability } from '@/lib/useAvailability';
 import { usePrefersReducedMotion } from '@/lib/useMediaQuery';
 import { Calendar } from './booking/Calendar';
 import { SlotPicker } from './booking/SlotPicker';
@@ -20,6 +19,16 @@ const ym = (d: IsoDate): YM => ({
   month: parseIsoDate(d).getUTCMonth() + 1,
 });
 const ymKey = (v: YM) => v.year * 12 + v.month;
+const clampView = (v: YM, min: YM, max: YM): YM =>
+  ymKey(v) < ymKey(min) ? min : ymKey(v) > ymKey(max) ? max : v;
+const monthStart = (v: YM): IsoDate => `${v.year}-${String(v.month).padStart(2, '0')}-01`;
+const monthEnd = (v: YM): IsoDate =>
+  addDays(
+    monthStart(
+      v.month === 12 ? { year: v.year + 1, month: 1 } : { year: v.year, month: v.month + 1 },
+    ),
+    -1,
+  );
 
 function Step({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {
   return (
@@ -43,23 +52,36 @@ export function Booking() {
   const first = settings.seasonStart > today ? settings.seasonStart : today;
   const minMonth = ym(first);
   const maxMonth = ym(settings.seasonEnd);
-  const [view, setView] = useState<YM>(minMonth);
+  const [requestedView, setView] = useState<YM | null>(null);
+  // Ansicht immer im Saisonzeitraum halten (auch wenn die echten Einstellungen erst später kommen).
+  const view = clampView(requestedView ?? minMonth, minMonth, maxMonth);
   const [date, setDate] = useState<IsoDate | null>(null);
   const [slotStart, setSlotStart] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+
+  const sectionRef = useRef<HTMLElement>(null);
   const slotsRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
 
-  // Phase 1: Beispieldaten. Ab Phase 2 aus get_availability().
-  const byDate = useMemo(() => {
-    const from = `${view.year}-${String(view.month).padStart(2, '0')}-01`;
-    const to = addDays(
-      `${view.month === 12 ? view.year + 1 : view.year}-${String((view.month % 12) + 1).padStart(2, '0')}-01`,
-      -1,
+  // Verfügbarkeit erst laden, wenn der Buchungsbereich in die Nähe kommt.
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e!.isIntersecting) {
+          setOpen(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: '300px 0px' },
     );
-    return groupByDate(
-      sampleAvailability(from, to, { start: settings.seasonStart, end: settings.seasonEnd }, today),
-    );
-  }, [view, settings.seasonStart, settings.seasonEnd, today]);
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  const { byDate, state, reload } = useAvailability(monthStart(view), monthEnd(view), open);
 
   const daySlots = date ? (byDate.get(date) ?? []) : [];
   const slot = daySlots.find((s) => s.startTime === slotStart && s.status === 'free') ?? null;
@@ -67,14 +89,36 @@ export function Booking() {
   const scrollTo = (el: HTMLElement | null) =>
     el?.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
 
-  useEffect(() => {
-    if (date) scrollTo(slotsRef.current);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [date]);
-  useEffect(() => {
-    if (slotStart) scrollTo(formRef.current);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slotStart]);
+  /** Nach jeder Auswahl frisch laden und prüfen, ob die Auswahl noch frei ist. */
+  async function refreshAndCheck(nextDate: IsoDate, nextSlot: string | null) {
+    const map = await reload();
+    if (!map) return;
+    const slots = map.get(nextDate) ?? [];
+    if (!slots.some((s) => s.status === 'free')) {
+      setDate(null);
+      setSlotStart(null);
+      setNotice('Dieser Tag ist gerade ausgebucht. Bitte wähle einen anderen.');
+    } else if (nextSlot && !slots.some((s) => s.startTime === nextSlot && s.status === 'free')) {
+      setSlotStart(null);
+      setNotice('Dieser Termin wurde gerade gebucht. Bitte wähle einen anderen.');
+    }
+  }
+
+  function selectDate(d: IsoDate) {
+    setNotice(null);
+    setDate(d);
+    setSlotStart(null);
+    requestAnimationFrame(() => scrollTo(slotsRef.current));
+    void refreshAndCheck(d, null);
+  }
+
+  function selectSlot(start: string) {
+    if (!date) return;
+    setNotice(null);
+    setSlotStart(start);
+    requestAnimationFrame(() => scrollTo(formRef.current));
+    void refreshAndCheck(date, start);
+  }
 
   const move = (delta: number) => {
     const k = ymKey(view) + delta;
@@ -83,32 +127,61 @@ export function Booking() {
   };
 
   return (
-    <section id="buchen" className="scroll-mt-20 px-4 py-20 sm:px-6 sm:py-28">
+    <section ref={sectionRef} id="buchen" className="scroll-mt-20 px-4 py-20 sm:px-6 sm:py-28">
       <div className="mx-auto max-w-3xl">
         <SectionHeading eyebrow="Buchung" title="Wähle deinen Abend" />
         <Reveal className="space-y-6">
           <Step n={1} title="Tag wählen">
-            <Calendar
-              year={view.year}
-              month={view.month}
-              canPrev={ymKey(view) > ymKey(minMonth)}
-              canNext={ymKey(view) < ymKey(maxMonth)}
-              onPrev={() => move(-1)}
-              onNext={() => move(1)}
-              byDate={byDate}
-              selected={date}
-              onSelect={(d) => {
-                setDate(d);
-                setSlotStart(null);
-              }}
-            />
+            <div className="relative" aria-busy={state === 'loading'}>
+              <Calendar
+                year={view.year}
+                month={view.month}
+                canPrev={ymKey(view) > ymKey(minMonth)}
+                canNext={ymKey(view) < ymKey(maxMonth)}
+                onPrev={() => move(-1)}
+                onNext={() => move(1)}
+                byDate={byDate}
+                selected={date}
+                onSelect={selectDate}
+              />
+              {state === 'loading' && (
+                <p className="mt-4 text-sm text-cream/65" role="status">
+                  Verfügbarkeit wird geladen …
+                </p>
+              )}
+              {(state === 'error' || state === 'unconfigured') && (
+                <div
+                  role="alert"
+                  className="mt-4 rounded-[3px] border border-rose-300/40 bg-rose-950/30 p-4"
+                >
+                  <p>
+                    Die freien Termine können gerade nicht geladen werden. Bitte prüfe deine
+                    Verbindung und versuche es noch einmal.
+                  </p>
+                  {state === 'error' && (
+                    <button
+                      type="button"
+                      onClick={() => void reload()}
+                      className="btn-outline mt-3 !min-h-10"
+                    >
+                      Erneut versuchen
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+            {notice && (
+              <p role="alert" className="mt-4 rounded-[3px] border border-gold/50 bg-gold/10 p-4">
+                {notice}
+              </p>
+            )}
           </Step>
 
           {date && (
             <div ref={slotsRef} className="scroll-mt-20">
               <Step n={2} title="Zeitfenster wählen">
                 <p className="mb-4 text-cream/75">{formatLongDate(date)}</p>
-                <SlotPicker slots={daySlots} selected={slotStart} onSelect={setSlotStart} />
+                <SlotPicker slots={daySlots} selected={slotStart} onSelect={selectSlot} />
               </Step>
             </div>
           )}

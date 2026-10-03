@@ -1,5 +1,5 @@
 /**
- * Öffentliche Einstellungen. Ab Phase 2 kommen sie aus der Funktion get_public_settings().
+ * Öffentliche Einstellungen aus get_public_settings().
  * PUBLIC_SETTINGS_FALLBACK ist nur der Startwert für den ersten Render, bis die Datenbank antwortet –
  * die verbindlichen Beträge liegen in der Tabelle settings und werden nur serverseitig verwendet.
  */
