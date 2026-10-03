@@ -88,7 +88,21 @@ Supabase → **Edge Functions → Secrets** (oder Project Settings → Edge Func
 
 1. **Einstellungen → Zahlungen → Zahlungsmethoden:** Karte, Apple Pay, Google Pay und **PayPal** aktiv. SEPA-Lastschrift, Klarna, Sofort/Überweisung brauchen wir nicht (die Seite fordert sie ohnehin nicht an).
 2. **Einstellungen → Unternehmensdetails / Branding / Rechnungen:** Firmendaten, Logo, Rechnungsnummernkreis pflegen.
-3. Den Webhook legen wir gemeinsam in Phase 3 an.
+3. **Webhook anlegen (Testmodus):** Entwickler → Webhooks → **Endpunkt hinzufügen**
+   - URL: `https://[PROJEKT-REF].supabase.co/functions/v1/stripe-webhook`
+   - Ereignisse: `checkout.session.completed`, `checkout.session.expired`,
+     `checkout.session.async_payment_succeeded`, `invoice.finalized`
+   - Danach das **Signing Secret** (`whsec_…`) kopieren und in Supabase als `STRIPE_WEBHOOK_SECRET` eintragen.
+4. Prüfen, ob Stripe für automatische Rechnungen (Invoicing) eine Gebühr berechnet – Rechnungen entstehen
+   nur bei Firmenbuchungen oder Rechnungswunsch.
+
+Optionale Supabase-Secrets für Stripe:
+
+| Name                          | Wert                                                                                      |
+| ----------------------------- | ----------------------------------------------------------------------------------------- |
+| `STRIPE_PAYMENT_METHOD_TYPES` | Standard `card,paypal`. Nur falls PayPal (noch) nicht aktiv ist: `card`                   |
+| `STRIPE_TAX_RATE_LOUNGE`      | Steuersatz-ID (`txr_…`) für die Lounge-Position – erst nach Rücksprache mit Steuerberater |
+| `STRIPE_TAX_RATE_FEE`         | Steuersatz-ID für die Vorverkaufsgebühr                                                   |
 
 ## 7. Brevo
 

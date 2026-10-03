@@ -39,6 +39,28 @@ jobs:
       - name: pgTAP-Tests
         run: supabase test db
 
+  functions:
+    name: Edge Functions (Deno-Typprüfung + Integrationstest mit stripe-mock)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.119.0
+      - name: Typprüfung
+        run: |
+          for f in supabase/functions/*/index.ts; do
+            dir=$(dirname "$f")
+            deno check --config "$dir/deno.json" "$f"
+          done
+      - name: Lokales Supabase starten
+        run: supabase start -x studio,imgproxy,mailpit,realtime,storage-api,postgres-meta,edge-runtime,logflare,vector,supavisor
+      - name: Integrationstest Checkout/Webhook
+        run: scripts/functions-integration.sh
+
   e2e:
     name: Playwright
     runs-on: ubuntu-latest

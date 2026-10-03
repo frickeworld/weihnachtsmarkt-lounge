@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Reveal } from '@/components/Reveal';
+import { releaseHold } from '@/lib/api';
 import { SectionHeading } from '@/components/SectionHeading';
 import { addDays, formatLongDate, parseIsoDate, todayInBerlin, type IsoDate } from '@/lib/dates';
 import { useSettings } from '@/lib/settingsContext';
@@ -57,7 +58,14 @@ export function Booking() {
   const view = clampView(requestedView ?? minMonth, minMonth, maxMonth);
   const [date, setDate] = useState<IsoDate | null>(null);
   const [slotStart, setSlotStart] = useState<string | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
+  // Rückkehr von Stripe mit „Zurück“: /?abbruch=<booking_id>#buchen
+  const [abortedBookingId] = useState(() =>
+    new URLSearchParams(window.location.search).get('abbruch'),
+  );
+  const [notice, setNotice] = useState<string | null>(() =>
+    abortedBookingId ? 'Zahlung abgebrochen. Du kannst es gleich noch einmal versuchen.' : null,
+  );
+  const [holdReleased, setHoldReleased] = useState(!abortedBookingId);
   const [open, setOpen] = useState(false);
 
   const sectionRef = useRef<HTMLElement>(null);
@@ -81,7 +89,21 @@ export function Booking() {
     return () => io.disconnect();
   }, []);
 
-  const { byDate, state, reload } = useAvailability(monthStart(view), monthEnd(view), open);
+  // Reservierung sofort freigeben und den Parameter aus der Adresse entfernen.
+  useEffect(() => {
+    if (!abortedBookingId) return;
+    const url = new URL(window.location.href);
+    url.searchParams.delete('abbruch');
+    window.history.replaceState(null, '', url.pathname + url.search + url.hash);
+    void releaseHold(abortedBookingId).then(() => setHoldReleased(true));
+  }, [abortedBookingId]);
+
+  // Verfügbarkeit erst laden, wenn eine abgebrochene Reservierung freigegeben ist.
+  const { byDate, state, reload } = useAvailability(
+    monthStart(view),
+    monthEnd(view),
+    open && holdReleased,
+  );
 
   const daySlots = date ? (byDate.get(date) ?? []) : [];
   const slot = daySlots.find((s) => s.startTime === slotStart && s.status === 'free') ?? null;
@@ -190,7 +212,17 @@ export function Booking() {
             <div ref={formRef} className="scroll-mt-20">
               <Step n={3} title="Deine Angaben">
                 <Suspense fallback={<p className="text-cream/70">Formular wird geladen …</p>}>
-                  <BookingForm date={date} startTime={slot.startTime} endTime={slot.endTime} />
+                  <BookingForm
+                    date={date}
+                    startTime={slot.startTime}
+                    endTime={slot.endTime}
+                    onSlotUnavailable={(message) => {
+                      setSlotStart(null);
+                      setNotice(message);
+                      void reload();
+                      requestAnimationFrame(() => scrollTo(slotsRef.current));
+                    }}
+                  />
                 </Suspense>
               </Step>
             </div>

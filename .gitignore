@@ -12,3 +12,4 @@ test-results
 *.log
 .vscode/*
 !.vscode/extensions.json
+supabase/functions/.local-ca.pem

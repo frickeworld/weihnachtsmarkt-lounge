@@ -36,7 +36,17 @@ export interface MockOptions {
   failAvailability?: boolean;
   /** Alle Aufrufe von track_event landen hier. */
   tracked?: { event_type: string; device: string }[];
+  /** Antwort von create-checkout (Standard: Weiterleitung auf eine Test-Seite). */
+  checkout?: { status: number; body: Record<string, unknown> };
+  /** Alle Anfragen an create-checkout. */
+  checkoutRequests?: unknown[];
+  /** Alle Anfragen an release-hold. */
+  releaseRequests?: unknown[];
+  /** Antworten von get_success_info nacheinander (letzte wird wiederholt). */
+  successInfo?: (Record<string, unknown> | null)[];
 }
+
+export const FAKE_STRIPE_URL = 'https://checkout.stripe.com/c/pay/cs_test_e2e';
 
 export async function mockSupabase(page: Page, opts: MockOptions = {}) {
   // .single() fordert bei PostgREST ein einzelnes Objekt an (Accept: application/vnd.pgrst.object+json).
@@ -47,6 +57,27 @@ export async function mockSupabase(page: Page, opts: MockOptions = {}) {
   await page.route('**/rest/v1/rpc/track_event*', async (route) => {
     opts.tracked?.push(route.request().postDataJSON());
     await route.fulfill({ status: 204, body: '' });
+  });
+  await page.route('**/functions/v1/create-checkout', async (route) => {
+    opts.checkoutRequests?.push(route.request().postDataJSON());
+    const r = opts.checkout ?? { status: 200, body: { url: FAKE_STRIPE_URL, bookingId: 'b1' } };
+    await route.fulfill({ status: r.status, json: r.body });
+  });
+  await page.route('**/functions/v1/release-hold', async (route) => {
+    opts.releaseRequests?.push(route.request().postDataJSON());
+    await route.fulfill({ json: { released: true } });
+  });
+  await page.route('https://checkout.stripe.com/**', (route) =>
+    route.fulfill({ contentType: 'text/html', body: '<h1>Stripe Checkout (Test)</h1>' }),
+  );
+  let successCalls = 0;
+  await page.route('**/rest/v1/rpc/get_success_info*', (route) => {
+    const list = opts.successInfo ?? [null];
+    const item = list[Math.min(successCalls++, list.length - 1)] ?? null;
+    const single = (route.request().headers()['accept'] ?? '').includes('vnd.pgrst.object');
+    if (single && !item)
+      return route.fulfill({ status: 406, json: { code: 'PGRST116', message: 'no rows' } });
+    return route.fulfill({ json: single ? item : item ? [item] : [] });
   });
   await page.route('**/rest/v1/rpc/get_availability*', (route) => {
     if (opts.failAvailability) return route.fulfill({ status: 500, json: { message: 'kaputt' } });

@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMemo, useState } from 'react';
+import { startCheckout } from '@/lib/api';
 import { useForm, useWatch } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import {
@@ -21,18 +22,21 @@ interface Props {
   date: IsoDate;
   startTime: string;
   endTime: string;
+  /** Das Zeitfenster ist inzwischen vergeben oder nicht mehr buchbar. */
+  onSlotUnavailable: (message: string) => void;
 }
 
-export function BookingForm({ date, startTime, endTime }: Props) {
+export function BookingForm({ date, startTime, endTime, onSlotUnavailable }: Props) {
   const settings = useSettings();
   const schema = useMemo(() => createBookingSchema(settings.maxPersons), [settings.maxPersons]);
-  const [notice, setNotice] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
     control,
-    formState: { errors },
+    setError,
+    formState: { errors, isSubmitting, isSubmitSuccessful },
   } = useForm<BookingFormInput, unknown, BookingFormValues>({
     resolver: zodResolver(schema),
     defaultValues: BOOKING_FORM_DEFAULTS,
@@ -46,11 +50,36 @@ export function BookingForm({ date, startTime, endTime }: Props) {
   const showBilling = needsBillingAddress({ companyName, invoiceRequested });
   const total = formatCents(totalCents(settings));
 
-  // Phase 1: noch ohne Zahlung. Ab Phase 3 startet hier create-checkout.
-  const onSubmit = () => setNotice(true);
+  const onSubmit = async (values: BookingFormValues) => {
+    setSubmitError(null);
+    const result = await startCheckout({ date, startTime, form: values });
+    if (result.ok) {
+      // Weiter zu Stripe. Der Button bleibt gesperrt, bis die Seite wechselt.
+      window.location.assign(result.url);
+      return;
+    }
+    if (result.kind === 'slot') {
+      onSlotUnavailable(result.message);
+      return;
+    }
+    if (result.kind === 'validation' && result.fields) {
+      for (const [path, message] of Object.entries(result.fields)) {
+        const field = path.replace(/^form\./, '') as keyof BookingFormInput;
+        setError(field, { type: 'server', message }, { shouldFocus: true });
+      }
+    }
+    setSubmitError(result.message);
+    throw new Error(result.message); // markiert den Versand als fehlgeschlagen
+  };
+
+  const busy = isSubmitting || isSubmitSuccessful;
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6">
+    <form
+      onSubmit={(e) => void handleSubmit(onSubmit)(e).catch(() => undefined)}
+      noValidate
+      className="space-y-6"
+    >
       <div className="grid gap-5 sm:grid-cols-2">
         <Field id="firstName" label="Vorname" error={errors.firstName}>
           <input
@@ -313,16 +342,25 @@ export function BookingForm({ date, startTime, endTime }: Props) {
         besteht daher nicht. Die Buchung ist verbindlich.
       </p>
 
-      <button type="submit" className="btn-gold w-full text-lg sm:w-auto sm:px-10">
-        Zahlungspflichtig buchen – {total}
+      <button
+        type="submit"
+        disabled={busy}
+        aria-busy={busy}
+        className="btn-gold w-full text-lg sm:w-auto sm:px-10"
+      >
+        {busy ? 'Weiter zur Zahlung …' : `Zahlungspflichtig buchen – ${total}`}
       </button>
+      <p className="text-sm text-cream/60">
+        Sichere Zahlung über Stripe mit Karte, Apple Pay, Google Pay oder PayPal. Dein Termin ist
+        während der Zahlung 30 Minuten für dich reserviert.
+      </p>
 
-      {notice && (
+      {submitError && (
         <div
-          role="status"
-          className="rounded-[3px] border border-gold/50 bg-gold/10 p-4 text-cream"
+          role="alert"
+          className="rounded-[3px] border border-rose-300/40 bg-rose-950/30 p-4 text-cream"
         >
-          Danke! Die Online-Zahlung wird gerade eingerichtet. Bald kannst du hier direkt buchen.
+          {submitError}
         </div>
       )}
     </form>

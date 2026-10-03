@@ -81,7 +81,7 @@ Frontend (`.env.local`, Cloudflare Pages, Build auf Mittwald):
 
 GitHub-Secrets: `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_REF`, `SUPABASE_DB_PASSWORD`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `STRIPE_TEST_SECRET_KEY` (nur für E2E)
 
-Supabase-Secrets: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_TAX_RATE_LOUNGE` (optional), `STRIPE_TAX_RATE_FEE` (optional), `BREVO_API_KEY`, `BREVO_SENDER_EMAIL`, `BREVO_SENDER_NAME`, `BREVO_LIST_BOOKINGS`, `BREVO_LIST_NEWSLETTER`, `BREVO_DOI_TEMPLATE_ID`, `PUBLIC_SITE_URL`, `SCANNER_TOKEN_SECRET`, `CRON_SECRET`
+Supabase-Secrets: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PAYMENT_METHOD_TYPES` (optional), `STRIPE_TAX_RATE_LOUNGE` (optional), `STRIPE_TAX_RATE_FEE` (optional), `BREVO_API_KEY`, `BREVO_SENDER_EMAIL`, `BREVO_SENDER_NAME`, `BREVO_LIST_BOOKINGS`, `BREVO_LIST_NEWSLETTER`, `BREVO_DOI_TEMPLATE_ID`, `PUBLIC_SITE_URL`, `SCANNER_TOKEN_SECRET`, `CRON_SECRET`
 
 ---
 
@@ -227,6 +227,16 @@ Spalten `scanner_pin_hash` sind nie über eine öffentliche Funktion erreichbar.
    - `checkout.session.expired` → `expired`, falls noch `pending`.
 5. **Abbruch** `?abbruch=[booking_id]` → `release-hold`: nur wenn `pending` und Session nicht bezahlt → Session expire, Buchung `expired`. Hinweis „Zahlung abgebrochen. Du kannst es gleich noch einmal versuchen.“
 6. **/buchung/erfolg**: `get_success_info`, Polling alle 2 s bis 20 s, danach „Deine Zahlung wird bestätigt – du bekommst gleich eine E-Mail.“ noindex.
+
+**Umsetzungsdetails (Phase 3):**
+
+- Zahlarten über `allowed_payment_method_types` (aktuelle Stripe-API, filtert die im Dashboard aktiven Methoden): `card` (inkl. Apple Pay / Google Pay) und `paypal`. Über das Secret `STRIPE_PAYMENT_METHOD_TYPES` änderbar.
+- Reservierung = `hold_minutes` + 2 Minuten Puffer (Stripe verlangt mindestens 30 Minuten Laufzeit); Stripe-`expires_at` = `hold_expires_at`.
+- Schutz vor Massen-Reservierungen: max. 10 erfolgreiche Reservierungen pro Stunde und (gesalzen gehashter) IP, Tabelle `checkout_attempts`, Löschung nach 24 h.
+- Statuswechsel ausschließlich über `mark_booking_paid()` / `mark_booking_expired()` (nur service_role). Späte Zahlung auf vergebenes Zeitfenster → `cancelled` mit Grund „… Erstattung in Stripe nötig“.
+- Rechnungslink kommt aus `checkout.session.completed` oder `invoice.finalized`.
+- Validierungsschema `supabase/functions/_shared/bookingSchema.ts` wird von Browser und Server gemeinsam genutzt.
+- Rechnungsland ist fest Deutschland (`DE`).
 
 ### 4.2 Ticket und E-Mails
 

@@ -56,7 +56,7 @@ test.describe('One-Pager', () => {
     await expect(page.getByLabel(/STUDIO\/F-Newsletter/)).not.toBeChecked();
     await page.getByLabel(/Ich akzeptiere die/).check();
     await submit.click();
-    await expect(page.getByRole('status').filter({ hasText: 'Online-Zahlung' })).toBeVisible();
+    await page.waitForURL(/checkout\.stripe\.com/);
   });
 
   test('Rechtsseiten und 404 erreichbar', async ({ page }) => {
