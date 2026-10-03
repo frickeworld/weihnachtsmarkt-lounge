@@ -44,6 +44,8 @@ export interface MockOptions {
   releaseRequests?: unknown[];
   /** Antworten von get_success_info nacheinander (letzte wird wiederholt). */
   successInfo?: (Record<string, unknown> | null)[];
+  /** Antwort von get_ticket (null = nicht gefunden). */
+  ticket?: Record<string, unknown> | null;
 }
 
 export const FAKE_STRIPE_URL = 'https://checkout.stripe.com/c/pay/cs_test_e2e';
@@ -70,6 +72,13 @@ export async function mockSupabase(page: Page, opts: MockOptions = {}) {
   await page.route('https://checkout.stripe.com/**', (route) =>
     route.fulfill({ contentType: 'text/html', body: '<h1>Stripe Checkout (Test)</h1>' }),
   );
+  await page.route('**/rest/v1/rpc/get_ticket*', (route) => {
+    const item = opts.ticket ?? null;
+    const single = (route.request().headers()['accept'] ?? '').includes('vnd.pgrst.object');
+    if (single && !item)
+      return route.fulfill({ status: 406, json: { code: 'PGRST116', message: 'no rows' } });
+    return route.fulfill({ json: single ? item : item ? [item] : [] });
+  });
   let successCalls = 0;
   await page.route('**/rest/v1/rpc/get_success_info*', (route) => {
     const list = opts.successInfo ?? [null];

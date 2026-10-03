@@ -63,6 +63,8 @@
   "workspace": {
     "dependencies": [
       "npm:@supabase/supabase-js@2.117.2",
+      "npm:pdf-lib@1.17.1",
+      "npm:qrcode@1.5.4",
       "npm:stripe@23.0.0",
       "npm:zod@4.6.5"
     ]

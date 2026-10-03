@@ -181,3 +181,43 @@ export async function fetchSuccessInfo(sessionId: string): Promise<SuccessInfo |
     status: data.status,
   };
 }
+
+// ---------------------------------------------------------------------------------------
+// Online-Ticket (Phase 4)
+// ---------------------------------------------------------------------------------------
+
+export interface TicketInfo {
+  firstName: string;
+  bookingCode: string;
+  date: IsoDate;
+  startTime: string;
+  endTime: string;
+  persons: number;
+  status: 'paid' | 'cancelled';
+  checkedInAt: string | null;
+}
+
+export async function fetchTicket(token: string): Promise<TicketInfo | null> {
+  const { data, error } = await client().rpc('get_ticket', { p_token: token }).maybeSingle<{
+    first_name: string;
+    booking_code: string;
+    slot_date: string;
+    start_time: string;
+    end_time: string;
+    persons: number;
+    status: TicketInfo['status'];
+    checked_in_at: string | null;
+  }>();
+  if (error) throw error;
+  if (!data) return null;
+  return {
+    firstName: data.first_name,
+    bookingCode: data.booking_code,
+    date: data.slot_date,
+    startTime: data.start_time.slice(0, 5),
+    endTime: data.end_time.slice(0, 5),
+    persons: data.persons,
+    status: data.status,
+    checkedInAt: data.checked_in_at,
+  };
+}

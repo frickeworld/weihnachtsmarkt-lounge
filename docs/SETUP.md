@@ -82,7 +82,7 @@ Supabase → **Edge Functions → Secrets** (oder Project Settings → Edge Func
 | `BREVO_DOI_TEMPLATE_ID` | ID der Double-Opt-in-Vorlage                                                  |
 | `PUBLIC_SITE_URL`       | die Cloudflare-URL (später die Live-Domain), ohne `/` am Ende                 |
 | `SCANNER_TOKEN_SECRET`  | lange Zufallszeichenkette – ich sage dir in Phase 6, wie du sie erzeugst      |
-| `CRON_SECRET`           | lange Zufallszeichenkette – kommt in Phase 2/4                                |
+| `CRON_SECRET`           | lange Zufallszeichenkette für die Erinnerungsmails, siehe Abschnitt 8         |
 
 ## 6. Stripe (Konto MF Coaching & Promotion GmbH)
 
@@ -109,7 +109,36 @@ Optionale Supabase-Secrets für Stripe:
 1. Liste „Lounge-Buchungen 2026“ anlegen, ID notieren.
 2. ID der Newsletter-Liste notieren.
 3. Double-Opt-in-Vorlage anlegen, Template-ID notieren.
-4. Kontakt-Attribute prüfen: heißen sie `VORNAME`/`NACHNAME` oder `FIRSTNAME`/`LASTNAME`? Attribut `FIRMA` ggf. anlegen. Sag mir die Namen.
+4. Kontakt-Attribute prüfen: heißen sie `VORNAME`/`NACHNAME` oder `FIRSTNAME`/`LASTNAME`? Attribut `FIRMA` ggf. anlegen.
+   Standard ist `VORNAME`/`NACHNAME`/`FIRMA`. Weichen die Namen ab, die Secrets `BREVO_ATTR_FIRSTNAME`,
+   `BREVO_ATTR_LASTNAME` bzw. `BREVO_ATTR_COMPANY` setzen (z. B. `FIRSTNAME`).
+5. Double-Opt-in-Vorlage: Als Ziel nach der Bestätigung trägt die Seite automatisch
+   `[PUBLIC_SITE_URL]/newsletter/bestaetigt` ein.
+6. Absender `tickets@studio-f.club` (oder ähnlich) unter **Absender & IP** anlegen; die Domain studio-f.club muss
+   mit SPF und DKIM verifiziert sein, sonst landen Tickets im Spam.
+
+## 8. Erinnerungsmails (Zeitplan)
+
+Die Datenbank ruft alle 15 Minuten die Function `send-reminders` auf (ab 10:00 Uhr am Buchungstag wird verschickt).
+Dafür braucht sie die Projekt-URL und ein Geheimnis – beides liegt verschlüsselt im Supabase Vault.
+
+1. Ein langes Zufalls-Geheimnis erzeugen, z. B. im Terminal: `openssl rand -hex 32`
+   (oder einen Passwort-Generator mit 64 Zeichen nutzen).
+2. In Supabase unter **Edge Functions → Secrets** als `CRON_SECRET` eintragen.
+3. Im **SQL Editor** einmalig ausführen (Werte ersetzen):
+
+```sql
+select vault.create_secret('https://[PROJEKT-REF].supabase.co', 'project_url');
+select vault.create_secret('[DEIN-CRON-SECRET]', 'cron_secret');
+```
+
+Fehlen diese Einträge, passiert einfach nichts (keine Fehler, aber auch keine Erinnerungen).
+
+## 9. Stripe-Rechnungen per Mail
+
+In Stripe unter **Einstellungen → Billing → Rechnungen → Kunden-E-Mails** „Abgeschlossene Rechnungen an
+Kunden senden“ aktivieren. Dann bekommt der Gast die Rechnung zusätzlich direkt von Stripe – auch wenn sie
+erst nach der Ticket-Mail fertig ist.
 
 ---
 

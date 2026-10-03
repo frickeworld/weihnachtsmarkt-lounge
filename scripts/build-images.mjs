@@ -1,7 +1,7 @@
 // Erzeugt optimierte Bilder aus /assets nach src/assets bzw. public.
 // Aufruf: node scripts/build-images.mjs (nur nötig, wenn sich /assets ändert; Ergebnisse werden committet).
 import sharp from 'sharp';
-import { readFile } from 'node:fs/promises';
+import { mkdir, readFile } from 'node:fs/promises';
 
 const LOGO = 'assets/haendler-logo-schmal.png';
 
@@ -13,6 +13,13 @@ for (const width of [480, 960]) {
     .webp({ quality: 90, alphaQuality: 100 })
     .toFile(`src/assets/haendler-logo-${width}.webp`);
 }
+
+// E-Mail und PDF: PNG (WebP zeigen nicht alle Mail-Programme an), 2× für Retina.
+await mkdir('public/email', { recursive: true });
+await sharp(trimmed)
+  .resize({ width: 440 })
+  .png({ compressionLevel: 9, palette: true })
+  .toFile('public/email/haendler-logo.png');
 
 // Open-Graph-Bild (1200×630): Nachtschwarz, Goldlicht, Logo auf Creme-Plakette, Titel.
 // Wird ersetzt, sobald ein Hero-Foto vorliegt.

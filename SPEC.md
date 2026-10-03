@@ -251,6 +251,15 @@ Spalten `scanner_pin_hash` sind nie über eine öffentliche Funktion erreichbar.
 - `send-reminders` (pg_cron stündlich, geschützt per `CRON_SECRET`): Buchungen `paid`, Datum = heute (Berlin), Berlin-Zeit ≥ 10:00, `reminder_sent_at IS NULL`, `created_at` vor heute 10:00 Uhr Berlin → Erinnerungsmail mit PDF, Betreff „Heute ist es so weit: deine Lounge um [Startzeit] Uhr“. `reminder_sent_at` setzen (genau einmal).
 - Login-Mails (Einladung, Passwort, MFA) zunächst über Supabase-Standard, vor Livegang über Brevo-SMTP mit studio-f.club-Absender.
 
+**Umsetzungsdetails (Phase 4):**
+
+- Gemeinsames Modul `supabase/functions/_shared/ticket.ts` für Ticket und Erinnerung; Mail-Vorlage `emailTemplates.ts` (alle Gast-Eingaben HTML-escaped), PDF `ticketPdf.ts` (A5, pdf-lib, Standard-Schriften).
+- Logo für Mail und PDF: `public/email/haendler-logo.png` (über `PUBLIC_SITE_URL` geladen).
+- Ort kommt aus `settings.lounge_location` (im Admin pflegbar).
+- Erinnerung: pg_cron alle 15 Minuten → `invoke_send_reminders()` → Function `send-reminders` (Header `x-cron-secret`); `claim_due_reminders()` reserviert atomar, bei Fehler `release_reminder_claim()`.
+- Brevo-Attributnamen per Secret (`BREVO_ATTR_FIRSTNAME`, `BREVO_ATTR_LASTNAME`, `BREVO_ATTR_COMPANY`), Standard `VORNAME`/`NACHNAME`/`FIRMA`.
+- Double-Opt-in wird pro Buchung höchstens einmal ausgelöst.
+
 ### 4.3 Manuelle Buchung (Admin)
 
 Formular wie online + Zahlungsart (bar / Überweisung / kostenlos) + Schalter „In Händler-Abrechnung aufnehmen“ (Standard an, bei „kostenlos“ automatisch aus). Status `paid`, `source=manual`. Regeln (Saison, Sperre, Buchungsschluss) dürfen mit Warnung übergangen werden → `admin_override=true`. Unique-Index gilt immer. Ticket per Brevo. Bei „kostenlos“ ist `amount_total_cents = 0`, die gespeicherten Anteile bleiben, `include_in_settlement=false`.

@@ -1,6 +1,8 @@
-// send-ticket: Versand von QR-Code, PDF-Ticket und Brevo-Kontakt folgt in Phase 4.
-// Phase 3: Stub, der nur mit dem service_role-Schlüssel aufrufbar ist.
+// send-ticket: Ticket-Mail mit QR-Code und PDF über Brevo. Aufruf durch den Stripe-Webhook
+// (und ab Phase 5 durch „Ticket erneut senden“ im Admin). Nur mit service_role-Schlüssel.
+import { adminClient } from '../_shared/db.ts';
 import { json, preflight, requireEnv, safeEqual } from '../_shared/http.ts';
+import { deliverTicket } from '../_shared/ticket.ts';
 
 Deno.serve(async (req) => {
   const early = preflight(req);
@@ -12,6 +14,12 @@ Deno.serve(async (req) => {
   }
 
   const { booking_id } = (await req.json().catch(() => ({}))) as { booking_id?: string };
-  console.log('send-ticket (Stub, Phase 4) für Buchung', booking_id);
-  return json({ queued: true, stub: true }, 202);
+  if (!booking_id) return json({ error: 'booking_id fehlt' }, 400);
+
+  const result = await deliverTicket(adminClient(), booking_id, 'ticket');
+  if (!result.ok) {
+    const status = result.error === 'not_found' ? 404 : result.error === 'not_paid' ? 409 : 502;
+    return json(result, status);
+  }
+  return json(result);
 });

@@ -21,10 +21,28 @@ insert into public.blocked_slots (date, start_time, reason) values ('2026-12-01'
 select event_type, device, count(*) from public.page_events group by 1, 2;
 ```
 
+## Phase 4 – Erinnerung testen
+
+```sql
+-- Bezahlte Buchung für HEUTE, „gebucht“ gestern (sonst gibt es keine Erinnerung).
+-- Eigene E-Mail-Adresse eintragen und ein Zeitfenster wählen, das heute noch nicht begonnen hat.
+insert into public.bookings (date, start_time, end_time, status, first_name, last_name, email, phone, persons, occasion, created_at)
+values (current_date, '19:00', '21:00', 'paid', 'Test', 'Gast', '[DEINE-EMAIL]', '0123456', 4, 'freunde', now() - interval '1 day');
+
+-- Nach 10:00 Uhr: sofort auslösen statt auf den 15-Minuten-Takt zu warten
+select public.invoke_send_reminders();
+
+-- Ergebnis ansehen
+select b.email, b.reminder_sent_at, l.type, l.status, l.error
+  from public.bookings b left join public.email_log l on l.booking_id = b.id
+ where b.email = '[DEINE-EMAIL]';
+```
+
 ## Aufräumen
 
 ```sql
-delete from public.bookings where email = 'test@example.de';
+delete from public.email_log where booking_id in (select id from public.bookings where email in ('test@example.de', '[DEINE-EMAIL]'));
+delete from public.bookings where email in ('test@example.de', '[DEINE-EMAIL]');
 delete from public.closed_dates where reason = 'Test';
 delete from public.blocked_slots where reason = 'Test';
 delete from public.page_events; -- nur vor dem Livegang!

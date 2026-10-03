@@ -22,5 +22,10 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src", "supabase/functions/_shared/bookingSchema.ts"]
+  "include": [
+    "src",
+    "supabase/functions/_shared/bookingSchema.ts",
+    "supabase/functions/_shared/emailTemplates.ts",
+    "supabase/functions/_shared/legal.ts"
+  ]
 }

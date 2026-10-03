@@ -11,6 +11,14 @@ export STRIPE_SECRET_KEY=sk_test_123
 export STRIPE_API_BASE=http://127.0.0.1:12111
 export STRIPE_WEBHOOK_SECRET=whsec_integration_test
 export PUBLIC_SITE_URL=http://127.0.0.1:4173
+export CRON_SECRET=cron_integration_test
+# Brevo-Simulator läuft im Test selbst (Port 8199)
+export BREVO_API_BASE=http://127.0.0.1:8199
+export BREVO_API_KEY=brevo_test_key
+export BREVO_SENDER_EMAIL=tickets@studio-f.club
+export BREVO_LIST_BOOKINGS=7
+export BREVO_LIST_NEWSLETTER=8
+export BREVO_DOI_TEMPLATE_ID=9
 
 docker rm -f stripe-mock >/dev/null 2>&1 || true
 docker run -d --name stripe-mock -p 12111:12111 stripe/stripe-mock:latest >/dev/null
@@ -23,14 +31,14 @@ cleanup() {
 trap cleanup EXIT
 
 port=8101
-for f in create-checkout stripe-webhook release-hold send-ticket; do
+for f in create-checkout stripe-webhook release-hold send-ticket send-reminders; do
   DENO_SERVE_ADDRESS="tcp:127.0.0.1:$port" deno run -A --config "supabase/functions/$f/deno.json" \
     "supabase/functions/$f/index.ts" >"/tmp/fn-$f.log" 2>&1 &
   pids+=($!)
   port=$((port + 1))
 done
 
-for p in 8101 8102 8103 8104 12111; do
+for p in 8101 8102 8103 8104 8105 12111; do
   for _ in $(seq 1 60); do
     (echo >"/dev/tcp/127.0.0.1/$p") 2>/dev/null && break
     sleep 1
