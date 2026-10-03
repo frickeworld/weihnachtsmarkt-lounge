@@ -3,6 +3,7 @@ import { fileURLToPath, URL } from 'node:url';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig, loadEnv, type Plugin } from 'vite';
+import { viteSingleFile } from 'vite-plugin-singlefile';
 
 /**
  * Setzt <meta name="robots" content="noindex"> für Vorschau- und Entwicklungs-Builds.
@@ -43,6 +44,9 @@ function preloadFonts(patterns: RegExp[]): Plugin {
 }
 
 export default defineConfig(({ mode }) => {
+  // Vorschau-Build (npm run build:preview): eine einzige HTML-Datei mit Beispieldaten, z. B. für ein Artifact.
+  const vorschau = mode === 'vorschau';
+  if (vorschau) process.env.VITE_DEMO = 'true';
   const env = loadEnv(mode, process.cwd(), 'VITE_');
   // Für absolute URLs in index.html (og:image). Ohne Angabe relativ.
   process.env.VITE_PUBLIC_SITE_URL ??= env.VITE_PUBLIC_SITE_URL ?? '';
@@ -56,12 +60,15 @@ export default defineConfig(({ mode }) => {
         /manrope-latin-400-normal-.*\.woff2$/,
         /manrope-latin-600-normal-.*\.woff2$/,
       ]),
+      ...(vorschau ? [viteSingleFile()] : []),
     ],
     resolve: {
       alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
     },
     server: { port: 5173, host: '127.0.0.1' },
-    build: { target: 'es2022', sourcemap: false },
+    build: vorschau
+      ? { target: 'es2022', outDir: 'dist-vorschau', assetsInlineLimit: 100_000_000 }
+      : { target: 'es2022', sourcemap: false },
     test: {
       environment: 'jsdom',
       include: ['src/**/*.test.{ts,tsx}'],

@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMemo, useState } from 'react';
 import { startCheckout } from '@/lib/api';
 import { useForm, useWatch } from 'react-hook-form';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   BOOKING_FORM_DEFAULTS,
   createBookingSchema,
@@ -30,6 +30,7 @@ export function BookingForm({ date, startTime, endTime, onSlotUnavailable }: Pro
   const settings = useSettings();
   const schema = useMemo(() => createBookingSchema(settings.maxPersons), [settings.maxPersons]);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const {
     register,
@@ -55,7 +56,9 @@ export function BookingForm({ date, startTime, endTime, onSlotUnavailable }: Pro
     const result = await startCheckout({ date, startTime, form: values });
     if (result.ok) {
       // Weiter zu Stripe. Der Button bleibt gesperrt, bis die Seite wechselt.
-      window.location.assign(result.url);
+      if (result.url.startsWith('/'))
+        navigate(result.url); // nur Vorschau-Modus
+      else window.location.assign(result.url);
       return;
     }
     if (result.kind === 'slot') {

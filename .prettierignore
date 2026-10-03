@@ -7,3 +7,4 @@ package-lock.json
 supabase/config.toml
 supabase/.temp
 assets
+dist-vorschau

@@ -8,14 +8,15 @@ Buchungssystem für die Lounge auf dem Weihnachtsmarkt im Schlosspark Detmold.
 
 ## Befehle
 
-| Befehl                                                        | Zweck                                        |
-| ------------------------------------------------------------- | -------------------------------------------- |
-| `npm run dev`                                                 | Entwicklungsserver auf http://127.0.0.1:5173 |
-| `npm run build`                                               | Statischer Build nach `dist/`                |
-| `npm run lint` / `npm run typecheck` / `npm run format:check` | Code-Prüfungen                               |
-| `npm test`                                                    | Unit-Tests (Vitest)                          |
-| `npm run test:e2e`                                            | Klicktests (Playwright)                      |
-| `node scripts/build-images.mjs`                               | Logo-WebP und OG-Bild aus `/assets` erzeugen |
+| Befehl                                                        | Zweck                                                             |
+| ------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `npm run dev`                                                 | Entwicklungsserver auf http://127.0.0.1:5173                      |
+| `npm run build`                                               | Statischer Build nach `dist/`                                     |
+| `npm run lint` / `npm run typecheck` / `npm run format:check` | Code-Prüfungen                                                    |
+| `npm test`                                                    | Unit-Tests (Vitest)                                               |
+| `npm run test:e2e`                                            | Klicktests (Playwright)                                           |
+| `npm run build:preview`                                       | Vorschau als eine HTML-Datei mit Beispieldaten (`dist-vorschau/`) |
+| `node scripts/build-images.mjs`                               | Logo-WebP und OG-Bild aus `/assets` erzeugen                      |
 
 ## Struktur
 

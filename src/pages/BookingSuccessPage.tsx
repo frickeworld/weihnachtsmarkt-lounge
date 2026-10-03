@@ -7,6 +7,8 @@ import { fetchSuccessInfo, type SuccessInfo } from '@/lib/api';
 import { formatLongDate } from '@/lib/dates';
 import { useSettings } from '@/lib/settingsContext';
 import { useNoindex } from '@/lib/useNoindex';
+import { DEMO } from '@/lib/demo';
+import { DEMO_TICKET_TOKEN } from '@/lib/demoApi';
 
 const POLL_INTERVAL_MS = 2000;
 const POLL_TIMEOUT_MS = 20000;
@@ -92,6 +94,11 @@ export function BookingSuccessPage() {
               <p className="mt-8 text-lg text-cream/85">
                 Dein Ticket ist auf dem Weg in dein Postfach.
               </p>
+              {DEMO && (
+                <Link to={`/ticket/${DEMO_TICKET_TOKEN}`} className="btn-gold mt-6">
+                  Vorschau: Online-Ticket ansehen
+                </Link>
+              )}
             </div>
           )}
 

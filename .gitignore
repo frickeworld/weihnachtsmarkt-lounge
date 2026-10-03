@@ -13,3 +13,4 @@ test-results
 .vscode/*
 !.vscode/extensions.json
 supabase/functions/.local-ca.pem
+dist-vorschau

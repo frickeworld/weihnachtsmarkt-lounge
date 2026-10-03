@@ -1,6 +1,8 @@
 import type { SlotAvailability, SlotStatus } from './availability';
 import type { IsoDate } from './dates';
 import type { PublicSettings } from './settings';
+import { DEMO } from './demo';
+import { DEMO_TICKET_TOKEN, demoAvailability, demoSettings } from './demoApi';
 import { env } from './env';
 import { supabase } from './supabase';
 
@@ -27,6 +29,7 @@ interface SettingsRow {
 }
 
 export async function fetchPublicSettings(): Promise<PublicSettings> {
+  if (DEMO) return demoSettings();
   const { data, error } = await client().rpc('get_public_settings').single<SettingsRow>();
   if (error) throw error;
   // Unvollständige Antworten nie übernehmen – dann bleiben die Startwerte stehen.
@@ -60,6 +63,7 @@ interface AvailabilityRow {
 }
 
 export async function fetchAvailability(from: IsoDate, to: IsoDate): Promise<SlotAvailability[]> {
+  if (DEMO) return demoAvailability(from, to);
   const { data, error } = await client().rpc('get_availability', { from_date: from, to_date: to });
   if (error) throw error;
   return (data as AvailabilityRow[]).map((r) => ({
@@ -122,6 +126,17 @@ export async function startCheckout(payload: {
   startTime: string;
   form: unknown;
 }): Promise<CheckoutResult> {
+  if (DEMO) {
+    // Vorschau: statt Stripe direkt die Erfolgsseite zeigen.
+    await new Promise((r) => setTimeout(r, 600));
+    const f = payload.form as { firstName?: string };
+    demoBooking = {
+      date: payload.date,
+      startTime: payload.startTime,
+      firstName: f.firstName ?? 'Gast',
+    };
+    return { ok: true, url: '/buchung/erfolg?session_id=cs_vorschau' };
+  }
   try {
     const { status, data } = await callFunction('create-checkout', payload);
     if (status === 200 && typeof data.url === 'string') return { ok: true, url: data.url };
@@ -143,6 +158,7 @@ export async function startCheckout(payload: {
 
 /** Gibt eine Reservierung frei, wenn der Gast bei Stripe abbricht. */
 export async function releaseHold(bookingId: string): Promise<void> {
+  if (DEMO) return;
   try {
     await callFunction('release-hold', { bookingId });
   } catch {
@@ -159,7 +175,25 @@ export interface SuccessInfo {
   status: 'pending' | 'paid' | 'cancelled' | 'expired';
 }
 
+let demoBooking: { date: IsoDate; startTime: string; firstName: string } | null = null;
+
+function demoEnd(start: string): string {
+  const [h, m] = start.split(':').map(Number);
+  return `${String(h! + 2).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
 export async function fetchSuccessInfo(sessionId: string): Promise<SuccessInfo | null> {
+  if (DEMO) {
+    const b = demoBooking ?? { date: '2026-12-05', startTime: '17:30', firstName: 'Anna' };
+    return {
+      firstName: b.firstName,
+      date: b.date,
+      startTime: b.startTime,
+      endTime: demoEnd(b.startTime),
+      bookingCode: 'HL-VORS-CHAU',
+      status: 'paid',
+    };
+  }
   const { data, error } = await client()
     .rpc('get_success_info', { p_session_id: sessionId })
     .maybeSingle<{
@@ -198,6 +232,20 @@ export interface TicketInfo {
 }
 
 export async function fetchTicket(token: string): Promise<TicketInfo | null> {
+  if (DEMO) {
+    if (token !== DEMO_TICKET_TOKEN) return null;
+    const b = demoBooking ?? { date: '2026-12-05', startTime: '17:30', firstName: 'Anna' };
+    return {
+      firstName: b.firstName,
+      bookingCode: 'HL-VORS-CHAU',
+      date: b.date,
+      startTime: b.startTime,
+      endTime: demoEnd(b.startTime),
+      persons: 8,
+      status: 'paid',
+      checkedInAt: null,
+    };
+  }
   const { data, error } = await client().rpc('get_ticket', { p_token: token }).maybeSingle<{
     first_name: string;
     booking_code: string;
