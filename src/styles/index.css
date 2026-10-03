@@ -1,0 +1,49 @@
+@import 'tailwindcss';
+@import './fonts.css';
+
+/* Design-Tokens – siehe CLAUDE.md „Design“. Werte nur hier pflegen. */
+@theme {
+  --color-night: #0f0d0b; /* Nachtschwarz – Hintergrund */
+  --color-coal: #1a1714; /* Kohle – Flächen */
+  --color-gold: #c9a24d; /* Gold – Akzente, Linien, Buttons */
+  --color-champagne: #e9d8a6; /* Champagner – helles Gold */
+  --color-cream: #f6efe3; /* Creme – Text, Logo-Plakette */
+  --color-haendler-red: #cd131c; /* Händler-Rot, gemessen aus dem Logo-Schriftzug */
+  --color-fir: #1f3a2e; /* Tannengrün – sparsam */
+
+  --font-display: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  body {
+    @apply bg-night text-cream font-sans antialiased;
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-display;
+    text-wrap: balance;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-champagne);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+}
