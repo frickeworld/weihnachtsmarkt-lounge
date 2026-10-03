@@ -11,8 +11,8 @@
   --color-haendler-red: #cd131c; /* Händler-Rot, gemessen aus dem Logo-Schriftzug */
   --color-fir: #1f3a2e; /* Tannengrün – sparsam */
 
-  --font-display: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
-  --font-sans: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Cormorant Garamond', 'Cormorant Fallback', Georgia, serif;
+  --font-sans: 'Manrope', 'Manrope Fallback', system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
 
 @layer base {
@@ -36,8 +36,11 @@
 
   h1,
   h2,
-  h3 {
-    @apply font-display;
+  h3,
+  h4,
+  .font-display {
+    font-family: var(--font-display);
+    font-variant-numeric: lining-nums; /* Cormorant hat sonst Mediävalziffern (178,50 wirkt unruhig) */
     text-wrap: balance;
   }
 
@@ -45,5 +48,231 @@
     outline: 2px solid var(--color-champagne);
     outline-offset: 3px;
     border-radius: 2px;
+  }
+}
+
+/* ---------- Festliche Effekte ---------- */
+
+@layer components {
+  /* Goldener Glanz-Sweep über Text (H1). Läuft etwa alle 6 s. */
+  .gold-shimmer-text {
+    background-image: linear-gradient(
+      110deg,
+      var(--color-cream) 0%,
+      var(--color-cream) 42%,
+      var(--color-champagne) 48%,
+      #fff7e0 50%,
+      var(--color-champagne) 52%,
+      var(--color-cream) 58%,
+      var(--color-cream) 100%
+    );
+    background-size: 300% 100%;
+    background-position: 100% 0;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: shimmer-text 6s ease-in-out infinite;
+  }
+
+  /* Haupt-Button in Gold mit Glanz-Sweep. */
+  .btn-gold {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 3rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 2px;
+    background: linear-gradient(180deg, #d8b462 0%, var(--color-gold) 55%, #b38c3c 100%);
+    color: var(--color-night);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    box-shadow:
+      0 0 0 1px rgba(233, 216, 166, 0.35) inset,
+      0 8px 30px -12px rgba(201, 162, 77, 0.6);
+    transition:
+      transform 200ms ease,
+      box-shadow 200ms ease,
+      filter 200ms ease;
+  }
+  .btn-gold::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(
+      105deg,
+      transparent 35%,
+      rgba(255, 249, 230, 0.75) 50%,
+      transparent 65%
+    );
+    transform: translateX(-120%);
+    animation: shimmer-button 6s ease-in-out infinite;
+  }
+  .btn-gold:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.06);
+    box-shadow:
+      0 0 0 1px rgba(233, 216, 166, 0.5) inset,
+      0 12px 34px -12px rgba(201, 162, 77, 0.8);
+  }
+  .btn-gold:disabled {
+    cursor: not-allowed;
+    filter: grayscale(0.6) brightness(0.7);
+    transform: none;
+  }
+
+  /* Sekundärer Button: Goldrahmen. */
+  .btn-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 2px;
+    border: 1px solid rgba(201, 162, 77, 0.7);
+    color: var(--color-champagne);
+    font-weight: 600;
+    transition:
+      background-color 200ms ease,
+      border-color 200ms ease;
+  }
+  .btn-outline:hover {
+    background-color: rgba(201, 162, 77, 0.1);
+    border-color: var(--color-champagne);
+  }
+
+  /* Karte mit feinem Goldrand, hebt sich beim Hover leicht an. */
+  .card {
+    border: 1px solid rgba(201, 162, 77, 0.28);
+    background: linear-gradient(180deg, rgba(26, 23, 20, 0.92), rgba(15, 13, 11, 0.92));
+    border-radius: 3px;
+    transition:
+      transform 300ms ease,
+      border-color 300ms ease,
+      box-shadow 300ms ease;
+  }
+  .card-hover:hover {
+    transform: translateY(-4px);
+    border-color: rgba(233, 216, 166, 0.7);
+    box-shadow: 0 18px 40px -24px rgba(201, 162, 77, 0.55);
+  }
+
+  .eyebrow {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--color-champagne);
+  }
+
+  /* Formularfelder */
+  .field-label {
+    display: block;
+    margin-bottom: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-cream);
+  }
+  .field-input {
+    width: 100%;
+    min-height: 3rem;
+    padding: 0.75rem 0.875rem;
+    border-radius: 2px;
+    border: 1px solid rgba(233, 216, 166, 0.3);
+    background: rgba(15, 13, 11, 0.7);
+    color: var(--color-cream);
+    font-size: 1rem; /* verhindert Zoom auf iOS */
+    transition: border-color 150ms ease;
+  }
+  .field-input::placeholder {
+    color: rgba(246, 239, 227, 0.4);
+  }
+  .field-input:focus {
+    outline: none;
+    border-color: var(--color-gold);
+    box-shadow: 0 0 0 3px rgba(201, 162, 77, 0.25);
+  }
+  .field-input[aria-invalid='true'] {
+    border-color: #e5736f;
+  }
+  .field-error {
+    margin-top: 0.375rem;
+    font-size: 0.875rem;
+    color: #f2a09c;
+  }
+}
+
+/* Lämpchen der Lichterkette */
+.bulb {
+  animation: twinkle var(--twinkle-duration, 3s) ease-in-out var(--twinkle-delay, 0s) infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  45% {
+    opacity: 0.45;
+  }
+  55% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes shimmer-text {
+  0%,
+  60% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0% 0;
+  }
+}
+
+@keyframes shimmer-button {
+  0%,
+  70% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+@keyframes glow-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+.glow-pulse {
+  animation: glow-pulse 7s ease-in-out infinite;
+}
+
+/* Bewegung reduzieren: Funkeln, Glanz und Pulsieren aus. */
+@media (prefers-reduced-motion: reduce) {
+  .bulb,
+  .glow-pulse,
+  .gold-shimmer-text,
+  .btn-gold::after {
+    animation: none !important;
+  }
+  .gold-shimmer-text {
+    background-position: 100% 0;
+  }
+  .card-hover:hover,
+  .btn-gold:hover {
+    transform: none;
   }
 }

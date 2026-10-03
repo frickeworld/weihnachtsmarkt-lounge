@@ -15,6 +15,7 @@ Buchungssystem für die Lounge auf dem Weihnachtsmarkt im Schlosspark Detmold.
 | `npm run lint` / `npm run typecheck` / `npm run format:check` | Code-Prüfungen                               |
 | `npm test`                                                    | Unit-Tests (Vitest)                          |
 | `npm run test:e2e`                                            | Klicktests (Playwright)                      |
+| `node scripts/build-images.mjs`                               | Logo-WebP und OG-Bild aus `/assets` erzeugen |
 
 ## Struktur
 

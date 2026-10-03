@@ -1,0 +1,330 @@
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMemo, useState } from 'react';
+import { useForm, useWatch } from 'react-hook-form';
+import { Link } from 'react-router-dom';
+import {
+  BOOKING_FORM_DEFAULTS,
+  createBookingSchema,
+  needsBillingAddress,
+  OCCASIONS,
+  type BookingFormInput,
+  type BookingFormValues,
+} from '@/lib/bookingSchema';
+import { formatLongDate, formatTime, type IsoDate } from '@/lib/dates';
+import { formatCents } from '@/lib/money';
+import { totalCents } from '@/lib/settings';
+import { useSettings } from '@/lib/settingsContext';
+import { a11y } from './a11y';
+import { Field } from './fields';
+
+interface Props {
+  date: IsoDate;
+  startTime: string;
+  endTime: string;
+}
+
+export function BookingForm({ date, startTime, endTime }: Props) {
+  const settings = useSettings();
+  const schema = useMemo(() => createBookingSchema(settings.maxPersons), [settings.maxPersons]);
+  const [notice, setNotice] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm<BookingFormInput, unknown, BookingFormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: BOOKING_FORM_DEFAULTS,
+    mode: 'onTouched',
+  });
+
+  const [companyName, invoiceRequested, persons] = useWatch({
+    control,
+    name: ['companyName', 'invoiceRequested', 'persons'],
+  });
+  const showBilling = needsBillingAddress({ companyName, invoiceRequested });
+  const total = formatCents(totalCents(settings));
+
+  // Phase 1: noch ohne Zahlung. Ab Phase 3 startet hier create-checkout.
+  const onSubmit = () => setNotice(true);
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6">
+      <div className="grid gap-5 sm:grid-cols-2">
+        <Field id="firstName" label="Vorname" error={errors.firstName}>
+          <input
+            className="field-input"
+            autoComplete="given-name"
+            {...a11y('firstName', errors.firstName)}
+            {...register('firstName')}
+          />
+        </Field>
+        <Field id="lastName" label="Nachname" error={errors.lastName}>
+          <input
+            className="field-input"
+            autoComplete="family-name"
+            {...a11y('lastName', errors.lastName)}
+            {...register('lastName')}
+          />
+        </Field>
+        <Field
+          id="email"
+          label="E-Mail"
+          error={errors.email}
+          hint="Hierhin schicken wir dein Ticket."
+        >
+          <input
+            type="email"
+            inputMode="email"
+            className="field-input"
+            autoComplete="email"
+            {...a11y('email', errors.email, true)}
+            {...register('email')}
+          />
+        </Field>
+        <Field
+          id="phone"
+          label="Telefon"
+          error={errors.phone}
+          hint="Nur für Rückfragen zu deiner Buchung."
+        >
+          <input
+            type="tel"
+            inputMode="tel"
+            className="field-input"
+            autoComplete="tel"
+            {...a11y('phone', errors.phone, true)}
+            {...register('phone')}
+          />
+        </Field>
+        <Field id="persons" label="Personenzahl" error={errors.persons}>
+          <select
+            className="field-input"
+            {...a11y('persons', errors.persons)}
+            {...register('persons')}
+          >
+            <option value="">Bitte wählen</option>
+            {Array.from({ length: settings.maxPersons }, (_, i) => i + 1).map((n) => (
+              <option key={n} value={n}>
+                {n} {n === 1 ? 'Person' : 'Personen'}
+              </option>
+            ))}
+          </select>
+        </Field>
+      </div>
+
+      <fieldset>
+        <legend className="field-label">Anlass</legend>
+        <div
+          className="flex flex-wrap gap-2"
+          aria-describedby={errors.occasion ? 'occasion-error' : undefined}
+        >
+          {OCCASIONS.map((o) => (
+            <label key={o.value} className="cursor-pointer">
+              <input
+                type="radio"
+                value={o.value}
+                className="peer sr-only"
+                {...register('occasion')}
+              />
+              <span className="inline-flex min-h-11 items-center rounded-full border border-gold/40 px-4 text-sm transition-colors peer-checked:border-gold peer-checked:bg-gold peer-checked:font-semibold peer-checked:text-night peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-champagne hover:border-champagne">
+                {o.label}
+              </span>
+            </label>
+          ))}
+        </div>
+        {errors.occasion?.message && (
+          <p id="occasion-error" className="field-error" role="alert">
+            {errors.occasion.message}
+          </p>
+        )}
+      </fieldset>
+
+      <div className="space-y-5 rounded-[3px] border border-gold/15 bg-night/40 p-5">
+        <Field id="companyName" label="Firmenname (optional)" error={errors.companyName}>
+          <input
+            className="field-input"
+            autoComplete="organization"
+            {...a11y('companyName', errors.companyName)}
+            {...register('companyName')}
+          />
+        </Field>
+        <label className="flex min-h-11 cursor-pointer items-center gap-3">
+          <input
+            type="checkbox"
+            className="h-5 w-5 shrink-0 accent-[#C9A24D]"
+            {...register('invoiceRequested')}
+          />
+          <span>Ich benötige eine Rechnung</span>
+        </label>
+
+        {showBilling && (
+          <div className="grid gap-5 sm:grid-cols-6">
+            <div className="sm:col-span-6">
+              <Field id="billingStreet" label="Straße und Hausnummer" error={errors.billingStreet}>
+                <input
+                  className="field-input"
+                  autoComplete="street-address"
+                  {...a11y('billingStreet', errors.billingStreet)}
+                  {...register('billingStreet')}
+                />
+              </Field>
+            </div>
+            <div className="sm:col-span-2">
+              <Field id="billingZip" label="PLZ" error={errors.billingZip}>
+                <input
+                  className="field-input"
+                  inputMode="numeric"
+                  autoComplete="postal-code"
+                  {...a11y('billingZip', errors.billingZip)}
+                  {...register('billingZip')}
+                />
+              </Field>
+            </div>
+            <div className="sm:col-span-4">
+              <Field id="billingCity" label="Ort" error={errors.billingCity}>
+                <input
+                  className="field-input"
+                  autoComplete="address-level2"
+                  {...a11y('billingCity', errors.billingCity)}
+                  {...register('billingCity')}
+                />
+              </Field>
+            </div>
+            <div className="sm:col-span-6">
+              <Field
+                id="vatId"
+                label="USt-ID (optional)"
+                error={errors.vatId}
+                hint="Erscheint auf der Rechnung, z. B. DE123456789."
+              >
+                <input
+                  className="field-input uppercase"
+                  {...a11y('vatId', errors.vatId, true)}
+                  {...register('vatId')}
+                />
+              </Field>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <Field id="notes" label="Wünsche (optional)" error={errors.notes}>
+        <textarea
+          rows={3}
+          className="field-input"
+          {...a11y('notes', errors.notes)}
+          {...register('notes')}
+        />
+      </Field>
+
+      {/* Zusammenfassung */}
+      <div
+        className="rounded-[3px] border border-gold/40 bg-coal p-5 sm:p-6"
+        aria-label="Zusammenfassung"
+      >
+        <h4 className="mb-4 text-2xl font-semibold">Deine Buchung</h4>
+        <dl className="space-y-1.5 text-cream/85">
+          <div className="flex justify-between gap-4">
+            <dt>Datum</dt>
+            <dd className="text-right">{formatLongDate(date)}</dd>
+          </div>
+          <div className="flex justify-between gap-4">
+            <dt>Zeitfenster</dt>
+            <dd>
+              {formatTime(startTime)}–{formatTime(endTime)} Uhr
+            </dd>
+          </div>
+          <div className="flex justify-between gap-4">
+            <dt>Personen</dt>
+            <dd>{persons ? String(persons) : '–'}</dd>
+          </div>
+        </dl>
+        <div className="my-4 h-px bg-gold/25" aria-hidden="true" />
+        <dl className="space-y-1.5">
+          <div className="flex justify-between gap-4">
+            <dt>Lounge</dt>
+            <dd>{formatCents(settings.priceCents)}</dd>
+          </div>
+          <div className="flex justify-between gap-4">
+            <dt>Vorverkaufsgebühr</dt>
+            <dd>{formatCents(settings.feeCents)}</dd>
+          </div>
+          <div className="flex justify-between gap-4 pt-2 text-xl font-bold text-champagne">
+            <dt>Gesamt</dt>
+            <dd>{total}</dd>
+          </div>
+        </dl>
+      </div>
+
+      <div className="space-y-4">
+        <div>
+          <label className="flex cursor-pointer items-start gap-3">
+            <input
+              type="checkbox"
+              className="mt-0.5 h-5 w-5 shrink-0 accent-[#C9A24D]"
+              aria-invalid={errors.termsAccepted ? true : undefined}
+              aria-describedby={errors.termsAccepted ? 'termsAccepted-error' : undefined}
+              {...register('termsAccepted')}
+            />
+            <span className="text-sm leading-relaxed">
+              Ich akzeptiere die{' '}
+              <Link
+                to="/agb"
+                target="_blank"
+                className="text-champagne underline underline-offset-4"
+              >
+                AGB
+              </Link>{' '}
+              und habe die{' '}
+              <Link
+                to="/datenschutz"
+                target="_blank"
+                className="text-champagne underline underline-offset-4"
+              >
+                Datenschutzerklärung
+              </Link>{' '}
+              gelesen. Mir ist bewusst, dass die Buchung verbindlich ist und nicht storniert werden
+              kann.
+            </span>
+          </label>
+          {errors.termsAccepted?.message && (
+            <p id="termsAccepted-error" className="field-error" role="alert">
+              {errors.termsAccepted.message}
+            </p>
+          )}
+        </div>
+        <label className="flex cursor-pointer items-start gap-3">
+          <input
+            type="checkbox"
+            className="mt-0.5 h-5 w-5 shrink-0 accent-[#C9A24D]"
+            {...register('newsletterOptIn')}
+          />
+          <span className="text-sm leading-relaxed text-cream/80">
+            Ja, ich möchte den STUDIO/F-Newsletter mit Events und Angeboten erhalten. Abmeldung
+            jederzeit möglich.
+          </span>
+        </label>
+      </div>
+
+      <p className="text-sm leading-relaxed text-cream/65">
+        Hinweis: Die Lounge-Buchung ist eine termingebundene Freizeitleistung. Ein Widerrufsrecht
+        besteht daher nicht. Die Buchung ist verbindlich.
+      </p>
+
+      <button type="submit" className="btn-gold w-full text-lg sm:w-auto sm:px-10">
+        Zahlungspflichtig buchen – {total}
+      </button>
+
+      {notice && (
+        <div
+          role="status"
+          className="rounded-[3px] border border-gold/50 bg-gold/10 p-4 text-cream"
+        >
+          Danke! Die Online-Zahlung wird gerade eingerichtet. Bald kannst du hier direkt buchen.
+        </div>
+      )}
+    </form>
+  );
+}

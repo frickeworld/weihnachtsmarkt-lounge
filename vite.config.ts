@@ -24,10 +24,37 @@ function noindex(enabled: boolean): Plugin {
   };
 }
 
+/**
+ * Lädt die Schriften für den sichtbaren Hero-Bereich vorab (verhindert Layout-Sprünge beim Schriftwechsel).
+ */
+function preloadFonts(patterns: RegExp[]): Plugin {
+  return {
+    name: 'preload-fonts',
+    apply: 'build',
+    transformIndexHtml(_html, ctx) {
+      const files = Object.keys(ctx.bundle ?? {}).filter((f) => patterns.some((p) => p.test(f)));
+      return files.map((f) => ({
+        tag: 'link',
+        attrs: { rel: 'preload', href: `/${f}`, as: 'font', type: 'font/woff2', crossorigin: '' },
+        injectTo: 'head' as const,
+      }));
+    },
+  };
+}
+
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), 'VITE_');
   return {
-    plugins: [react(), tailwindcss(), noindex(env.VITE_NOINDEX !== 'false')],
+    plugins: [
+      react(),
+      tailwindcss(),
+      noindex(env.VITE_NOINDEX !== 'false'),
+      preloadFonts([
+        /cormorant-garamond-latin-600-normal-.*\.woff2$/,
+        /manrope-latin-400-normal-.*\.woff2$/,
+        /manrope-latin-600-normal-.*\.woff2$/,
+      ]),
+    ],
     resolve: {
       alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
     },

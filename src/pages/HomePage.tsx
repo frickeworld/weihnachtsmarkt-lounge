@@ -1,24 +1,44 @@
-import { LogoPlaque } from '@/components/LogoPlaque';
-import { StudioFBadge } from '@/components/StudioFBadge';
+import { Footer } from '@/components/Footer';
+import { Header } from '@/components/Header';
+import { LightString } from '@/components/LightString';
+import { MobileBookingBar } from '@/components/MobileBookingBar';
+import { Snowfall } from '@/components/Snowfall';
+import { Booking } from '@/sections/Booking';
+import { Directions } from '@/sections/Directions';
+import { Experience } from '@/sections/Experience';
+import { Faq } from '@/sections/Faq';
+import { Hero } from '@/sections/Hero';
+import { HowItWorks } from '@/sections/HowItWorks';
+import { Occasions } from '@/sections/Occasions';
+import { Pricing } from '@/sections/Pricing';
 
-/** Phase 0: Platzhalter im Seitendesign. Der One-Pager folgt in Phase 1. */
+const Divider = () => <LightString variant="divider" className="opacity-80" />;
+
 export function HomePage() {
   return (
-    <main className="flex min-h-dvh flex-col items-center justify-center gap-8 px-4 py-16 text-center">
-      <p className="text-xs font-semibold tracking-[0.25em] text-champagne uppercase">
-        Weihnachtsmarkt im Schlosspark Detmold
-      </p>
-      <LogoPlaque size="lg" />
-      <div className="h-px w-24 bg-gold" aria-hidden="true" />
-      <h1 className="max-w-xl text-4xl leading-tight font-semibold sm:text-5xl">
-        Deine Lounge mitten im Weihnachtsmarkt
-      </h1>
-      <p className="max-w-md text-cream/80">
-        Hier entsteht gerade etwas Festliches. Bald kannst du deine Lounge buchen.
-      </p>
-      <footer className="mt-10">
-        <StudioFBadge />
-      </footer>
-    </main>
+    <>
+      <a
+        href="#buchen"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:bg-gold focus:px-4 focus:py-2 focus:text-night"
+      >
+        Direkt zur Buchung
+      </a>
+      <Snowfall />
+      <Header />
+      <main>
+        <Hero />
+        <Experience />
+        <Occasions />
+        <Divider />
+        <Pricing />
+        <Booking />
+        <Divider />
+        <HowItWorks />
+        <Faq />
+        <Directions />
+      </main>
+      <Footer />
+      <MobileBookingBar />
+    </>
   );
 }
