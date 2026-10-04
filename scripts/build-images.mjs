@@ -152,7 +152,9 @@ for (const file of await readdir('assets/sponsoren')) {
   const { height: lh = 0 } = await sharp(marktLogo).metadata();
   await sharp('assets/weihnachtsmarkt/gold-glitzer.webp')
     .resize({ width: W, height: H, fit: 'cover' })
-    .composite([{ input: marktLogo, left: Math.round((W - logoW) / 2), top: Math.round((H - lh) / 2) }])
+    .composite([
+      { input: marktLogo, left: Math.round((W - logoW) / 2), top: Math.round((H - lh) / 2) },
+    ])
     .jpeg({ quality: 78, mozjpeg: true })
     .toFile('public/email/kopf.jpg');
 }
