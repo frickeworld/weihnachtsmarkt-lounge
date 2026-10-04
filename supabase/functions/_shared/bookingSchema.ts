@@ -135,6 +135,6 @@ export function createManualBookingRequestSchema(maxPersons: number) {
     }),
     includeInSettlement: z.boolean(),
     /** Admin bestätigt bewusst: Buchungsschluss, Sperre, Schließtag oder Saison übergehen. */
-    override: z.boolean(),
+    override: z.boolean().default(false),
   });
 }

@@ -57,7 +57,7 @@ jobs:
             deno check --config "$dir/deno.json" "$f"
           done
       - name: Lokales Supabase starten
-        run: supabase start -x studio,imgproxy,mailpit,realtime,postgres-meta,edge-runtime,logflare,vector,supavisor
+        run: supabase start -x studio,imgproxy,realtime,postgres-meta,edge-runtime,logflare,vector,supavisor
       - name: Integrationstest Checkout/Webhook/Ticket
         run: scripts/functions-integration.sh
 

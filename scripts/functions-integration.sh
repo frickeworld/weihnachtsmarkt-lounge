@@ -7,6 +7,8 @@ cd "$(dirname "$0")/.."
 STATUS=$(npx supabase status -o env)
 export SUPABASE_URL=$(echo "$STATUS" | grep '^API_URL=' | cut -d= -f2- | tr -d '"')
 export SUPABASE_SERVICE_ROLE_KEY=$(echo "$STATUS" | grep '^SERVICE_ROLE_KEY=' | cut -d= -f2- | tr -d '"')
+export MAILPIT_URL=$(echo "$STATUS" | grep '^MAILPIT_URL=' | cut -d= -f2- | tr -d '"')
+export SUPABASE_ANON_KEY=$(echo "$STATUS" | grep '^ANON_KEY=' | cut -d= -f2- | tr -d '"')
 export STRIPE_SECRET_KEY=sk_test_123
 export STRIPE_API_BASE=http://127.0.0.1:12111
 export STRIPE_WEBHOOK_SECRET=whsec_integration_test
@@ -31,14 +33,14 @@ cleanup() {
 trap cleanup EXIT
 
 port=8101
-for f in create-checkout stripe-webhook release-hold send-ticket send-reminders; do
+for f in create-checkout stripe-webhook release-hold send-ticket send-reminders admin; do
   DENO_SERVE_ADDRESS="tcp:127.0.0.1:$port" deno run -A --config "supabase/functions/$f/deno.json" \
     "supabase/functions/$f/index.ts" >"/tmp/fn-$f.log" 2>&1 &
   pids+=($!)
   port=$((port + 1))
 done
 
-for p in 8101 8102 8103 8104 8105 12111; do
+for p in 8101 8102 8103 8104 8105 8106 12111; do
   for _ in $(seq 1 60); do
     (echo >"/dev/tcp/127.0.0.1/$p") 2>/dev/null && break
     sleep 1
