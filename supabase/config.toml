@@ -434,3 +434,6 @@ verify_jwt = false
 
 [functions.send-reminders]
 verify_jwt = false
+
+[functions.admin]
+verify_jwt = false

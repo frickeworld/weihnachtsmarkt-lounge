@@ -117,3 +117,24 @@ export function createCheckoutRequestSchema(maxPersons: number) {
     form: createBookingSchema(maxPersons),
   });
 }
+
+/** Manuelle Buchung im Admin (Telefon, Sonderfälle). Ticket geht trotzdem per E-Mail raus. */
+export const PAYMENT_METHODS_MANUAL = [
+  { value: 'bar', label: 'Bar' },
+  { value: 'ueberweisung', label: 'Überweisung' },
+  { value: 'kostenlos', label: 'Kostenlos' },
+] as const;
+
+export function createManualBookingRequestSchema(maxPersons: number) {
+  return z.object({
+    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Ungültiges Datum.'),
+    startTime: z.string().regex(/^\d{2}:\d{2}$/, 'Ungültige Uhrzeit.'),
+    form: createBookingSchema(maxPersons),
+    paymentMethod: z.enum(['bar', 'ueberweisung', 'kostenlos'], {
+      message: 'Bitte wähle die Zahlungsart.',
+    }),
+    includeInSettlement: z.boolean(),
+    /** Admin bestätigt bewusst: Buchungsschluss, Sperre, Schließtag oder Saison übergehen. */
+    override: z.boolean(),
+  });
+}

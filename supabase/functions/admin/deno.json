@@ -1,0 +1,9 @@
+{
+  "imports": {
+    "@supabase/supabase-js": "npm:@supabase/supabase-js@2.117.2",
+    "pdf-lib": "npm:pdf-lib@1.17.1",
+    "qrcode": "npm:qrcode@1.5.4",
+    "stripe": "npm:stripe@23.0.0",
+    "zod": "npm:zod@4.6.5"
+  }
+}
