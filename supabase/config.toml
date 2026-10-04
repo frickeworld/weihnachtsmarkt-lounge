@@ -441,3 +441,6 @@ verify_jwt = false
 
 [functions.ticket-files]
 verify_jwt = false
+
+[functions.scanner]
+verify_jwt = false

@@ -23,6 +23,7 @@ const routes: RouteObject[] = [
   { path: '/login/*', lazy: lazyDefault(() => import('./backoffice/LoginRoutes')) },
   { path: '/admin/*', lazy: lazyDefault(() => import('./backoffice/admin/AdminRoutes')) },
   { path: '/haendler/*', lazy: lazyDefault(() => import('./backoffice/haendler/HaendlerRoutes')) },
+  { path: '/scan', lazy: lazyDefault(() => import('./scanner/ScannerApp')) },
   { path: '*', element: <NotFoundPage /> },
 ];
 

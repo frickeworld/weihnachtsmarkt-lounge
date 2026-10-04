@@ -1,6 +1,7 @@
 {
   "imports": {
     "@supabase/supabase-js": "npm:@supabase/supabase-js@2.117.2",
-    "fflate": "npm:fflate@0.8.2"
+    "fflate": "npm:fflate@0.8.2",
+    "bcryptjs": "npm:bcryptjs@2.4.3"
   }
 }

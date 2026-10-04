@@ -5,6 +5,8 @@ const executablePath = process.env.PW_CHROMIUM_PATH || undefined;
 
 export default defineConfig({
   testDir: 'tests/e2e',
+  // Fake-Kamera mit QR-Code für den Scanner-Test
+  globalSetup: './tests/e2e/support/makeQrVideo.ts',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,

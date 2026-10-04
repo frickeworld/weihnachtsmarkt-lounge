@@ -366,7 +366,16 @@ function ScannerPinPanel() {
           ? 'Eine PIN ist gesetzt.'
           : 'Noch keine PIN gesetzt – der Scanner ist gesperrt.'}{' '}
         Die PIN wird nur verschlüsselt gespeichert und kann nicht angezeigt werden. Eine neue PIN
-        meldet alle Geräte ab.
+        meldet alle Geräte ab. Der Scanner läuft im Handy-Browser unter{' '}
+        <a
+          href="/scan"
+          target="_blank"
+          rel="noreferrer"
+          className="font-semibold text-gold-deep underline"
+        >
+          /scan
+        </a>
+        .
       </p>
       <form
         onSubmit={(e) => void submit(e)}

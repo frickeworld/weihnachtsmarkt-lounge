@@ -251,7 +251,18 @@ entstehen auf unserem Server und liegen danach nur auf dem Gerät des Gasts).
 Koordinaten der Lounge für die Sperrbildschirm-Anzeige prüfen: `LOUNGE_COORDINATES` in
 `supabase/functions/_shared/walletConfig.ts`.
 
-## 12. Fotos der Lounge
+## 12. Scanner am Einlass (ab Phase 6)
+
+1. **Supabase-Secret** `SCANNER_TOKEN_SECRET`: eine lange Zufallszeichenfolge (z. B. `openssl rand -hex 32`).
+   Damit werden die Anmeldungen der Scanner-Handys signiert. Ohne eigenes Secret wird der
+   service_role-Schlüssel genutzt – funktioniert, ist aber weniger sauber.
+2. Im Admin unter **Einstellungen → Scanner-PIN** eine 6-stellige PIN festlegen.
+3. Auf dem Einlass-Handy `https://[DOMAIN]/scan` öffnen, PIN eingeben, Kamera erlauben.
+   Tipp: Seite zum Home-Bildschirm hinzufügen. Den Tab während des Einlasses offen lassen –
+   Offline-Check-ins liegen nur in diesem Tab, bis sie übertragen sind.
+4. Die Anmeldung gilt 12 Stunden. Eine neue PIN meldet alle Geräte sofort ab.
+
+## 13. Fotos der Lounge
 
 Originalfotos in `assets/lounge-fotos/` legen (siehe `LIESMICH.md` dort) und `npm run images`
 ausführen – oder mir die Fotos schicken. Die Galerie erscheint erst, wenn Fotos da sind.

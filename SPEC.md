@@ -282,6 +282,15 @@ Pflichtfeld Grund → `cancelled`, `cancelled_at`, `cancel_reason`. Hinweis „D
 - Jede Aktion → `scan_log`. Taschenlampe über `MediaStreamTrack.applyConstraints({advanced:[{torch:true}]})`, wenn unterstützt. Ton + Vibration. noindex.
 - PIN-Wechsel im Admin erhöht `scanner_token_version` → alle Tokens ungültig.
 
+**Umsetzungsdetails (Phase 6):**
+
+- Eine Edge Function `scanner` mit Aktionen `auth`, `today`, `scan`, `taler` statt vier einzelner Functions. Die Regeln liegen in SQL (`scanner_check_pin`, `scanner_scan`, `scanner_taler`, `scanner_today`), nur für service_role ausführbar.
+- PIN-Sperre: 5 Fehlversuche je Gerät (IP-Hash) → 10 min; zusätzlich gerätübergreifend 30 Fehlversuche in 10 min → 10 min Pause für alle (Schutz gegen Durchprobieren mit wechselnden IPs).
+- Token: HMAC-SHA256 mit Secret `SCANNER_TOKEN_SECRET`, 12 h gültig, enthält `scanner_token_version`; liegt im sessionStorage.
+- Buchungscode wird auch klein und ohne Bindestriche erkannt. Ein Check-in wird nie überschrieben.
+- Liste „Heute“ enthält statt des Ticket-Tokens nur dessen SHA-256, keine E-Mail/Telefon. Offline prüft das Gerät gegen diese Liste (gleiche Regeln), Check-ins und Taler gehen in eine Warteschlange und werden mit `offline=true` und Gerätezeit (max. 24 h zurück) nachgetragen. Offline werden nur Buchungen von heute erkannt.
+- QR-Erkennung: eingebaute BarcodeDetector-API, sonst jsQR (iPhone). Taschenlampe, Ton und Vibration (iPhone: keine Vibration im Browser).
+
 ### 4.6 Händler-Bereich
 
 - Übersicht: Kennzahlen wie Admin, statt „davon Studio F“ nur „Euer Anteil“. Zeitraumfilter, Tagesdiagramm.
