@@ -304,3 +304,27 @@ export async function fetchSuccessTicketToken(sessionId: string): Promise<string
   if (error) return null;
   return typeof data === 'string' && /^[A-Za-z0-9]{32}$/.test(data) ? data : null;
 }
+
+// ---------------------------------------------------------------------------------------
+// Kontaktformular (Edge Function contact)
+// ---------------------------------------------------------------------------------------
+export type ContactResult =
+  { ok: true } | { ok: false; message: string; fields?: Record<string, string> };
+
+export async function sendContact(values: Record<string, unknown>): Promise<ContactResult> {
+  if (DEMO) {
+    await new Promise((r) => setTimeout(r, 500));
+    return { ok: true };
+  }
+  const { error } = await client().functions.invoke('contact', { body: values });
+  if (!error) return { ok: true };
+  const ctx = (error as { context?: Response }).context;
+  const body =
+    ctx && typeof ctx.json === 'function'
+      ? ((await ctx.json().catch(() => ({}))) as {
+          message?: string;
+          fields?: Record<string, string>;
+        })
+      : {};
+  return { ok: false, message: body.message ?? GENERIC_ERROR, fields: body.fields };
+}

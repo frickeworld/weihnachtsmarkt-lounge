@@ -10,7 +10,7 @@ Mobile-first One-Page-Website, über die eine überdachte Lounge auf dem Weihnac
 
 - **Die Händler (Werbegemeinschaft Detmold e. V.)**: Gastgeber, ihr Logo steht im Mittelpunkt.
 - **MF Coaching & Promotion GmbH**: Verkäufer, Zahlungsempfänger (Stripe), Verantwortlicher im Datenschutz, Absender der Rechnungen. Betreibt auch STUDIO/F (Brevo-Konto, Newsletter).
-- **STUDIO/F** (studio-f.club): technischer Betreiber, erscheint nur im Footer als „Powered by STUDIO/F“.
+- **STUDIO/F** (studio-f.club): technischer Betreiber und Ansprechpartner für alle Fragen zur Buchung (Kontaktbereich mit Formular → `settings.contact_email`, info@studio-f.club). Im Footer groß „Powered by STUDIO/F“ (Entscheidung Louis, 04.10.2026).
 - **Tanzschule Fricke**: Tischservice an der Lounge.
 
 ## Geschäftsregeln – NIE brechen
@@ -69,7 +69,8 @@ Mobile-first One-Page-Website, über die eine überdachte Lounge auf dem Weihnac
 - Hero: Glitzer-Band mit Markt-Schriftzug, darunter großes Foto (Platzhalter „Symbolbild · Bildquelle: Stadt Detmold“) mit Schnee (Canvas nur im Hero).
 - Keine Lichterkette mehr.
 - Mobil: Header zeigt nur das Händler-Logo zentriert; „Lounge buchen“ steht mobil im Hero und in der festen Leiste unten. Karten mobil kompakt (Icon links, Text rechts).
-- Footer: Sponsoren & Partner (weiße Logos), Instagram @diehaendlerdetmold, Link weihnachtsmarkt-detmold.de, „Powered by STUDIO/F“.
+- Footer: Sponsoren & Partner (weiße Logos), Instagram @diehaendlerdetmold, Link weihnachtsmarkt-detmold.de, Kontakt-Link, großes „Powered by STUDIO/F“.
+- Kontaktbereich „Fragen? Wir helfen dir gern.“ (nach FAQ): STUDIO/F-Karte (Logo auf Dunkelbraun) + Formular (Edge Function `contact`, Honigtopf, max. 5 Nachrichten/Stunde je Gerät, nichts wird gespeichert).
 - Ansprache „Du“, warm, hochwertig, erwachsen (30–65). Keine Jugendsprache, keine Emojis. Alle Texte Deutsch.
 - `prefers-reduced-motion`: Schnee, Glanz und Funkeln aus, nur weiche Einblendungen.
 - Mobile-first, große Touch-Flächen (≥ 44 px), WCAG AA, Lighthouse mobil ≥ 85.

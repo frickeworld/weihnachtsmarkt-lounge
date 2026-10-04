@@ -73,6 +73,12 @@ export function Footer() {
         <nav aria-label="Rechtliches" className="mt-10">
           <ul className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-sm text-on-dark/75">
             <li>
+              <a href="/#kontakt" className="hover:text-gold-light">
+                Kontakt
+              </a>
+            </li>
+            <li aria-hidden="true">·</li>
+            <li>
               <Link to="/impressum" className="hover:text-gold-light">
                 Impressum
               </Link>
@@ -91,7 +97,7 @@ export function Footer() {
             </li>
           </ul>
         </nav>
-        <div className="mt-6 flex justify-center">
+        <div className="mt-10 flex justify-center border-t border-white/10 pt-10">
           <StudioFBadge />
         </div>
       </div>

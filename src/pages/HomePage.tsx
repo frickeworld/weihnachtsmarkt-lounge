@@ -3,6 +3,7 @@ import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { MobileBookingBar } from '@/components/MobileBookingBar';
 import { Booking } from '@/sections/Booking';
+import { Contact } from '@/sections/Contact';
 import { Directions } from '@/sections/Directions';
 import { Experience } from '@/sections/Experience';
 import { Faq } from '@/sections/Faq';
@@ -47,6 +48,7 @@ export function HomePage() {
         <Booking />
         <Market />
         <Faq />
+        <Contact />
         <Directions />
       </main>
       <Footer />

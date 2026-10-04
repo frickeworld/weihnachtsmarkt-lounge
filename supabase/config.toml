@@ -444,3 +444,6 @@ verify_jwt = false
 
 [functions.scanner]
 verify_jwt = false
+
+[functions.contact]
+verify_jwt = false

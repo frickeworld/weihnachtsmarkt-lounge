@@ -63,7 +63,7 @@ test.describe('One-Pager', () => {
 
     await page.getByLabel('Vorname').fill('Anna');
     await page.getByLabel('Nachname').fill('Muster');
-    await page.getByLabel('E-Mail').fill('anna@example.de');
+    await page.locator('#buchen').getByLabel('E-Mail').fill('anna@example.de');
     await page.getByLabel('Telefon').fill('05231 123456');
     await page.getByLabel('Personenzahl').selectOption('8');
     await expect(page.getByText('Anlass (optional)')).toBeVisible();

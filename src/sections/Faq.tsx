@@ -36,6 +36,18 @@ export function Faq() {
       ),
     },
     {
+      q: 'Ich habe kein Ticket bekommen. Was nun?',
+      a: (
+        <>
+          Schau bitte zuerst im Spam-Ordner nach. Ist es dort auch nicht, schreib uns über das{' '}
+          <a href="#kontakt" className="font-semibold text-gold-deep underline underline-offset-4">
+            Kontaktformular
+          </a>{' '}
+          – am besten mit deinem Buchungscode. STUDIO/F schickt dir das Ticket erneut.
+        </>
+      ),
+    },
+    {
       q: 'Bekomme ich eine Rechnung?',
       a: 'Ja. Gib beim Buchen deinen Firmennamen an oder setze das Häkchen „Ich benötige eine Rechnung“. Die Rechnung kommt automatisch per E-Mail.',
     },

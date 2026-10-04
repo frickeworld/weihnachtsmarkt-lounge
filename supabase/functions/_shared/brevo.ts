@@ -27,6 +27,7 @@ export function sendTransactionalEmail(mail: {
   text: string;
   attachments?: { name: string; content: string }[];
   tags?: string[];
+  replyTo?: { email: string; name?: string };
 }): Promise<void> {
   return call('/smtp/email', {
     sender: {
@@ -39,6 +40,7 @@ export function sendTransactionalEmail(mail: {
     textContent: mail.text,
     ...(mail.attachments?.length ? { attachment: mail.attachments } : {}),
     ...(mail.tags?.length ? { tags: mail.tags } : {}),
+    ...(mail.replyTo ? { replyTo: mail.replyTo } : {}),
   });
 }
 

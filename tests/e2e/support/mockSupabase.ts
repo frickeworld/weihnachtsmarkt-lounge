@@ -48,6 +48,8 @@ export interface MockOptions {
   successToken?: string | null;
   /** Eingerichtete Wallets (ticket-files?format=info). */
   wallet?: { apple: boolean; google: boolean };
+  /** Alle Anfragen an das Kontaktformular. */
+  contactRequests?: unknown[];
   /** Antwort von get_ticket (null = nicht gefunden). */
   ticket?: Record<string, unknown> | null;
 }
@@ -68,6 +70,10 @@ export async function mockSupabase(page: Page, opts: MockOptions = {}) {
     opts.checkoutRequests?.push(route.request().postDataJSON());
     const r = opts.checkout ?? { status: 200, body: { url: FAKE_STRIPE_URL, bookingId: 'b1' } };
     await route.fulfill({ status: r.status, json: r.body });
+  });
+  await page.route('**/functions/v1/contact', async (route) => {
+    opts.contactRequests?.push(route.request().postDataJSON());
+    await route.fulfill({ json: { ok: true } });
   });
   await page.route('**/functions/v1/release-hold', async (route) => {
     opts.releaseRequests?.push(route.request().postDataJSON());

@@ -328,6 +328,7 @@ Alle Admin-Aktionen serverseitig mit `is_admin_aal2()` geprüft.
 - Mobile Buchen-Leiste ohne dunklen Balken: schwebender Gold-Button mit Schatten.
 - Galerie „So sieht die Lounge aus“ (nach dem Abschnitt „Das Erlebnis“), unsichtbar bis Fotos in `assets/lounge-fotos/` liegen.
 - Standort: „Weihnachtsmarkt im Schlosspark, Detmold“ (Platzhalter `[GENAUE POSITION]` entfernt).
+- Kontaktbereich mit STUDIO/F und Formular (Themen: Buchung, kein Ticket, Zahlung, Rechnung, größere Gruppe, Sonstiges; optional Buchungscode). Edge Function `contact` sendet per Brevo an `settings.contact_email` mit Reply-To des Gasts; Honigtopf und Begrenzung über `register_checkout_attempt('contact:…', 5)`. FAQ „Ich habe kein Ticket bekommen“. „Powered by STUDIO/F“ im Footer deutlich größer.
 
 **Umsetzungsdetails (Phase 5):**
 
