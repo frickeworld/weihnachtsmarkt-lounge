@@ -297,6 +297,13 @@ Pflichtfeld Grund → `cancelled`, `cancelled_at`, `cancel_reason`. Hinweis „D
 - Buchungen: Datum, Zeitfenster, Name, Firma, Personen, Anlass, Status (bezahlt/storniert), eingecheckt (+Uhrzeit), Taler übergeben, „Nicht erschienen“ für vergangene ohne Check-in. Filter, Suche.
 - Abrechnung: Zeitraum (Standard Saison). Zählt `paid` + `include_in_settlement`. Summen aus gespeicherten Beträgen. Einzelaufstellung. CSV (Semikolon, UTF-8 BOM) + PDF „Abrechnungsübersicht Weihnachtsmarkt-Lounge [Zeitraum]“ mit Fußzeile „Grundlage für eure Rechnung an die MF Coaching & Promotion GmbH. Dies ist keine Rechnung.“ Gleiche Seite im Admin.
 
+**Umsetzungsdetails (Phase 7):**
+
+- Funktionen `haendler_dashboard`, `haendler_bookings`, `settlement` (für Händler und Admin). Zugriff über `is_haendler_or_admin()`: Admin mit 2FA oder Händler; hat ein Händler 2FA eingerichtet, verlangt auch die Datenbank den Code (aal2).
+- Händler sehen keine E-Mail, Telefon, Adresse, Wünsche, USt-ID und keine Aktions-Buttons; Kennzahlen ohne Umsatz und Studio-F-Anteil („Euer Anteil“). `settlement` liefert Gesamtbetrag und Studio-F-Anteil nur an Admins.
+- Abrechnung: Zeitraum nach Lounge-Datum (Standard Saison), Summen aus den gespeicherten Beträgen, Hinweis auf nicht berechnete Stornos und kostenlose Buchungen. CSV mit Summenzeile; PDF (A4, im Browser mit pdf-lib erzeugt) mit Fußzeile „Grundlage für eure Rechnung …“. Dieselbe Seite unter `/admin/abrechnung`.
+- Händler-Konto: Passwort ändern über „Passwort vergessen“, 2FA freiwillig.
+
 ### 4.7 Admin
 
 1. Übersicht: Zeitraumfilter (Heute, 7 Tage, Saison, frei). Kennzahlen: Aufrufe, Klicks, bezahlte Buchungen, Abschlussquote (Buchungen ÷ Klicks), Auslastung (verkauft ÷ verfügbar), Umsatz brutto, davon Händler, davon Studio F, Check-ins, No-Shows, übergebene Taler. Diagramm pro Tag. Block „Heute“.

@@ -58,3 +58,25 @@ values (current_date + 1, '19:00', '21:00', 'paid', 'Test', 'Admin', 'test@examp
 -- Wer hat welche Rolle?
 select u.email, r.role from public.user_roles r join auth.users u on u.id = r.user_id;
 ```
+
+## Phase 7 – Rechenprobe Abrechnung
+
+```sql
+-- Drei Buchungen am Saisonstart: erschienen, nicht erschienen, storniert → Händler 275,00 €
+insert into public.bookings (date, start_time, end_time, status, first_name, last_name, email, phone, persons, paid_at, checked_in_at, cancelled_at, cancel_reason)
+select season_start, t.st::time, t.et::time, t.status, t.fn, 'Test', 'rechenprobe@example.de', '0123456', 4,
+       case when t.status = 'paid' then now() end,
+       case when t.fn = 'Erschienen' then now() end,
+       case when t.status = 'cancelled' then now() end,
+       case when t.status = 'cancelled' then 'Rechenprobe' end
+  from public.settings,
+       (values ('17:00', '19:00', 'paid', 'Erschienen'),
+               ('19:00', '21:00', 'paid', 'Nichtda'),
+               ('17:30', '19:30', 'cancelled', 'Storno')) t(st, et, status, fn)
+ where id = 1;
+
+-- Händler-Testzugang: im Admin unter „Zugänge“ mit Rolle „Händler“ einladen.
+
+-- Aufräumen
+delete from public.bookings where email = 'rechenprobe@example.de';
+```

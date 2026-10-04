@@ -218,6 +218,107 @@ export async function mockBackoffice(page: Page, opts: BackofficeOptions = {}) {
       },
     });
   });
+  await page.route('**/rest/v1/rpc/haendler_dashboard*', (route) =>
+    route.fulfill({
+      json: {
+        page_views: 800,
+        book_clicks: 80,
+        paid_bookings: 2,
+        online_paid_in_period: 2,
+        available_slots: 66,
+        haendler_cents: 27500,
+        checked_in: 1,
+        no_shows: 1,
+        taler_handed_out: 1,
+        cancelled: 1,
+        daily: [
+          { date: addDays(today(), -1), page_views: 30, book_clicks: 3, bookings: 1 },
+          { date: today(), page_views: 50, book_clicks: 5, bookings: 1 },
+        ],
+      },
+    }),
+  );
+  const hb = (over: Record<string, unknown>) => ({
+    id: 'h1',
+    booking_code: 'HL-AAAA-AAAA',
+    slot_date: addDays(today(), -1),
+    start_time: '17:00:00',
+    end_time: '19:00:00',
+    first_name: 'Erika',
+    last_name: 'Erschienen',
+    company_name: 'Müller GmbH',
+    persons: 6,
+    occasion: 'firmenfeier',
+    status: 'paid',
+    checked_in_at: new Date().toISOString(),
+    taler_handed_out_at: new Date().toISOString(),
+    no_show: false,
+    include_in_settlement: true,
+    haendler_share_cents: 13750,
+    ...over,
+  });
+  await page.route('**/rest/v1/rpc/haendler_bookings*', (route) =>
+    route.fulfill({
+      json: [
+        hb({}),
+        hb({
+          id: 'h2',
+          booking_code: 'HL-BBBB-BBBB',
+          first_name: 'Nico',
+          last_name: 'Nichtda',
+          company_name: null,
+          start_time: '19:00:00',
+          end_time: '21:00:00',
+          checked_in_at: null,
+          taler_handed_out_at: null,
+          no_show: true,
+        }),
+        hb({
+          id: 'h3',
+          booking_code: 'HL-CCCC-CCCC',
+          first_name: 'Stefan',
+          last_name: 'Storno',
+          company_name: null,
+          status: 'cancelled',
+          checked_in_at: null,
+          taler_handed_out_at: null,
+        }),
+      ],
+    }),
+  );
+  await page.route('**/rest/v1/rpc/settlement*', (route) => {
+    const admin = (opts.role ?? 'studio_admin') === 'studio_admin';
+    const row = (code: string, name: string, checked: boolean) => ({
+      date: addDays(today(), -1),
+      start_time: '17:00',
+      end_time: '19:00',
+      booking_code: code,
+      name,
+      company_name: null,
+      persons: 6,
+      source: 'online',
+      checked_in: checked,
+      haendler_share_cents: 13750,
+      amount_total_cents: admin ? 17850 : null,
+    });
+    return route.fulfill({
+      json: {
+        from: addDays(today(), -3),
+        to: addDays(today(), 30),
+        count: 2,
+        haendler_cents: 27500,
+        revenue_cents: admin ? 35700 : null,
+        studio_cents: admin ? 8200 : null,
+        no_shows: 1,
+        excluded_cancelled: 1,
+        excluded_not_in_settlement: 0,
+        rows: [
+          row('HL-AAAA-AAAA', 'Erika Erschienen', true),
+          row('HL-BBBB-BBBB', 'Nico Nichtda', false),
+        ],
+      },
+    });
+  });
   await page.route('**/rest/v1/rpc/admin_check_in*', (route) =>
     route.fulfill({ json: new Date().toISOString() }),
   );

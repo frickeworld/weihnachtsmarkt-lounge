@@ -27,6 +27,7 @@
     "@supabase/supabase-js": "^2.117.2",
     "framer-motion": "^14.0.0",
     "jsqr": "^1.4.0",
+    "pdf-lib": "^1.17.1",
     "qrcode": "^1.5.4",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",

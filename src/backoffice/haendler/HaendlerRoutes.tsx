@@ -1,38 +1,27 @@
-import { Link } from 'react-router-dom';
-import { AuthProvider, useAuth } from '../AuthProvider';
-import { AuthShell } from '../auth/AuthShell';
+import { Navigate, Route, Routes } from 'react-router-dom';
+import { AuthProvider } from '../AuthProvider';
 import { RequireAccess } from '../RequireAccess';
-import { smallBtn } from '../ui';
+import { SettlementPage } from '../settlement/SettlementPage';
+import { HaendlerAccount } from './HaendlerAccount';
+import { HaendlerBookings } from './HaendlerBookings';
+import { HaendlerLayout } from './HaendlerLayout';
+import { HaendlerOverview } from './HaendlerOverview';
 
-/** /haendler – Dashboard und Abrechnung folgen in Phase 7. */
+/** /haendler/* – nur lesen (Rolle haendler oder studio_admin). */
 export default function HaendlerRoutes() {
   return (
     <AuthProvider>
       <RequireAccess area="haendler">
-        <HaendlerPlaceholder />
+        <Routes>
+          <Route element={<HaendlerLayout />}>
+            <Route index element={<HaendlerOverview />} />
+            <Route path="buchungen" element={<HaendlerBookings />} />
+            <Route path="abrechnung" element={<SettlementPage />} />
+            <Route path="konto" element={<HaendlerAccount />} />
+            <Route path="*" element={<Navigate to="/haendler" replace />} />
+          </Route>
+        </Routes>
       </RequireAccess>
     </AuthProvider>
-  );
-}
-
-function HaendlerPlaceholder() {
-  const { session, aal, signOut } = useAuth();
-  return (
-    <AuthShell title="Händler-Bereich">
-      <div className="space-y-5">
-        <p className="text-ink-soft">
-          Hallo {session?.user.email}. Hier siehst du bald Buchungen, Kennzahlen und die Abrechnung
-          der Lounge.
-        </p>
-        {aal.next !== 'aal2' && (
-          <Link to="/login/2fa?einrichten=1&next=%2Fhaendler" className="btn-outline w-full">
-            Zwei-Faktor-Anmeldung einrichten (empfohlen)
-          </Link>
-        )}
-        <button type="button" className={`${smallBtn} w-full`} onClick={() => void signOut()}>
-          Abmelden
-        </button>
-      </div>
-    </AuthShell>
   );
 }

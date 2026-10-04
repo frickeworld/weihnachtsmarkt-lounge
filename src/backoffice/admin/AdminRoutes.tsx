@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from '../AuthProvider';
 import { RequireAccess } from '../RequireAccess';
+import { SettlementPage } from '../settlement/SettlementPage';
 import { AccessPage } from './AccessPage';
 import { AdminLayout } from './AdminLayout';
 import { BookingsPage } from './BookingsPage';
@@ -25,6 +26,7 @@ export default function AdminRoutes() {
             <Route path="kalender" element={<CalendarPage />} />
             <Route path="einstellungen" element={<SettingsPage />} />
             <Route path="zugaenge" element={<AccessPage />} />
+            <Route path="abrechnung" element={<SettlementPage />} />
             <Route path="export" element={<ExportPage />} />
             <Route path="datenpflege" element={<DataCarePage />} />
             <Route path="*" element={<Navigate to="/admin" replace />} />

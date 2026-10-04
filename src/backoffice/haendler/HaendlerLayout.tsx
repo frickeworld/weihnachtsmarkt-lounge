@@ -4,32 +4,36 @@ import { useNoindex } from '@/lib/useNoindex';
 import { useAuth } from '../AuthProvider';
 
 const NAV = [
-  { to: '/admin', label: 'Übersicht', end: true },
-  { to: '/admin/buchungen', label: 'Buchungen' },
-  { to: '/admin/neue-buchung', label: 'Neue Buchung' },
-  { to: '/admin/kalender', label: 'Kalender' },
-  { to: '/admin/einstellungen', label: 'Einstellungen' },
-  { to: '/admin/zugaenge', label: 'Zugänge' },
-  { to: '/admin/abrechnung', label: 'Abrechnung' },
-  { to: '/admin/export', label: 'Export' },
-  { to: '/admin/datenpflege', label: 'Datenpflege' },
+  { to: '/haendler', label: 'Übersicht', end: true },
+  { to: '/haendler/buchungen', label: 'Buchungen' },
+  { to: '/haendler/abrechnung', label: 'Abrechnung' },
+  { to: '/haendler/konto', label: 'Konto' },
 ];
 
-export function AdminLayout() {
+/** Händler-Bereich: nur lesen. Gleiche Gestaltung wie der Admin, eigener Hinweis „Händler“. */
+export function HaendlerLayout() {
   useNoindex();
-  const { session, signOut } = useAuth();
+  const { session, roles, signOut } = useAuth();
   return (
     <div className="min-h-dvh">
       <header className="on-dark bg-brown print:hidden">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3">
-          <Link to="/admin" className="flex items-center gap-3" aria-label="Admin-Übersicht">
+          <Link to="/haendler" className="flex items-center gap-3" aria-label="Händler-Übersicht">
             <HaendlerLogo />
             <span className="rounded-full border border-gold-light/50 px-2.5 py-0.5 text-xs font-semibold tracking-wide text-gold-light">
-              ADMIN
+              LOUNGE
             </span>
           </Link>
           <div className="flex items-center gap-3 text-sm text-on-dark">
             <span className="hidden sm:inline">{session?.user.email}</span>
+            {roles.includes('studio_admin') && (
+              <Link
+                to="/admin"
+                className="min-h-11 rounded-full border border-on-dark/40 px-4 py-2.5 font-semibold"
+              >
+                Admin
+              </Link>
+            )}
             <button
               type="button"
               onClick={() => void signOut()}
@@ -39,7 +43,7 @@ export function AdminLayout() {
             </button>
           </div>
         </div>
-        <nav aria-label="Admin-Navigation" className="border-t border-white/10">
+        <nav aria-label="Händler-Navigation" className="border-t border-white/10">
           <ul className="mx-auto flex max-w-7xl gap-1 overflow-x-auto px-2">
             {NAV.map((n) => (
               <li key={n.to} className="shrink-0">
