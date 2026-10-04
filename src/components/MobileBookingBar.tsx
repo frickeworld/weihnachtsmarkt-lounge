@@ -38,9 +38,14 @@ export function MobileBookingBar() {
           animate={{ y: 0 }}
           exit={{ y: '110%' }}
           transition={{ duration: 0.3, ease: 'easeOut' }}
-          className="fixed inset-x-0 bottom-0 z-40 bg-brown/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-md md:hidden"
+          className="pointer-events-none fixed inset-x-0 bottom-0 z-40 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:hidden"
         >
-          <a href="#buchen" onClick={trackBookClick} className="btn-gold w-full">
+          {/* Ohne Balken (Louis, 04.10.2026): Der Button schwebt mit Schatten über der Seite. */}
+          <a
+            href="#buchen"
+            onClick={trackBookClick}
+            className="btn-gold pointer-events-auto w-full shadow-[0_12px_32px_-8px_rgba(36,34,30,0.55)]"
+          >
             Lounge buchen · {formatCents(settings.priceCents)}
           </a>
         </m.div>

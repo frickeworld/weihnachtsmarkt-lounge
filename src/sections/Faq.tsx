@@ -1,7 +1,6 @@
 import { IconChevron } from '@/components/Icons';
 import { Reveal } from '@/components/Reveal';
 import { SectionHeading } from '@/components/SectionHeading';
-import { PLACEHOLDER_POSITION } from '@/content/home';
 import { useSettings } from '@/lib/settingsContext';
 import type { ReactNode } from 'react';
 
@@ -46,7 +45,7 @@ export function Faq() {
     },
     {
       q: 'Wo finde ich die Lounge?',
-      a: `Auf dem Weihnachtsmarkt im Schlosspark Detmold, direkt am Residenzschloss. ${PLACEHOLDER_POSITION}`,
+      a: 'Mitten auf dem Weihnachtsmarkt im Schlosspark in Detmold.',
     },
   ];
 

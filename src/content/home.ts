@@ -2,11 +2,13 @@
  * Texte des One-Pagers. Preise, Taler und Personenzahl werden aus den Einstellungen eingesetzt,
  * damit sie nie hart im Text stehen.
  */
-export const PLACEHOLDER_POSITION = '[GENAUE POSITION]';
+/** Standort (Louis, 04.10.2026): Die Lounge steht auf dem Weihnachtsmarkt im Schlosspark Detmold. */
+export const LOCATION_NAME = 'Weihnachtsmarkt im Schlosspark';
+export const LOCATION_ADDRESS = 'Schlosspark, 32756 Detmold';
 
 export const MAPS_URL =
   'https://www.google.com/maps/dir/?api=1&destination=' +
-  encodeURIComponent('Schloßplatz 1, 32756 Detmold');
+  encodeURIComponent('Weihnachtsmarkt im Schlosspark, Detmold');
 
 export const howItWorks = [
   { title: 'Termin wählen', text: 'Tag und Zeitfenster aussuchen.' },

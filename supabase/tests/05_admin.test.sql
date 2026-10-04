@@ -10,6 +10,8 @@ insert into public.user_roles (user_id, role) values
   ('00000000-0000-0000-0000-0000000000b1', 'haendler');
 
 update public.settings set season_start = '2026-12-01', season_end = '2026-12-07';
+create temp table pin_before as select scanner_token_version as v from public.settings;
+grant select on pin_before to authenticated;
 
 -- Drei bezahlte Buchungen (eine erschienen, eine nicht, eine wird storniert) + eine kostenlose
 insert into public.bookings (id, date, start_time, end_time, status, first_name, last_name, email, phone, persons, occasion, paid_at, source)
@@ -59,7 +61,7 @@ select is((select (j ->> 'taler_handed_out')::int from k), 1, '1 × Taler überg
 select is((select jsonb_array_length(j -> 'daily') from k), 7, 'Tagesreihe hat 7 Tage');
 
 -- Scanner-PIN
-select is(public.admin_set_scanner_pin('482915'), 2, 'PIN gesetzt, Version erhöht (alle Scanner abgemeldet)');
+select is(public.admin_set_scanner_pin('482915'), (select v + 1 from pin_before), 'PIN gesetzt, Version erhöht (alle Scanner abgemeldet)');
 select throws_ok($$select public.admin_set_scanner_pin('12ab56')$$, '22023', null, 'PIN muss 6 Ziffern haben');
 select throws_ok($$select scanner_pin_hash from public.settings$$, '42501', null, 'Admin kann den PIN-Hash nicht lesen');
 
