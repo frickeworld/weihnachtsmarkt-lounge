@@ -263,3 +263,13 @@
     transform: none;
   }
 }
+
+/* Rechtstexte: Links sichtbar unterstrichen */
+@layer components {
+  .legal a {
+    color: var(--color-gold-deep);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+}
