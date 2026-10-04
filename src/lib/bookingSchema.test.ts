@@ -30,6 +30,13 @@ describe('Buchungsformular', () => {
     expect(schema.safeParse(valid).success).toBe(true);
   });
 
+  it('Anlass ist optional, ungültige Werte werden abgelehnt', () => {
+    expect(schema.safeParse({ ...valid, occasion: undefined }).success).toBe(true);
+    expect(schema.safeParse({ ...valid, occasion: null }).success).toBe(true);
+    expect(schema.safeParse({ ...valid, occasion: '' }).success).toBe(true);
+    expect(errorPaths({ ...valid, occasion: 'party' })).toContain('occasion');
+  });
+
   it('verlangt die AGB-Bestätigung', () => {
     expect(errorPaths({ ...valid, termsAccepted: false })).toContain('termsAccepted');
   });

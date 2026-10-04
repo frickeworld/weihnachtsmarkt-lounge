@@ -130,6 +130,13 @@ Deno.test({
       sessionId = b.stripe_checkout_session_id as string;
     });
 
+    await t.step('Buchung ohne Anlass (optional) wird angenommen', async () => {
+      const r = await post(FN.checkout, { date: day, startTime: '19:00', form: { ...form, occasion: null } });
+      assertEquals(r.status, 200, JSON.stringify(r.body));
+      assertEquals((await booking(r.body.bookingId)).occasion, null);
+      await post(FN.release, { bookingId: r.body.bookingId });
+    });
+
     await t.step('zweite Buchung desselben Zeitfensters → 409', async () => {
       const r = await post(FN.checkout, { date: day, startTime: '17:00', form });
       assertEquals(r.status, 409);

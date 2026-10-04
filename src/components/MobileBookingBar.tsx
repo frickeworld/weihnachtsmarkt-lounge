@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, m } from 'framer-motion';
 import { formatCents } from '@/lib/money';
-import { totalCents } from '@/lib/settings';
 import { useSettings } from '@/lib/settingsContext';
 import { trackBookClick } from '@/lib/track';
 
@@ -42,7 +41,7 @@ export function MobileBookingBar() {
           className="fixed inset-x-0 bottom-0 z-40 bg-brown/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-md md:hidden"
         >
           <a href="#buchen" onClick={trackBookClick} className="btn-gold w-full">
-            Lounge buchen · {formatCents(totalCents(settings))}
+            Lounge buchen · {formatCents(settings.priceCents)}
           </a>
         </m.div>
       )}

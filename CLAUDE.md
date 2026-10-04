@@ -16,7 +16,10 @@ Mobile-first One-Page-Website, über die eine überdachte Lounge auf dem Weihnac
 ## Geschäftsregeln – NIE brechen
 
 - Preis 175,00 € + 3,50 € Vorverkaufsgebühr = **178,50 €**. Beträge in Cent, immer aus `settings`, nie hart codiert.
-- **Preisanzeige (PAngV):** groß der Gesamtpreis „178,50 €“, darunter „inkl. 3,50 € Vorverkaufsgebühr“.
+- **Preisanzeige (Entscheidung Louis, Design-Runde 2):** Beworben wird **„175 €“** mit dem Zusatz „zzgl. 3,50 € Vorverkaufsgebühr“ (klein, direkt daneben). Der Gesamtpreis 178,50 € erscheint in der Buchungs-Zusammenfassung und im Checkout. ⚠ PAngV-Risiko (Gesamtpreisangabe) – vom Anwalt prüfen lassen.
+- Alle Werbe-Buttons heißen **„Lounge buchen“**. Nur der Abschluss-Button im Formular heißt „Zahlungspflichtig buchen“ (§ 312j BGB).
+- Der Anlass ist bei der Buchung **optional**.
+- Die **100 € Freiverzehr** werden groß herausgestellt (Hero, Eckdaten-Band).
 - Enthalten: Lounge exklusiv 2 Stunden, bis 10 Personen, 100 Residenztaler (je 1 €, pro gekauftem Artikel 1 Taler), Tischservice der Tanzschule Fricke.
 - Zeitfenster Mo–Fr 17:00–19:00 / 19:00–21:00, Sa–So 17:30–19:30 / 19:30–21:30. Zeitzone immer **Europe/Berlin**.
 - Saison, Schließtage, gesperrte Zeitfenster: im Admin einstellbar.
@@ -56,7 +59,7 @@ Mobile-first One-Page-Website, über die eine überdachte Lounge auf dem Weihnac
 - Deployment: GitHub Action spielt bei Push auf `main` Migrations + Functions ein.
 - Tests: Vitest (Kernlogik: Preise, Abrechnung, Zeitfenster, Zeitzone), pgTAP/SQL-Tests (RLS, Doppelbuchung), Playwright (Buchung mit Stripe-Testkarte). CI bei jedem Push.
 
-## Design (Stand Design-Runde 1, 04.10.2026)
+## Design (Stand Design-Runde 2, 04.10.2026)
 
 - Look: **hell & festlich** im Stil von weihnachtsmarkt-detmold.de. Creme-Papier als Grundfläche, dunkle Schrift, Gold-Glitzer als Akzent (Bänder, Preis-Karte, Schritt-Nummern). Dunkelbraun nur für Header, Hero-Foto und Footer. **Keine dunklen Elemente auf dunklem Grund.**
 - Tokens (nur in `src/styles/index.css` pflegen): Papier `#FBF7EF`, Fläche `#FFFFFF`, Sand `#F3EBDC`, Linie `#E4D8C2`, Tinte `#23201B`, Tinte weich `#5F574B`, Gold `#C6A45C` (Flächen), Gold tief `#7A5A1E` (Text auf hell), Gold hell `#E8D6A8` (auf dunkel), Braun `#24221E`, Text auf dunkel `#F8F3E8`, Händler-Rot `#CD131C` (sparsam).
@@ -65,6 +68,7 @@ Mobile-first One-Page-Website, über die eine überdachte Lounge auf dem Weihnac
 - Schriften: Jost (Überschriften, geometrisch wie die Markt-Seite), Manrope (Text). Selbst gehostet.
 - Hero: Glitzer-Band mit Markt-Schriftzug, darunter großes Foto (Platzhalter „Symbolbild · Bildquelle: Stadt Detmold“) mit Schnee (Canvas nur im Hero).
 - Keine Lichterkette mehr.
+- Mobil: Header zeigt nur das Händler-Logo zentriert; „Lounge buchen“ steht mobil im Hero und in der festen Leiste unten. Karten mobil kompakt (Icon links, Text rechts).
 - Footer: Sponsoren & Partner (weiße Logos), Instagram @diehaendlerdetmold, Link weihnachtsmarkt-detmold.de, „Powered by STUDIO/F“.
 - Ansprache „Du“, warm, hochwertig, erwachsen (30–65). Keine Jugendsprache, keine Emojis. Alle Texte Deutsch.
 - `prefers-reduced-motion`: Schnee, Glanz und Funkeln aus, nur weiche Einblendungen.

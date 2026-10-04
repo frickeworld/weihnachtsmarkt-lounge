@@ -9,22 +9,40 @@ test.describe('One-Pager', () => {
     await mockSupabase(page);
   });
 
-  test('zeigt Gesamtpreis groß und ohne Kaminfeuer-Versprechen', async ({ page }) => {
+  test('wirbt mit 175 € zzgl. Gebühr, 100 € Freiverzehr und ohne Kaminfeuer-Versprechen', async ({
+    page,
+  }) => {
     await page.goto('/');
-    await expect(page.locator('#preis')).toContainText('178,50 €');
-    await expect(page.locator('#preis')).toContainText('inkl. 3,50 € Vorverkaufsgebühr');
+    await expect(page.locator('#preis')).toContainText('175 €');
+    await expect(page.locator('#preis')).toContainText('zzgl. 3,50 € Vorverkaufsgebühr');
+    await expect(page.locator('#preis')).not.toContainText('178,50');
+    await expect(page.locator('#start')).toContainText('Freiverzehr');
     await expect(page.locator('body')).not.toContainText('Kaminfeuer');
+  });
+
+  test('mobil: Logo im Header zentriert, kein Buchen-Button oben', async ({ page, isMobile }) => {
+    test.skip(!isMobile, 'nur mobil');
+    await page.goto('/');
+    await expect(
+      page.getByRole('banner').getByRole('link', { name: 'Lounge buchen' }),
+    ).toBeHidden();
+    const logo = await page
+      .getByRole('banner')
+      .getByAltText(/Die Händler/)
+      .boundingBox();
+    const vw = page.viewportSize()!.width;
+    expect(Math.abs(logo!.x + logo!.width / 2 - vw / 2)).toBeLessThan(4);
   });
 
   test('Anker springen zu den richtigen Abschnitten', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('link', { name: 'Jetzt Lounge buchen' }).click();
+    await page.locator('#start').getByRole('link', { name: 'Lounge buchen' }).click();
     await expect(page).toHaveURL(/#buchen$/);
     await expect(page.locator('#buchen')).toBeInViewport();
     await page.goto('/');
     await page.getByRole('link', { name: 'Was dich erwartet' }).click();
     await expect(page.locator('#erlebnis')).toBeInViewport();
-    await page.getByRole('link', { name: 'Termin wählen' }).click();
+    await page.locator('#preis').getByRole('link', { name: 'Lounge buchen' }).click();
     await expect(page.locator('#buchen')).toBeInViewport();
   });
 
@@ -48,8 +66,7 @@ test.describe('One-Pager', () => {
     await page.getByLabel('E-Mail').fill('anna@example.de');
     await page.getByLabel('Telefon').fill('05231 123456');
     await page.getByLabel('Personenzahl').selectOption('8');
-    await page.locator('#buchen label').filter({ hasText: 'Firmenfeier' }).click();
-    await expect(page.getByRole('radio', { name: 'Firmenfeier' })).toBeChecked();
+    await expect(page.getByText('Anlass (optional)')).toBeVisible();
     await page.getByLabel('Straße und Hausnummer').fill('Schloßplatz 1');
     await page.getByLabel('PLZ').fill('32756');
     await page.getByLabel('Ort').fill('Detmold');
@@ -148,7 +165,7 @@ test.describe('Echte Verfügbarkeit (Phase 2)', () => {
     await expect(firstFreeDay(page)).toBeEnabled();
   });
 
-  test('Tracking: page_view beim Laden, book_click bei „Jetzt Lounge buchen“', async ({
+  test('Tracking: page_view beim Laden, book_click bei „Lounge buchen“', async ({
     page,
     isMobile,
   }) => {
@@ -156,7 +173,7 @@ test.describe('Echte Verfügbarkeit (Phase 2)', () => {
     await mockSupabase(page, { tracked });
     await page.goto('/');
     await expect.poll(() => tracked.filter((t) => t.event_type === 'page_view').length).toBe(1);
-    await page.getByRole('link', { name: 'Jetzt Lounge buchen' }).click();
+    await page.locator('#start').getByRole('link', { name: 'Lounge buchen' }).click();
     await expect.poll(() => tracked.filter((t) => t.event_type === 'book_click').length).toBe(1);
     expect(tracked.every((t) => t.device === (isMobile ? 'mobile' : 'desktop'))).toBe(true);
     const cookies = await page.context().cookies();
@@ -180,7 +197,7 @@ test.describe('Mobile Buchungsleiste', () => {
     test.skip(!isMobile, 'nur mobil');
     await mockSupabase(page);
     await page.goto('/');
-    const bar = page.getByRole('link', { name: 'Lounge buchen · 178,50 €' });
+    const bar = page.getByRole('link', { name: 'Lounge buchen · 175,00 €' });
     await expect(bar).toHaveCount(0);
     await page.locator('#anlaesse').scrollIntoViewIfNeeded();
     await expect(bar).toBeVisible();

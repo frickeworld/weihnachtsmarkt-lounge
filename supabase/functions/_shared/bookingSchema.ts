@@ -38,9 +38,11 @@ export function createBookingSchema(maxPersons: number) {
         .int()
         .min(1, 'Bitte wähle die Personenzahl.')
         .max(maxPersons, `Die Lounge bietet Platz für bis zu ${maxPersons} Personen.`),
-      occasion: z.enum(['firmenfeier', 'familienfeier', 'freunde', 'sonstiges'], {
-        message: 'Bitte wähle einen Anlass.',
-      }),
+      // Anlass ist freiwillig (Design-Runde 2). Leer/null zählt als „keine Angabe“.
+      occasion: z.preprocess(
+        (v) => (v === '' || v === null ? undefined : v),
+        z.enum(['firmenfeier', 'familienfeier', 'freunde', 'sonstiges']).optional(),
+      ),
       companyName: trimmed(120),
       invoiceRequested: z.boolean(),
       vatId: z

@@ -2,7 +2,6 @@ import { IconCheck } from '@/components/Icons';
 import { Reveal } from '@/components/Reveal';
 import { SectionHeading } from '@/components/SectionHeading';
 import { formatCents } from '@/lib/money';
-import { totalCents } from '@/lib/settings';
 import { useSettings } from '@/lib/settingsContext';
 import { trackBookClick } from '@/lib/track';
 
@@ -11,7 +10,7 @@ export function Pricing() {
   const included = [
     'Lounge exklusiv für 2 Stunden',
     `Platz für bis zu ${s.maxPersons} Personen`,
-    `${s.talerCount} Residenztaler Freiverzehr im Wert von ${s.talerCount} €`,
+    `${s.talerCount} € Freiverzehr – ${s.talerCount} Residenztaler für die Stände`,
     'Tischservice der Tanzschule Fricke',
     'Ticket mit QR-Code per E-Mail',
   ];
@@ -26,11 +25,11 @@ export function Pricing() {
               Pro Lounge und Zeitfenster
             </p>
             <p className="font-display mt-3 text-7xl leading-none font-medium sm:text-8xl">
-              {formatCents(totalCents(s))}
+              {formatCents(s.priceCents).replace(/,00\s?€$/, ' €')}
             </p>
-            <p className="mt-3 font-medium">inkl. {formatCents(s.feeCents)} Vorverkaufsgebühr</p>
+            <p className="mt-3 font-medium">zzgl. {formatCents(s.feeCents)} Vorverkaufsgebühr</p>
             <a href="#buchen" onClick={trackBookClick} className="btn-outline mt-8 self-center">
-              Termin wählen
+              Lounge buchen
             </a>
           </div>
           <div className="bg-surface p-8 sm:p-12">

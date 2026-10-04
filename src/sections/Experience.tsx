@@ -39,14 +39,21 @@ export function Experience() {
             lang nur dir und deinen Leuten.
           </p>
         </SectionHeading>
-        <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <ul className="grid gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
           {cards.map((c, i) => (
-            <Reveal as="li" key={c.title} delay={i * 0.08} className="card card-hover p-7">
-              <span className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-full bg-gold/20 text-gold-deep">
-                <c.icon className="h-7 w-7" />
+            <Reveal
+              as="li"
+              key={c.title}
+              delay={i * 0.08}
+              className="card card-hover flex gap-4 p-4 sm:block sm:p-7"
+            >
+              <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gold/20 text-gold-deep sm:mb-5 sm:h-12 sm:w-12">
+                <c.icon className="h-6 w-6 sm:h-7 sm:w-7" />
               </span>
-              <h3 className="mb-2 text-xl font-medium">{c.title}</h3>
-              <p className="leading-relaxed text-ink-soft">{c.text}</p>
+              <div>
+                <h3 className="mb-1 text-lg font-medium sm:mb-2 sm:text-xl">{c.title}</h3>
+                <p className="text-[15px] leading-relaxed text-ink-soft sm:text-base">{c.text}</p>
+              </div>
             </Reveal>
           ))}
         </ul>

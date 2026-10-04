@@ -13,7 +13,8 @@ export function Header({ home = true }: { home?: boolean }) {
   const prefix = home ? '' : '/';
   return (
     <header className="on-dark sticky top-0 z-40 bg-brown/95 text-on-dark backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
+      {/* Mobil: nur das Logo, zentriert. „Lounge buchen“ steht mobil unten in der festen Leiste. */}
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-center gap-4 px-4 sm:px-6 md:justify-between">
         <a href={`${prefix}#start`} aria-label="Zur Startseite" className="shrink-0">
           <HaendlerLogo size="sm" />
         </a>
@@ -31,7 +32,7 @@ export function Header({ home = true }: { home?: boolean }) {
         <a
           href={`${prefix}#buchen`}
           onClick={trackBookClick}
-          className="btn-gold !min-h-10 !px-5 !py-2 text-sm"
+          className="btn-gold !hidden !min-h-10 !px-5 !py-2 text-sm md:!inline-flex"
         >
           Lounge buchen
         </a>

@@ -15,7 +15,6 @@ async function fillAndSubmit(page: Page, extra?: (p: Page) => Promise<void>) {
   await page.getByLabel('E-Mail').fill('anna@example.de');
   await page.getByLabel('Telefon').fill('05231 123456');
   await page.getByLabel('Personenzahl').selectOption('8');
-  await page.locator('#buchen label').filter({ hasText: 'Firmenfeier' }).click();
   if (extra) await extra(page);
   await page.getByLabel(/Ich akzeptiere die/).check();
   await page.getByRole('button', { name: /Zahlungspflichtig buchen – 178,50 €/ }).click();

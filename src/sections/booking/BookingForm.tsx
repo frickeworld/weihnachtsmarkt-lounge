@@ -147,7 +147,7 @@ export function BookingForm({ date, startTime, endTime, onSlotUnavailable }: Pro
       </div>
 
       <fieldset>
-        <legend className="field-label">Anlass</legend>
+        <legend className="field-label">Anlass (optional)</legend>
         <div
           className="flex flex-wrap gap-2"
           aria-describedby={errors.occasion ? 'occasion-error' : undefined}

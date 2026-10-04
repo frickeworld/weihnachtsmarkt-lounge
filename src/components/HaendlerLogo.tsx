@@ -4,7 +4,7 @@ import logo960 from '@/assets/haendler-logo-weiss-960.webp';
 type Size = 'sm' | 'md' | 'lg';
 
 const sizes: Record<Size, { img: string; width: number }> = {
-  sm: { img: 'h-6 sm:h-7', width: 170 },
+  sm: { img: 'h-8 md:h-7', width: 190 },
   md: { img: 'h-9', width: 220 },
   lg: { img: 'h-12 sm:h-16', width: 420 },
 };

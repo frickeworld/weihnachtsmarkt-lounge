@@ -110,7 +110,7 @@ Deno.serve(async (req) => {
       email: form.email,
       phone: form.phone,
       persons: form.persons,
-      occasion: form.occasion,
+      occasion: form.occasion ?? null,
       company_name: form.companyName || null,
       vat_id: withBilling && form.vatId ? form.vatId.replace(/\s/g, '') : null,
       invoice_requested: form.invoiceRequested,

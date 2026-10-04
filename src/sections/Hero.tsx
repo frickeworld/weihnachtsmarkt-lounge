@@ -3,8 +3,6 @@ import hero800 from '@/assets/hero-800.webp';
 import { GlitterBand } from '@/components/GlitterBand';
 import { Snowfall } from '@/components/Snowfall';
 import { WeihnachtsmarktLogo } from '@/components/WeihnachtsmarktLogo';
-import { formatCents } from '@/lib/money';
-import { totalCents } from '@/lib/settings';
 import { useSettings } from '@/lib/settingsContext';
 import { trackBookClick } from '@/lib/track';
 
@@ -46,31 +44,32 @@ export function Hero() {
               Deine Lounge mitten im Weihnachtsmarkt
             </h1>
             <p className="mt-5 text-lg leading-relaxed text-on-dark/90 sm:text-xl">
-              Überdacht, warm und gemütlich – für bis zu {s.maxPersons} Personen. Mit {s.talerCount}{' '}
-              € Freiverzehr und Tischservice direkt an deinem Platz.
+              Überdacht, warm und gemütlich – für bis zu {s.maxPersons} Personen, mit Tischservice
+              direkt an deinem Platz.
             </p>
-            <div className="mt-8 flex flex-wrap items-center gap-4">
-              <a href="#buchen" onClick={trackBookClick} className="btn-gold px-7 text-base">
-                Jetzt Lounge buchen
+            {/* Das stärkste Argument groß: Freiverzehr */}
+            <div className="glitter mt-6 inline-flex items-center gap-4 rounded-2xl px-5 py-3 shadow-[0_18px_40px_-20px_rgba(0,0,0,0.8)]">
+              <span className="font-display text-5xl leading-none font-medium sm:text-6xl">
+                {s.talerCount}&nbsp;€
+              </span>
+              <span className="text-sm leading-tight font-bold tracking-wide uppercase">
+                Freiverzehr
+                <br />
+                inklusive
+              </span>
+            </div>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+              <a
+                href="#buchen"
+                onClick={trackBookClick}
+                className="btn-gold w-full px-8 text-base sm:w-auto"
+              >
+                Lounge buchen
               </a>
-              <a href="#erlebnis" className="btn-outline">
+              <a href="#erlebnis" className="btn-outline w-full sm:w-auto">
                 Was dich erwartet
               </a>
             </div>
-            <ul className="mt-8 flex flex-wrap gap-2 text-sm">
-              {[
-                `bis ${s.maxPersons} Personen`,
-                '2 Stunden exklusiv',
-                `${formatCents(totalCents(s))} pro Lounge`,
-              ].map((fact) => (
-                <li
-                  key={fact}
-                  className="rounded-full bg-on-dark/12 px-3 py-1.5 text-on-dark ring-1 ring-on-dark/25 backdrop-blur-sm"
-                >
-                  {fact}
-                </li>
-              ))}
-            </ul>
           </div>
         </div>
         <p className="absolute right-3 bottom-2 z-20 text-[11px] text-on-dark/60">

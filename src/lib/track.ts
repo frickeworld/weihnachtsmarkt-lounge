@@ -16,7 +16,7 @@ export function trackPageView(): void {
   void trackEvent('page_view', device()).catch(() => undefined);
 }
 
-/** Für „Lounge buchen“, „Jetzt Lounge buchen“, „Termin wählen“ und die mobile Buchungsleiste. */
+/** Für alle „Lounge buchen“-Buttons (Header, Hero, Preis, mobile Buchungsleiste). */
 export function trackBookClick(): void {
   void trackEvent('book_click', device()).catch(() => undefined);
 }
