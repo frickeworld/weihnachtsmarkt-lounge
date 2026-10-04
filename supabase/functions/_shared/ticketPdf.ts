@@ -12,6 +12,9 @@ export interface TicketPdfData {
   location: string;
   talerCount: number;
   qrPng: Uint8Array;
+  /** Glitzer-Kopf mit Markt-Schriftzug (JPEG), optional */
+  headerJpg?: Uint8Array | null;
+  /** Händler-Logo weiß (PNG), optional – steht auf dem dunklen Fuß */
   logoPng?: Uint8Array | null;
 }
 
@@ -19,11 +22,15 @@ const hex = (h: string) => {
   const n = parseInt(h.slice(1), 16);
   return rgb(((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255);
 };
-const NIGHT = hex('#0F0D0B');
-const GOLD = hex('#C9A24D');
-const CREAM = hex('#F6EFE3');
-const CHAMPAGNE = hex('#E9D8A6');
-const MUTED = hex('#BDB3A3');
+// Helles Design (Design-Runde 2)
+const PAPER = hex('#FBF7EF');
+const LINE = hex('#E4D8C2');
+const INK = hex('#23201B');
+const INK_SOFT = hex('#5F574B');
+const GOLD = hex('#C6A45C');
+const GOLD_DEEP = hex('#7A5A1E');
+const BROWN = hex('#24221E');
+const ON_DARK = hex('#F8F3E8');
 
 /** Entfernt Zeichen, die WinAnsi nicht kann (z. B. Emojis in Namen), statt abzustürzen. */
 function safe(text: string): string {
@@ -53,86 +60,82 @@ export async function renderTicketPdf(d: TicketPdfData): Promise<Uint8Array> {
   const W = 420;
   const H = 595;
   const page = pdf.addPage([W, H]);
-  const serif = await pdf.embedFont(StandardFonts.TimesRoman);
   const serifBold = await pdf.embedFont(StandardFonts.TimesRomanBold);
   const sans = await pdf.embedFont(StandardFonts.Helvetica);
   const sansBold = await pdf.embedFont(StandardFonts.HelveticaBold);
   const mono = await pdf.embedFont(StandardFonts.CourierBold);
 
-  const center = (text: string, y: number, font = sans, size = 10, color = CREAM) => {
+  const center = (text: string, y: number, font = sans, size = 10, color = INK) => {
     const t = safe(text);
     page.drawText(t, { x: (W - font.widthOfTextAtSize(t, size)) / 2, y, size, font, color });
   };
 
-  // Hintergrund und Goldrahmen
-  page.drawRectangle({ x: 0, y: 0, width: W, height: H, color: NIGHT });
-  page.drawRectangle({
-    x: 14,
-    y: 14,
-    width: W - 28,
-    height: H - 28,
-    borderColor: GOLD,
-    borderWidth: 1,
-  });
+  // Hintergrund
+  page.drawRectangle({ x: 0, y: 0, width: W, height: H, color: PAPER });
 
-  // Logo-Plakette
-  let y = H - 40;
-  if (d.logoPng) {
-    const logo = await pdf.embedPng(d.logoPng);
-    const lw = 170;
-    const lh = (logo.height / logo.width) * lw;
-    page.drawRectangle({
-      x: (W - lw) / 2 - 10,
-      y: y - lh - 10,
-      width: lw + 20,
-      height: lh + 20,
-      color: CREAM,
-      borderColor: GOLD,
-      borderWidth: 1,
-    });
-    page.drawImage(logo, { x: (W - lw) / 2, y: y - lh, width: lw, height: lh });
-    y -= lh + 34;
+  // Kopf: Gold-Glitzer mit Markt-Schriftzug
+  const headH = 84;
+  if (d.headerJpg) {
+    const head = await pdf.embedJpg(d.headerJpg);
+    page.drawImage(head, { x: 0, y: H - headH, width: W, height: headH });
   } else {
-    center('DIE HÄNDLER', y - 14, sansBold, 16, CHAMPAGNE);
-    y -= 40;
+    page.drawRectangle({ x: 0, y: H - headH, width: W, height: headH, color: GOLD });
+    center('Weihnachtsmarkt im Schlosspark Detmold', H - headH / 2 - 5, serifBold, 15, INK);
   }
 
-  center('WEIHNACHTSMARKT IM SCHLOSSPARK DETMOLD', y, sans, 8, CHAMPAGNE);
+  // Fuß: dunkelbraun mit weißem Händler-Logo und Kurz-Impressum
+  const footH = 74;
+  page.drawRectangle({ x: 0, y: 0, width: W, height: footH, color: BROWN });
+
+  let y = H - headH - 30;
+  center('DEIN TICKET FÜR DIE LOUNGE', y, sansBold, 8.5, GOLD_DEEP);
   y -= 26;
-  center('Weihnachtsmarkt-Lounge', y, serif, 22, CREAM);
-  y -= 30;
-  center(d.dateLabel, y, serifBold, 17, CHAMPAGNE);
+  center(d.dateLabel, y, sansBold, 18, INK);
   y -= 20;
-  center(`${d.startTime}–${d.endTime} Uhr`, y, sans, 13, CREAM);
+  center(`${d.startTime}–${d.endTime} Uhr`, y, sansBold, 13, GOLD_DEEP);
 
   // QR-Code auf weißem Feld
-  const qrSize = 170;
-  y -= qrSize + 30;
+  const qrSize = 168;
+  y -= qrSize + 26;
   page.drawRectangle({
     x: (W - qrSize) / 2 - 10,
     y: y - 10,
     width: qrSize + 20,
     height: qrSize + 20,
     color: rgb(1, 1, 1),
+    borderColor: LINE,
+    borderWidth: 1,
   });
   const qr = await pdf.embedPng(d.qrPng);
   page.drawImage(qr, { x: (W - qrSize) / 2, y, width: qrSize, height: qrSize });
 
-  y -= 28;
-  center(d.bookingCode, y, mono, 15, CREAM);
+  y -= 30;
+  center(d.bookingCode, y, mono, 15, INK);
   y -= 16;
   center(
     `Für ${d.firstName} · ${d.persons} ${d.persons === 1 ? 'Person' : 'Personen'}`,
     y,
     sans,
     9,
-    MUTED,
+    INK_SOFT,
+  );
+
+  // Hervorgehoben: Freiverzehr
+  y -= 30;
+  const boxW = 300;
+  page.drawRectangle({ x: (W - boxW) / 2, y: y - 8, width: boxW, height: 26, color: GOLD });
+  center(
+    `${d.talerCount} € Freiverzehr inklusive – ${d.talerCount} Residenztaler beim Einlass`,
+    y,
+    sansBold,
+    8.5,
+    INK,
   );
 
   // Hinweise
-  y -= 26;
+  y -= 24;
   const notes = [
-    `${d.talerCount} Residenztaler beim Einlass – je 1 €, pro gekauftem Artikel 1 Taler.`,
+    'Je 1 € pro Taler, an den Ständen einlösbar – pro gekauftem Artikel 1 Taler.',
     'Tischservice der Tanzschule Fricke an eurem Platz.',
     `Ort: ${d.location}`,
     `Bitte sei pünktlich – dein Zeitfenster endet um ${d.endTime} Uhr.`,
@@ -140,25 +143,39 @@ export async function renderTicketPdf(d: TicketPdfData): Promise<Uint8Array> {
   ];
   for (const n of notes) {
     for (const line of wrap(n, 80)) {
-      center(line, y, sans, 8.5, CREAM);
+      center(line, y, sans, 8.5, INK);
       y -= 12;
     }
   }
 
-  // Fußzeile
-  const legal = wrap(legalLine(), 95);
-  let fy = 30 + legal.length * 9;
-  center(
-    'Eine Aktion der Händler – Werbegemeinschaft Detmold e. V. · Powered by STUDIO/F',
-    fy + 4,
-    sans,
-    6.5,
-    MUTED,
-  );
+  // Fuß-Inhalt
+  if (d.logoPng) {
+    const logo = await pdf.embedPng(d.logoPng);
+    const lw = 110;
+    const lh = (logo.height / logo.width) * lw;
+    page.drawImage(logo, { x: 22, y: footH - lh - 14, width: lw, height: lh });
+  }
+  const legal = wrap(legalLine(), 62);
+  let fy = footH - 18;
+  const textX = 150;
+  page.drawText(safe('Eine Aktion der Händler – Werbegemeinschaft Detmold e. V.'), {
+    x: textX,
+    y: fy,
+    size: 6.5,
+    font: sansBold,
+    color: ON_DARK,
+  });
   for (const line of legal) {
     fy -= 9;
-    center(line, fy, sans, 6.5, MUTED);
+    page.drawText(safe(line), { x: textX, y: fy, size: 6.2, font: sans, color: ON_DARK });
   }
+  page.drawText('Powered by STUDIO/F', {
+    x: textX,
+    y: fy - 11,
+    size: 6.2,
+    font: sans,
+    color: ON_DARK,
+  });
 
   return await pdf.save();
 }

@@ -52,7 +52,9 @@ describe('Ticket-Mail', () => {
       expect(html).toContain(s);
     }
     expect(html).toContain('href="https://lounge.example/ticket/tok"');
-    expect(html).toContain('src="https://lounge.example/email/haendler-logo.png"');
+    expect(html).toContain('src="https://lounge.example/email/kopf.jpg"');
+    expect(html).toContain('src="https://lounge.example/email/haendler-logo-weiss.png"');
+    expect(html).toContain('100 € Freiverzehr');
     expect(text).toContain('Dein Ticket online: https://lounge.example/ticket/tok');
     expect(html).not.toContain('Rechnung ansehen');
   });

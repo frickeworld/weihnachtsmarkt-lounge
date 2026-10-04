@@ -47,9 +47,10 @@ async function log(db: SupabaseClient, bookingId: string, type: string, error: u
   });
 }
 
-async function fetchLogo(siteUrl: string): Promise<Uint8Array | null> {
+/** Bilder für das PDF kommen von der Website (public/email). Fehlt eins, wird ohne gerendert. */
+async function fetchAsset(url: string): Promise<Uint8Array | null> {
   try {
-    const res = await fetch(`${siteUrl}/email/haendler-logo.png`);
+    const res = await fetch(url);
     return res.ok ? new Uint8Array(await res.arrayBuffer()) : null;
   } catch {
     return null;
@@ -111,7 +112,11 @@ export async function deliverTicket(
       location: s?.lounge_location ?? 'Weihnachtsmarkt im Schlosspark Detmold',
     };
 
-    const pdf = await renderTicketPdf({ ...common, qrPng, logoPng: await fetchLogo(siteUrl) });
+    const [headerJpg, logoPng] = await Promise.all([
+      fetchAsset(`${siteUrl}/email/kopf.jpg`),
+      fetchAsset(`${siteUrl}/email/haendler-logo-weiss.png`),
+    ]);
+    const pdf = await renderTicketPdf({ ...common, qrPng, headerJpg, logoPng });
     const mail = renderTicketEmail({
       ...common,
       kind,
