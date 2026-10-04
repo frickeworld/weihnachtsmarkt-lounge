@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { MobileBookingBar } from '@/components/MobileBookingBar';
+import { StructuredData } from '@/components/StructuredData';
 import { Booking } from '@/sections/Booking';
 import { Contact } from '@/sections/Contact';
 import { Directions } from '@/sections/Directions';
@@ -36,6 +37,7 @@ export function HomePage() {
       >
         Direkt zur Buchung
       </a>
+      <StructuredData />
       <Header />
       <main>
         <Hero />

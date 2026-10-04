@@ -4,6 +4,7 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig, loadEnv, type Plugin } from 'vite';
 import { viteSingleFile } from 'vite-plugin-singlefile';
+import { siteFiles } from './scripts/siteFiles';
 
 /**
  * Setzt <meta name="robots" content="noindex"> für Vorschau- und Entwicklungs-Builds.
@@ -42,8 +43,9 @@ function preloadFonts(patterns: RegExp[]): Plugin {
           injectTo: 'head' as const,
         }));
       // Hero-Foto (größtes sichtbares Element) und Glitzer-Band früh laden
-      const hero800 = files.find((f) => /hero-800-.*\.webp$/.test(f));
-      const hero1200 = files.find((f) => /hero-1200-.*\.webp$/.test(f));
+      // AVIF vorladen (type-geprüft: Browser ohne AVIF ignorieren den Hinweis und laden WebP normal)
+      const hero800 = files.find((f) => /hero-800-.*\.avif$/.test(f));
+      const hero1200 = files.find((f) => /hero-1200-.*\.avif$/.test(f));
       const glitter = files.find((f) => /gold-glitzer-.*\.webp$/.test(f));
       const images = [
         ...(hero800 && hero1200
@@ -53,7 +55,7 @@ function preloadFonts(patterns: RegExp[]): Plugin {
                 attrs: {
                   rel: 'preload',
                   as: 'image',
-                  type: 'image/webp',
+                  type: 'image/avif',
                   imagesrcset: `/${hero800} 800w, /${hero1200} 1200w`,
                   imagesizes: '100vw',
                   fetchpriority: 'high',
@@ -94,7 +96,15 @@ export default defineConfig(({ mode }) => {
         /manrope-latin-400-normal-.*\.woff2$/,
         /manrope-latin-600-normal-.*\.woff2$/,
       ]),
-      ...(vorschau ? [viteSingleFile()] : []),
+      ...(vorschau
+        ? [viteSingleFile()]
+        : [
+            siteFiles({
+              siteUrl: env.VITE_PUBLIC_SITE_URL ?? '',
+              supabaseUrl: env.VITE_SUPABASE_URL ?? '',
+              noindex: env.VITE_NOINDEX !== 'false',
+            }),
+          ]),
     ],
     resolve: {
       alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
@@ -105,7 +115,7 @@ export default defineConfig(({ mode }) => {
       : { target: 'es2022', sourcemap: false },
     test: {
       environment: 'jsdom',
-      include: ['src/**/*.test.{ts,tsx}'],
+      include: ['src/**/*.test.{ts,tsx}', 'scripts/**/*.test.ts'],
       setupFiles: ['src/test/setup.ts'],
     },
   };
