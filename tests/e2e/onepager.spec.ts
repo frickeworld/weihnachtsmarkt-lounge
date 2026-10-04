@@ -79,8 +79,8 @@ test.describe('One-Pager', () => {
   test('Rechtsseiten und 404 erreichbar', async ({ page }) => {
     for (const [path, title] of [
       ['/impressum', 'Impressum'],
-      ['/datenschutz', 'Datenschutz'],
-      ['/agb', 'AGB'],
+      ['/datenschutz', 'Datenschutzerklärung'],
+      ['/agb', 'Allgemeine Geschäftsbedingungen'],
     ]) {
       await page.goto(path);
       await expect(page.getByRole('heading', { level: 1 })).toHaveText(title);

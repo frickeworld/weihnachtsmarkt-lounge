@@ -154,7 +154,12 @@ export function BookingsPage() {
           </ul>
 
           {/* Desktop: Tabelle */}
-          <div className="card hidden overflow-x-auto md:block">
+          <div
+            className="card hidden overflow-x-auto md:block"
+            tabIndex={0}
+            role="region"
+            aria-label="Buchungsliste"
+          >
             <table className="w-full text-sm">
               <thead className="bg-sand text-left">
                 <tr>

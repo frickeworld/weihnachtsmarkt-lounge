@@ -470,6 +470,16 @@ Login, MFA, alle Admin-Seiten (4.7), Tagesliste-PDF, Anonymisierung.
 - [ ] Tastaturbedienung von Kalender und Formular
 - [ ] Gold auf Schwarz erfüllt AA
 
+**Umsetzungsdetails (Phase 8):**
+
+- Rechtstexte als Entwürfe (`src/pages/legal/`), gemeinsame Firmendaten in `supabase/functions/_shared/legal.ts` (auch für Mail und PDF). Deutlicher Vermerk „Entwurf – noch nicht freigegeben“.
+- `robots.txt`, `sitemap.xml`, `.htaccess` (Mittwald: SPA-Fallback, HTTPS, CSP und weitere Sicherheits-Header, Caching, `X-Robots-Tag` für interne Bereiche) und `_headers` (Cloudflare) entstehen beim Build (`scripts/siteFiles.ts`). Ohne `VITE_NOINDEX=false` sperrt `robots.txt` alles.
+- schema.org Product/Offer zur Laufzeit aus den Einstellungen (Gesamtpreis, kein fester Betrag).
+- Öffentliche Seite ohne supabase-js (schlanker `fetch`-Helfer `src/lib/rest.ts`), Kontaktformular nachgeladen: Haupt-Bundle 637 → 433 KB (gzip 197 → 146 KB). Hero-Foto als AVIF mit WebP-Rückfall.
+- Fehlerseite für unerwartete Fehler und veraltete Bundles nach einem Update („Seite neu laden“).
+- Barrierefreiheit automatisch geprüft (axe, WCAG 2.1 AA) für öffentliche Seiten, Ticket, Login, Scanner, Admin und Händler; CSP im Browser-Test ohne Verstöße.
+- `scripts/testdaten-zuruecksetzen.sql` mit Bestätigung und Sperre nach Saisonstart; `LIVE-SCHALTUNG.md` als Checkliste.
+
 ### Gesamttest vor dem Start
 
 - [ ] Anwalt prüft Impressum, AGB, Datenschutz → Entwurfs-Vermerk entfernen
@@ -497,7 +507,7 @@ Login, MFA, alle Admin-Seiten (4.7), Tagesliste-PDF, Anonymisierung.
 ## 8. Offene Platzhalter
 
 - [ ] Saison 2026 und Schließtage (aktuell 26.11.–23.12.2026)
-- [ ] Genaue Position der Lounge `[GENAUE POSITION]`
+- [x] Position der Lounge: Weihnachtsmarkt im Schlosspark, Detmold (Louis, 04.10.2026)
 - [x] Händler-Rot: `#CD131C` (aus dem Logo-Schriftzug gemessen; Signet-Quadrat `#CD2027`)
 - [ ] KI-Bilder (Prompt in Abschnitt 5), später echte Fotos
 - [ ] Impressum MF Coaching: Adresse, Registergericht, HRB, Geschäftsführer, USt-ID

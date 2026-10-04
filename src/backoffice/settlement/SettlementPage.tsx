@@ -96,7 +96,12 @@ export function SettlementPage() {
             Stornierte und kostenlose Buchungen zählen nicht. {SETTLEMENT_FOOTER}
           </p>
 
-          <div className="card mt-6 overflow-x-auto">
+          <div
+            className="card mt-6 overflow-x-auto"
+            tabIndex={0}
+            role="region"
+            aria-label="Einzelaufstellung"
+          >
             <table className="w-full text-sm">
               <thead className="bg-sand text-left">
                 <tr>
