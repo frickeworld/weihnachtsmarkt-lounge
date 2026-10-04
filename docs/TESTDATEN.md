@@ -47,3 +47,14 @@ delete from public.closed_dates where reason = 'Test';
 delete from public.blocked_slots where reason = 'Test';
 delete from public.page_events; -- nur vor dem Livegang!
 ```
+
+## Phase 5 – Admin ausprobieren
+
+```sql
+-- Eine bezahlte Beispielbuchung für morgen (erscheint in Übersicht, Buchungen, Kalender)
+insert into public.bookings (date, start_time, end_time, status, first_name, last_name, email, phone, persons, paid_at)
+values (current_date + 1, '19:00', '21:00', 'paid', 'Test', 'Admin', 'test@example.de', '0123456', 6, now());
+
+-- Wer hat welche Rolle?
+select u.email, r.role from public.user_roles r join auth.users u on u.id = r.user_id;
+```

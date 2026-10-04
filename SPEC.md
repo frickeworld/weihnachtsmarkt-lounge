@@ -306,6 +306,19 @@ Alle Admin-Aktionen serverseitig mit `is_admin_aal2()` geprüft.
 
 `/login` mit E-Mail + Passwort, „Passwort vergessen“. Nach Login: studio_admin → MFA-Einrichtung (falls fehlt) bzw. TOTP-Abfrage → `/admin`; haendler → `/haendler` (MFA optional unter „Konto“); ohne Rolle → „Kein Zugang“. Erster Admin: louis@tanzschule-fricke.de (Anlage im Supabase-Dashboard, SQL für Rolle wird geliefert).
 
+**Umsetzungsdetails (Phase 5):**
+
+- Backoffice (`/login`, `/admin`, `/haendler`) als eigene Bundles (`src/backoffice/`); die öffentliche Seite lädt davon nichts. Eigener Auth-Client mit Sitzung im localStorage (Schlüssel `lounge-backoffice-auth`), Implicit-Flow für Einladungs- und Passwort-Links.
+- Routen: `/login`, `/login/passwort-vergessen`, `/login/neues-passwort` (Ziel von Einladung und Zurücksetzen), `/login/2fa` (Einrichten oder Code; Händler freiwillig über `?einrichten=1`), `/login/kein-zugang`. Rücksprung über `?next=` nur auf interne Pfade.
+- Zugriffsregel (`decideAccess`): Admin braucht immer aal2; Händler nur, wenn ein Faktor eingerichtet ist. Die Datenbank prüft unabhängig davon (`is_admin_aal2()`).
+- Schreibende Buchungsaktionen über RPCs (`admin_check_in`, `admin_mark_taler`, `admin_cancel_booking`) bzw. die Edge Function `admin` (`resend_ticket`, `manual_booking`, `invite_user`). Kalender, Einstellungen und Zeitfenster schreiben direkt per RLS (`is_admin_aal2()`); `scanner_pin_hash` ist per Spaltenrechten weder les- noch schreibbar.
+- Scanner-PIN: Der Admin legt die 6-stellige PIN selbst fest (zweimal eingeben); sie wird nur als bcrypt-Hash gespeichert und nie wieder angezeigt. Jede neue PIN erhöht `scanner_token_version`.
+- Tagesliste: Druckansicht `/admin/tagesliste/:datum`, PDF über „Drucken → Als PDF speichern“ (kein PDF-Generator im Browser nötig).
+- CSV: Semikolon, UTF-8 mit BOM, CRLF, Formel-Schutz gegen CSV-Injection.
+- Anonymisierung: Standard-Stichtag ist der letzte vergangene 31. März; Bestätigung durch Eintippen von „ANONYMISIEREN“.
+- Abrechnung (4.7 Punkt 8) kommt mit Phase 7 zusammen mit dem Händler-Bereich.
+- Manuelle Buchungen mit Rechnungswunsch: Stripe erzeugt keine Rechnung – Hinweis im Formular.
+
 ---
 
 ## 5. One-Pager – Inhalte

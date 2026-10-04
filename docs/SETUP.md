@@ -59,11 +59,12 @@ Ab Phase 3 kommt `STRIPE_TEST_SECRET_KEY` für den automatischen Klicktest dazu.
 
 ## 4. Supabase-Grundeinstellungen (Dashboard)
 
-1. **Authentication → Sign In / Providers → Email:** „Allow new users to sign up“ **aus**.
+1. **Authentication → Sign In / Providers:** Unter „User Signups“ den Schalter **„Allow new users to sign up“ aus**. Den Anbieter **„Email“ selbst eingeschaltet lassen** – sonst funktioniert auch die Anmeldung nicht.
 2. **Authentication → Multi-Factor:** TOTP (Authenticator App) **aktiviert**.
 3. **Authentication → URL Configuration:**
    - Site URL: die Cloudflare-URL (später die Live-Domain)
    - Redirect URLs: `http://localhost:5173/**`, `https://*.weihnachtsmarkt-lounge.pages.dev/**`, die Cloudflare-URL mit `/**`
+   - Einladungen und „Passwort vergessen“ führen auf `/login/neues-passwort` – das deckt `/**` ab.
 4. **Database → Extensions:** `pg_cron` und `pg_net` aktivieren (brauchen wir ab Phase 2 für Reservierungs-Ablauf und Erinnerungsmails). Falls es nicht klappt: Ich mache es per Migration.
 
 ## 5. Supabase-Secrets (ab Phase 3)
@@ -141,6 +142,56 @@ Kunden senden“ aktivieren. Dann bekommt der Gast die Rechnung zusätzlich dire
 erst nach der Ticket-Mail fertig ist.
 
 ---
+
+## 10. Login und Admin (ab Phase 5)
+
+### 10.1 E-Mail-Versand für Einladungen (SMTP)
+
+Der eingebaute Mailversand von Supabase schickt nur an Mitglieder des Supabase-Teams und
+höchstens wenige Mails pro Stunde. Für Einladungen an die Händler deshalb Brevo als SMTP eintragen:
+
+**Supabase → Authentication → Emails → SMTP Settings → Enable custom SMTP**
+
+- Host `smtp-relay.brevo.com`, Port `587`
+- Benutzer und Passwort: aus **Brevo → SMTP & API → SMTP** (eigener SMTP-Schlüssel, nicht der API-Key)
+- Absender: `tickets@studio-f.club` (oder die verifizierte Absenderadresse), Name „Lounge der Händler“
+
+### 10.2 Deutsche Texte für die Auth-Mails
+
+**Supabase → Authentication → Emails → Templates.** Vorschlag:
+
+- **Invite user** – Betreff: `Dein Zugang zur Lounge der Händler`
+  ```html
+  <p>Hallo,</p>
+  <p>Studio F hat dir einen Zugang zum Buchungssystem der Weihnachtsmarkt-Lounge eingerichtet.</p>
+  <p><a href="{{ .ConfirmationURL }}">Jetzt Passwort festlegen</a></p>
+  <p>Der Link ist 24 Stunden gültig.</p>
+  ```
+- **Reset password** – Betreff: `Neues Passwort für die Lounge der Händler`
+  ```html
+  <p>Hallo,</p>
+  <p>Über diesen Link legst du ein neues Passwort fest:</p>
+  <p><a href="{{ .ConfirmationURL }}">Neues Passwort festlegen</a></p>
+  <p>Wenn du das nicht angefordert hast, ignoriere diese E-Mail einfach.</p>
+  ```
+
+### 10.3 Ersten Admin anlegen (einmalig)
+
+1. **Supabase → Authentication → Users → Add user → Send invitation** an `louis@tanzschule-fricke.de`.
+2. **SQL Editor** – Rolle vergeben:
+   ```sql
+   insert into public.user_roles (user_id, role)
+   select id, 'studio_admin' from auth.users where email = 'louis@tanzschule-fricke.de'
+   on conflict do nothing;
+   ```
+3. Link aus der Einladungsmail öffnen → Passwort festlegen → Authenticator-App einrichten
+   (z. B. Google Authenticator, 1Password) → fertig. Alle weiteren Zugänge vergibst du im
+   Admin unter **Zugänge**.
+
+**2FA-Gerät verloren?** Im Supabase-SQL-Editor den Faktor löschen:
+`delete from auth.mfa_factors where user_id = (select id from auth.users where email = '…');`
+Danach richtet man 2FA beim nächsten Login neu ein.
+Tipp: Den Schlüssel bei der Einrichtung zusätzlich im Passwort-Manager sichern.
 
 ## Lokal entwickeln (optional)
 
