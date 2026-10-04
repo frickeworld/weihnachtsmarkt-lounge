@@ -193,6 +193,69 @@ höchstens wenige Mails pro Stunde. Für Einladungen an die Händler deshalb Bre
 Danach richtet man 2FA beim nächsten Login neu ein.
 Tipp: Den Schlüssel bei der Einrichtung zusätzlich im Passwort-Manager sichern.
 
+## 11. Apple Wallet und Google Wallet (optional, empfohlen)
+
+Ohne diese Schritte gibt es PDF-Download und Online-Ticket; die Wallet-Buttons erscheinen
+automatisch, sobald die Secrets hinterlegt sind (Website und Mail).
+
+### 11.1 Apple Wallet (Konto: MF Coaching & Promotion GmbH)
+
+1. **Apple Developer Program** als Organisation beitreten (99 $ pro Jahr, D-U-N-S-Nummer nötig):
+   developer.apple.com → Account.
+2. **Certificates, Identifiers & Profiles → Identifiers → +** → „Pass Type IDs“ →
+   Beschreibung „Weihnachtsmarkt-Lounge“, ID `pass.club.studio-f.lounge`.
+3. Auf dem Mac in der **Schlüsselbundverwaltung** → Zertifikatsassistent → „Zertifikat einer
+   Zertifizierungsinstanz anfordern“ → auf der Festplatte sichern (CSR-Datei).
+4. Bei der Pass Type ID **„Create Certificate“** → CSR hochladen → `pass.cer` herunterladen →
+   doppelklicken → im Schlüsselbund als `.p12` exportieren (mit Passwort).
+5. Apple-Zwischenzertifikat **WWDR G4** von apple.com/certificateauthority herunterladen.
+6. Umwandeln (Terminal):
+   ```bash
+   openssl pkcs12 -in pass.p12 -clcerts -nokeys -out pass-cert.pem -legacy
+   openssl pkcs12 -in pass.p12 -nocerts -out pass-key.pem -legacy   # Passwort vergeben
+   openssl x509 -inform DER -in AppleWWDRCAG4.cer -out wwdr.pem
+   ```
+7. **Supabase → Edge Functions → Secrets:**
+
+   | Name                      | Wert                                     |
+   | ------------------------- | ---------------------------------------- |
+   | `APPLE_PASS_TYPE_ID`      | `pass.club.studio-f.lounge`              |
+   | `APPLE_TEAM_ID`           | Team-ID (oben rechts im Developer-Konto) |
+   | `APPLE_PASS_CERT`         | Inhalt von `pass-cert.pem`               |
+   | `APPLE_PASS_KEY`          | Inhalt von `pass-key.pem`                |
+   | `APPLE_PASS_KEY_PASSWORD` | Passwort aus Schritt 6                   |
+   | `APPLE_WWDR_CERT`         | Inhalt von `wwdr.pem`                    |
+
+   (Mehrzeilige Werte gehen; alternativ base64-kodiert.) Das Zertifikat läuft nach einem Jahr ab –
+   rechtzeitig erneuern.
+
+### 11.2 Google Wallet (kostenlos)
+
+1. **pay.google.com/business/console** → Google Wallet API → Issuer-Konto anlegen (Firma: MF Coaching
+   & Promotion GmbH). Die **Issuer-ID** notieren.
+2. **console.cloud.google.com** → Projekt anlegen → „Google Wallet API“ aktivieren → **Dienstkonto**
+   anlegen → Schlüssel als JSON herunterladen.
+3. In der Pay & Wallet Console unter **Nutzer** die E-Mail-Adresse des Dienstkontos als Entwickler
+   hinzufügen.
+4. **Supabase-Secrets:** `GOOGLE_WALLET_ISSUER_ID` (Issuer-ID) und `GOOGLE_WALLET_SERVICE_ACCOUNT`
+   (kompletter Inhalt der JSON-Datei).
+5. Solange Google das Konto nicht freigegeben hat („Publishing access“ beantragen), können nur
+   Test-Nutzer speichern – in der Console unter „Testkonten“ eintragen.
+
+**Datenschutz:** Für Google Wallet übertragen wir nur Termin, Buchungscode, Personenzahl und den
+QR-Inhalt – keine Namen oder Kontaktdaten. Für die Datenschutzerklärung vormerken (Apple-Pässe
+entstehen auf unserem Server und liegen danach nur auf dem Gerät des Gasts).
+
+**Vor dem Livegang:** Die schwarzen Wallet-Buttons durch die offiziellen Badges
+„Zu Apple Wallet hinzufügen“ / „In Google Wallet speichern“ ersetzen (Vorgaben von Apple und Google).
+Koordinaten der Lounge für die Sperrbildschirm-Anzeige prüfen: `LOUNGE_COORDINATES` in
+`supabase/functions/_shared/walletConfig.ts`.
+
+## 12. Fotos der Lounge
+
+Originalfotos in `assets/lounge-fotos/` legen (siehe `LIESMICH.md` dort) und `npm run images`
+ausführen – oder mir die Fotos schicken. Die Galerie erscheint erst, wenn Fotos da sind.
+
 ## Lokal entwickeln (optional)
 
 Du musst nichts lokal installieren. Wer es trotzdem möchte:

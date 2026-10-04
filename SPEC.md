@@ -306,6 +306,13 @@ Alle Admin-Aktionen serverseitig mit `is_admin_aal2()` geprüft.
 
 `/login` mit E-Mail + Passwort, „Passwort vergessen“. Nach Login: studio_admin → MFA-Einrichtung (falls fehlt) bzw. TOTP-Abfrage → `/admin`; haendler → `/haendler` (MFA optional unter „Konto“); ohne Rolle → „Kein Zugang“. Erster Admin: louis@tanzschule-fricke.de (Anlage im Supabase-Dashboard, SQL für Rolle wird geliefert).
 
+**Nachträge (04.10.2026, nach der ersten Testbuchung):**
+
+- Ticket-Downloads über die Edge Function `ticket-files` (nur mit `ticket_token`): PDF, Apple-Wallet-Pass (`.pkpass`, signiert) und Google-Wallet-Link. Buttons auf Ticket- und Erfolgsseite und in der Ticket-Mail; Wallet-Buttons nur, wenn die Secrets hinterlegt sind. Erfolgsseite holt den Token über `get_success_ticket_token(session_id)`.
+- Mobile Buchen-Leiste ohne dunklen Balken: schwebender Gold-Button mit Schatten.
+- Galerie „So sieht die Lounge aus“ (nach dem Abschnitt „Das Erlebnis“), unsichtbar bis Fotos in `assets/lounge-fotos/` liegen.
+- Standort: „Weihnachtsmarkt im Schlosspark, Detmold“ (Platzhalter `[GENAUE POSITION]` entfernt).
+
 **Umsetzungsdetails (Phase 5):**
 
 - Backoffice (`/login`, `/admin`, `/haendler`) als eigene Bundles (`src/backoffice/`); die öffentliche Seite lädt davon nichts. Eigener Auth-Client mit Sitzung im localStorage (Schlüssel `lounge-backoffice-auth`), Implicit-Flow für Einladungs- und Passwort-Links.

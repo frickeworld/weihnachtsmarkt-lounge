@@ -6,6 +6,7 @@ import { Booking } from '@/sections/Booking';
 import { Directions } from '@/sections/Directions';
 import { Experience } from '@/sections/Experience';
 import { Faq } from '@/sections/Faq';
+import { Gallery } from '@/sections/Gallery';
 import { Hero } from '@/sections/Hero';
 import { Highlights } from '@/sections/Highlights';
 import { HowItWorks } from '@/sections/HowItWorks';
@@ -39,6 +40,7 @@ export function HomePage() {
         <Hero />
         <Highlights />
         <Experience />
+        <Gallery />
         <Occasions />
         <Pricing />
         <HowItWorks />

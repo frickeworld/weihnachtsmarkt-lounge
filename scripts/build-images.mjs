@@ -95,11 +95,18 @@ async function toWhite(input) {
     data[i] = data[i + 1] = data[i + 2] = 255;
     data[i + 3] = Math.round(data[i + 3] * best.a);
   }
+  return { data, info };
+}
+
+/** Weißes Logo als PNG-Puffer (für weitere Verarbeitung). */
+async function toWhitePng(input) {
+  const { data, info } = await toWhite(input);
   return sharp(data, { raw: info }).png().toBuffer();
 }
 
 {
-  const white = sharp(await toWhite(trimmed));
+  const { data, info } = await toWhite(trimmed);
+  const white = sharp(data, { raw: info });
   for (const width of [480, 960]) {
     await white
       .clone()
@@ -169,8 +176,8 @@ for (const file of await readdir('assets/sponsoren')) {
 {
   await mkdir('public/wallet', { recursive: true });
   const BROWN = { r: 36, g: 34, b: 30, alpha: 1 };
-  const whiteLogo = await toWhite(trimmed);
-  const whiteSignet = await toWhite(
+  const whiteLogo = await toWhitePng(trimmed);
+  const whiteSignet = await toWhitePng(
     await sharp('assets/haendler-signet.png').trim({ threshold: 1 }).png().toBuffer(),
   );
   // Logo oben links im Pass: max. 160 × 50 pt, weiß auf transparent (Pass-Hintergrund ist Dunkelbraun)
@@ -231,4 +238,27 @@ for (const file of await readdir('assets/sponsoren')) {
     .composite([{ input: marktLogo, gravity: 'center' }])
     .jpeg({ quality: 80, mozjpeg: true })
     .toFile('public/wallet/google-hero.jpg');
+}
+
+// ---------------------------------------------------------------------------------------
+// Lounge-Fotos (Galerie): assets/lounge-fotos → src/assets/lounge/<name>-800|1600.webp
+// ---------------------------------------------------------------------------------------
+{
+  const files = (await readdir('assets/lounge-fotos')).filter((f) =>
+    /\.(jpe?g|png|webp)$/i.test(f),
+  );
+  for (const file of files) {
+    const name = file
+      .replace(/\.[^.]+$/, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
+    for (const width of [800, 1600]) {
+      await sharp(`assets/lounge-fotos/${file}`)
+        .rotate() // EXIF-Ausrichtung vom Handy übernehmen
+        .resize({ width, withoutEnlargement: true })
+        .webp({ quality: 76 })
+        .toFile(`src/assets/lounge/${name}-${width}.webp`);
+    }
+  }
 }
