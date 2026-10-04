@@ -136,6 +136,20 @@ test.describe('Erfolgsseite', () => {
     await expect(page.locator('meta[name="robots"][content*="noindex"]').first()).toBeAttached();
   });
 
+  test('bezahlt: Ticket öffnen und als PDF herunterladen', async ({ page }) => {
+    const token = 'Ab3dEf6hIj9kLm2nOp5qRs8tUv1wXy4z';
+    await mockSupabase(page, { successInfo: [{ ...info, status: 'paid' }], successToken: token });
+    await page.goto('/buchung/erfolg?session_id=cs_test_e2e');
+    await expect(page.getByRole('link', { name: 'Ticket jetzt öffnen' })).toHaveAttribute(
+      'href',
+      `/ticket/${token}`,
+    );
+    await expect(page.getByRole('link', { name: 'Ticket als PDF herunterladen' })).toHaveAttribute(
+      'href',
+      new RegExp(`token=${token}&format=pdf$`),
+    );
+  });
+
   test('ohne gültige Session: freundlicher Hinweis', async ({ page }) => {
     await mockSupabase(page);
     await page.goto('/buchung/erfolg');

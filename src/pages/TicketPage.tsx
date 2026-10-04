@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { HaendlerLogo } from '@/components/HaendlerLogo';
+import { TicketDownloads } from '@/components/TicketDownloads';
 import { fetchTicket, type TicketInfo } from '@/lib/api';
 import { formatLongDate } from '@/lib/dates';
 import { useNoindex } from '@/lib/useNoindex';
@@ -60,7 +61,7 @@ export function TicketPage() {
         </p>
       )}
 
-      {state.kind === 'ready' && <TicketView ticket={state.ticket} qr={state.qr} />}
+      {state.kind === 'ready' && <TicketView ticket={state.ticket} qr={state.qr} token={token} />}
 
       {state.kind === 'notfound' && (
         <div role="alert" className="mt-12">
@@ -84,7 +85,7 @@ export function TicketPage() {
   );
 }
 
-function TicketView({ ticket, qr }: { ticket: TicketInfo; qr: string }) {
+function TicketView({ ticket, qr, token }: { ticket: TicketInfo; qr: string; token: string }) {
   const cancelled = ticket.status === 'cancelled';
   const status = cancelled
     ? { label: 'Storniert', className: 'bg-rose-50 text-rose-800 ring-rose-300' }
@@ -135,6 +136,8 @@ function TicketView({ ticket, qr }: { ticket: TicketInfo; qr: string }) {
       <p className="mt-6 text-sm leading-relaxed text-ink-soft">
         Zeig diesen QR-Code am Einlass. Bitte stell die Bildschirmhelligkeit hoch.
       </p>
+
+      {!cancelled && <TicketDownloads token={token} />}
     </>
   );
 }

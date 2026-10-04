@@ -40,6 +40,37 @@ test.describe('Online-Ticket', () => {
     await expect(page.getByText('Storniert')).toBeVisible();
   });
 
+  test('PDF-Download, Wallet-Buttons erst wenn eingerichtet', async ({ page }) => {
+    await mockSupabase(page, { ticket });
+    await page.goto(`/ticket/${TOKEN}`);
+    await expect(page.getByRole('link', { name: 'Ticket als PDF herunterladen' })).toHaveAttribute(
+      'href',
+      `http://supabase.test/functions/v1/ticket-files?token=${TOKEN}&format=pdf`,
+    );
+    await expect(page.getByRole('link', { name: /Wallet/ })).toHaveCount(0);
+
+    await mockSupabase(page, { ticket, wallet: { apple: true, google: true } });
+    await page.reload();
+    await expect(page.getByRole('link', { name: 'Zu Apple Wallet hinzufügen' })).toHaveAttribute(
+      'href',
+      /format=apple$/,
+    );
+    await expect(page.getByRole('link', { name: 'In Google Wallet speichern' })).toHaveAttribute(
+      'href',
+      /format=google$/,
+    );
+  });
+
+  test('storniertes Ticket hat keine Downloads', async ({ page }) => {
+    await mockSupabase(page, {
+      ticket: { ...ticket, status: 'cancelled' },
+      wallet: { apple: true, google: true },
+    });
+    await page.goto(`/ticket/${TOKEN}`);
+    await expect(page.getByText('Storniert')).toBeVisible();
+    await expect(page.getByRole('link', { name: /PDF|Wallet/ })).toHaveCount(0);
+  });
+
   test('unbekanntes oder ungültiges Token', async ({ page }) => {
     await mockSupabase(page, { ticket: null });
     await page.goto(`/ticket/${TOKEN}`);

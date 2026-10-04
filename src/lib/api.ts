@@ -269,3 +269,38 @@ export async function fetchTicket(token: string): Promise<TicketInfo | null> {
     checkedInAt: data.checked_in_at,
   };
 }
+
+// ---------------------------------------------------------------------------------------
+// Ticket-Downloads (Edge Function ticket-files)
+// ---------------------------------------------------------------------------------------
+export type TicketFileFormat = 'pdf' | 'apple' | 'google';
+
+/** Direkter Link – öffnet PDF, Apple-Pass oder die Google-Wallet-Seite. Der Token ist das Ticket. */
+export function ticketFileUrl(token: string, format: TicketFileFormat): string {
+  return `${(env.supabaseUrl ?? '').replace(/\/$/, '')}/functions/v1/ticket-files?token=${encodeURIComponent(token)}&format=${format}`;
+}
+
+/** Welche Wallets eingerichtet sind (sonst nur PDF). */
+export async function fetchWalletInfo(): Promise<{ apple: boolean; google: boolean }> {
+  if (DEMO || !env.supabaseUrl) return { apple: false, google: false };
+  try {
+    const res = await fetch(
+      `${env.supabaseUrl.replace(/\/$/, '')}/functions/v1/ticket-files?format=info`,
+    );
+    if (!res.ok) return { apple: false, google: false };
+    const j = (await res.json()) as { apple?: boolean; google?: boolean };
+    return { apple: j.apple === true, google: j.google === true };
+  } catch {
+    return { apple: false, google: false };
+  }
+}
+
+/** Erfolgsseite: Ticket-Token zur Stripe-Session (nur bezahlt). */
+export async function fetchSuccessTicketToken(sessionId: string): Promise<string | null> {
+  if (DEMO) return DEMO_TICKET_TOKEN;
+  const { data, error } = await client().rpc('get_success_ticket_token', {
+    p_session_id: sessionId,
+  });
+  if (error) return null;
+  return typeof data === 'string' && /^[A-Za-z0-9]{32}$/.test(data) ? data : null;
+}

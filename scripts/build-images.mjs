@@ -72,8 +72,8 @@ await mkdir('src/assets/sponsoren', { recursive: true });
 
 // Händler-Logo komplett weiß. Die vier Quadrate des Signets bekommen abgestufte Deckkraft,
 // damit das Raster als Weiß-Ton-Fläche erkennbar bleibt.
-{
-  const { data, info } = await sharp(trimmed)
+async function toWhite(input) {
+  const { data, info } = await sharp(input)
     .ensureAlpha()
     .raw()
     .toBuffer({ resolveWithObject: true });
@@ -95,7 +95,11 @@ await mkdir('src/assets/sponsoren', { recursive: true });
     data[i] = data[i + 1] = data[i + 2] = 255;
     data[i + 3] = Math.round(data[i + 3] * best.a);
   }
-  const white = sharp(data, { raw: info });
+  return sharp(data, { raw: info }).png().toBuffer();
+}
+
+{
+  const white = sharp(await toWhite(trimmed));
   for (const width of [480, 960]) {
     await white
       .clone()
@@ -157,4 +161,74 @@ for (const file of await readdir('assets/sponsoren')) {
     ])
     .jpeg({ quality: 78, mozjpeg: true })
     .toFile('public/email/kopf.jpg');
+}
+
+// ---------------------------------------------------------------------------------------
+// Wallet-Pässe: Apple (icon/logo in 1x–3x) und Google (Logo quadratisch, Kopfbild)
+// ---------------------------------------------------------------------------------------
+{
+  await mkdir('public/wallet', { recursive: true });
+  const BROWN = { r: 36, g: 34, b: 30, alpha: 1 };
+  const whiteLogo = await toWhite(trimmed);
+  const whiteSignet = await toWhite(
+    await sharp('assets/haendler-signet.png').trim({ threshold: 1 }).png().toBuffer(),
+  );
+  // Logo oben links im Pass: max. 160 × 50 pt, weiß auf transparent (Pass-Hintergrund ist Dunkelbraun)
+  for (const [scale, suffix] of [
+    [1, ''],
+    [2, '@2x'],
+    [3, '@3x'],
+  ]) {
+    await sharp(whiteLogo)
+      .resize({ width: 160 * scale, height: 50 * scale, fit: 'inside' })
+      .png({ compressionLevel: 9 })
+      .toFile(`public/wallet/logo${suffix}.png`);
+    // Symbol (Mitteilungen, Mail): Signet weiß auf Dunkelbraun, 29 pt
+    const size = 29 * scale;
+    const inner = Math.round(size * 0.68);
+    await sharp({ create: { width: size, height: size, channels: 4, background: BROWN } })
+      .composite([
+        {
+          input: await sharp(whiteSignet)
+            .resize({
+              width: inner,
+              height: inner,
+              fit: 'contain',
+              background: { r: 0, g: 0, b: 0, alpha: 0 },
+            })
+            .png()
+            .toBuffer(),
+          gravity: 'center',
+        },
+      ])
+      .png({ compressionLevel: 9 })
+      .toFile(`public/wallet/icon${suffix}.png`);
+  }
+  // Google Wallet: Logo 660 × 660 (wird rund beschnitten), Kopfbild 1032 × 336
+  await sharp({ create: { width: 660, height: 660, channels: 4, background: BROWN } })
+    .composite([
+      {
+        input: await sharp(whiteSignet)
+          .resize({
+            width: 400,
+            height: 400,
+            fit: 'contain',
+            background: { r: 0, g: 0, b: 0, alpha: 0 },
+          })
+          .png()
+          .toBuffer(),
+        gravity: 'center',
+      },
+    ])
+    .png({ compressionLevel: 9 })
+    .toFile('public/wallet/google-logo.png');
+  const marktLogo = await sharp('assets/weihnachtsmarkt/weihnachtsmarkt-logo.svg', { density: 300 })
+    .resize({ width: 560 })
+    .png()
+    .toBuffer();
+  await sharp('assets/weihnachtsmarkt/gold-glitzer.webp')
+    .resize({ width: 1032, height: 336, fit: 'cover' })
+    .composite([{ input: marktLogo, gravity: 'center' }])
+    .jpeg({ quality: 80, mozjpeg: true })
+    .toFile('public/wallet/google-hero.jpg');
 }

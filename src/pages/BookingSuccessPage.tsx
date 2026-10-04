@@ -3,19 +3,19 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { GlitterBand } from '@/components/GlitterBand';
-import { fetchSuccessInfo, type SuccessInfo } from '@/lib/api';
+import { TicketDownloads } from '@/components/TicketDownloads';
+import { fetchSuccessInfo, fetchSuccessTicketToken, type SuccessInfo } from '@/lib/api';
 import { formatLongDate } from '@/lib/dates';
 import { useSettings } from '@/lib/settingsContext';
 import { useNoindex } from '@/lib/useNoindex';
 import { DEMO } from '@/lib/demo';
-import { DEMO_TICKET_TOKEN } from '@/lib/demoApi';
 
 const POLL_INTERVAL_MS = 2000;
 const POLL_TIMEOUT_MS = 20000;
 
 type View =
   | { kind: 'loading' }
-  | { kind: 'paid'; info: SuccessInfo }
+  | { kind: 'paid'; info: SuccessInfo; token: string | null }
   | { kind: 'confirming'; info: SuccessInfo | null }
   | { kind: 'conflict'; info: SuccessInfo }
   | { kind: 'unknown' };
@@ -45,7 +45,11 @@ export function BookingSuccessPage() {
     const poll = async () => {
       const info = await fetchSuccessInfo(sessionId).catch(() => null);
       if (cancelled) return;
-      if (info?.status === 'paid') return setView({ kind: 'paid', info });
+      if (info?.status === 'paid') {
+        const token = await fetchSuccessTicketToken(sessionId).catch(() => null);
+        if (!cancelled) setView({ kind: 'paid', info, token });
+        return;
+      }
       if (info?.status === 'cancelled') return setView({ kind: 'conflict', info });
       if (Date.now() - started >= POLL_TIMEOUT_MS) {
         return setView(
@@ -92,10 +96,13 @@ export function BookingSuccessPage() {
                 <p className="mt-1 font-mono text-lg tracking-wider">{view.info.bookingCode}</p>
               </div>
               <p className="mt-8 text-lg text-ink">Dein Ticket ist auf dem Weg in dein Postfach.</p>
-              {DEMO && (
-                <Link to={`/ticket/${DEMO_TICKET_TOKEN}`} className="btn-gold mt-6">
-                  Vorschau: Online-Ticket ansehen
-                </Link>
+              {view.token && (
+                <div className="mx-auto max-w-md">
+                  <Link to={`/ticket/${view.token}`} className="btn-gold mt-6 w-full">
+                    {DEMO ? 'Vorschau: Online-Ticket ansehen' : 'Ticket jetzt öffnen'}
+                  </Link>
+                  <TicketDownloads token={view.token} />
+                </div>
               )}
             </div>
           )}

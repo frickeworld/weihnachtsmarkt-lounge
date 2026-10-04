@@ -22,6 +22,26 @@ export BREVO_LIST_BOOKINGS=7
 export BREVO_LIST_NEWSLETTER=8
 export BREVO_DOI_TEMPLATE_ID=9
 
+# Wallet: Test-Zertifikate (selbst signiert) statt der echten Apple-Zertifikate, Google-API simuliert der Test
+WALLET_DIR=$(mktemp -d)
+openssl req -x509 -newkey rsa:2048 -nodes -days 2 -subj "/CN=Test WWDR" \
+  -keyout "$WALLET_DIR/ca.key" -out "$WALLET_DIR/ca.pem" 2>/dev/null
+openssl req -newkey rsa:2048 -nodes -subj "/CN=Pass Type ID: pass.test.lounge" \
+  -keyout "$WALLET_DIR/pass.key" -out "$WALLET_DIR/pass.csr" 2>/dev/null
+openssl x509 -req -in "$WALLET_DIR/pass.csr" -CA "$WALLET_DIR/ca.pem" -CAkey "$WALLET_DIR/ca.key" \
+  -CAcreateserial -days 2 -out "$WALLET_DIR/pass.pem" 2>/dev/null
+openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out "$WALLET_DIR/google.key" 2>/dev/null
+export APPLE_PASS_TYPE_ID=pass.test.lounge
+export APPLE_TEAM_ID=TEAMID1234
+export APPLE_PASS_CERT="$(cat "$WALLET_DIR/pass.pem")"
+export APPLE_PASS_KEY="$(cat "$WALLET_DIR/pass.key")"
+export APPLE_WWDR_CERT="$(cat "$WALLET_DIR/ca.pem")"
+export TEST_WALLET_CA_FILE="$WALLET_DIR/ca.pem"
+export GOOGLE_WALLET_ISSUER_ID=3388000000000000000
+export GOOGLE_WALLET_SERVICE_ACCOUNT="$(python3 -c 'import json,sys; print(json.dumps({"client_email":"wallet@test.iam.gserviceaccount.com","private_key":open(sys.argv[1]).read()}))' "$WALLET_DIR/google.key")"
+export GOOGLE_WALLET_API_BASE=http://127.0.0.1:8198/walletobjects/v1
+export GOOGLE_OAUTH_TOKEN_URL=http://127.0.0.1:8198/token
+
 docker rm -f stripe-mock >/dev/null 2>&1 || true
 docker run -d --name stripe-mock -p 12111:12111 stripe/stripe-mock:latest >/dev/null
 
@@ -29,18 +49,19 @@ pids=()
 cleanup() {
   for pid in "${pids[@]}"; do kill "$pid" 2>/dev/null || true; done
   docker rm -f stripe-mock >/dev/null 2>&1 || true
+  rm -rf "$WALLET_DIR"
 }
 trap cleanup EXIT
 
 port=8101
-for f in create-checkout stripe-webhook release-hold send-ticket send-reminders admin; do
+for f in create-checkout stripe-webhook release-hold send-ticket send-reminders admin ticket-files; do
   DENO_SERVE_ADDRESS="tcp:127.0.0.1:$port" deno run -A --config "supabase/functions/$f/deno.json" \
     "supabase/functions/$f/index.ts" >"/tmp/fn-$f.log" 2>&1 &
   pids+=($!)
   port=$((port + 1))
 done
 
-for p in 8101 8102 8103 8104 8105 8106 12111; do
+for p in 8101 8102 8103 8104 8105 8106 8107 12111; do
   for _ in $(seq 1 60); do
     (echo >"/dev/tcp/127.0.0.1/$p") 2>/dev/null && break
     sleep 1

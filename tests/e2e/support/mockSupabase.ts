@@ -44,6 +44,10 @@ export interface MockOptions {
   releaseRequests?: unknown[];
   /** Antworten von get_success_info nacheinander (letzte wird wiederholt). */
   successInfo?: (Record<string, unknown> | null)[];
+  /** Ticket-Token auf der Erfolgsseite (get_success_ticket_token). */
+  successToken?: string | null;
+  /** Eingerichtete Wallets (ticket-files?format=info). */
+  wallet?: { apple: boolean; google: boolean };
   /** Antwort von get_ticket (null = nicht gefunden). */
   ticket?: Record<string, unknown> | null;
 }
@@ -79,6 +83,12 @@ export async function mockSupabase(page: Page, opts: MockOptions = {}) {
       return route.fulfill({ status: 406, json: { code: 'PGRST116', message: 'no rows' } });
     return route.fulfill({ json: single ? item : item ? [item] : [] });
   });
+  await page.route('**/rest/v1/rpc/get_success_ticket_token*', (route) =>
+    route.fulfill({ json: opts.successToken ?? null }),
+  );
+  await page.route('**/functions/v1/ticket-files?format=info', (route) =>
+    route.fulfill({ json: opts.wallet ?? { apple: false, google: false } }),
+  );
   let successCalls = 0;
   await page.route('**/rest/v1/rpc/get_success_info*', (route) => {
     const list = opts.successInfo ?? [null];

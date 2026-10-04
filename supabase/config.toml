@@ -438,3 +438,6 @@ verify_jwt = false
 
 [functions.admin]
 verify_jwt = false
+
+[functions.ticket-files]
+verify_jwt = false

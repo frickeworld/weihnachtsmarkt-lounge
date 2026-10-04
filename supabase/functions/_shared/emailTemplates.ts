@@ -12,6 +12,11 @@ export interface TicketMailData {
   bookingCode: string;
   qrImageUrl: string;
   ticketUrl: string;
+  /** PDF zum Herunterladen (zusätzlich zum Anhang) */
+  pdfUrl?: string | null;
+  /** Nur gesetzt, wenn das jeweilige Wallet eingerichtet ist */
+  appleWalletUrl?: string | null;
+  googleWalletUrl?: string | null;
   invoiceUrl?: string | null;
   talerCount: number;
   location: string;
@@ -41,6 +46,17 @@ const C = {
   brown: '#24221E',
   onDark: '#F8F3E8',
 };
+
+/** Schwarze Wallet-Buttons (Platzhalter für die offiziellen Badges von Apple und Google). */
+function walletButtons(d: Pick<TicketMailData, 'appleWalletUrl' | 'googleWalletUrl'>): string {
+  const btn = (href: string, label: string) =>
+    `<a href="${escapeHtml(href)}" style="display:inline-block;margin:4px;background:#000000;color:#FFFFFF;text-decoration:none;font-weight:bold;font-size:14px;padding:11px 20px;border-radius:10px;">${label}</a>`;
+  const buttons = [
+    d.appleWalletUrl ? btn(d.appleWalletUrl, 'Zu Apple Wallet hinzufügen') : '',
+    d.googleWalletUrl ? btn(d.googleWalletUrl, 'In Google Wallet speichern') : '',
+  ].join('');
+  return buttons ? `<tr><td align="center" style="padding:12px 24px 0;">${buttons}</td></tr>` : '';
+}
 
 export function ticketSubject(d: Pick<TicketMailData, 'kind' | 'dateLabel' | 'startTime'>): string {
   return d.kind === 'reminder'
@@ -134,6 +150,12 @@ export function renderTicketEmail(d: TicketMailData): {
       <tr><td align="center" style="padding:28px 32px 8px;">
         <a href="${escapeHtml(d.ticketUrl)}" style="display:inline-block;background:${C.gold};color:${C.ink};text-decoration:none;font-weight:bold;font-size:16px;padding:14px 30px;border-radius:999px;">Ticket online öffnen</a>
       </td></tr>
+      ${walletButtons(d)}
+      ${
+        d.pdfUrl
+          ? `<tr><td align="center" style="padding:8px 32px 0;"><a href="${escapeHtml(d.pdfUrl)}" style="color:${C.goldDeep};font-size:14px;font-weight:bold;">Ticket als PDF herunterladen</a></td></tr>`
+          : ''
+      }
       ${
         d.invoiceUrl
           ? `<tr><td align="center" style="padding:8px 32px 0;"><a href="${escapeHtml(d.invoiceUrl)}" style="color:${C.goldDeep};font-size:14px;font-weight:bold;">Rechnung ansehen</a></td></tr>`
@@ -165,6 +187,8 @@ export function renderTicketEmail(d: TicketMailData): {
     '',
     `Dein Ticket online: ${d.ticketUrl}`,
     'Das Ticket hängt zusätzlich als PDF an. Zeig den QR-Code am Einlass.',
+    ...(d.appleWalletUrl ? [`Zu Apple Wallet hinzufügen: ${d.appleWalletUrl}`] : []),
+    ...(d.googleWalletUrl ? [`In Google Wallet speichern: ${d.googleWalletUrl}`] : []),
     '',
     'Was dich erwartet:',
     `- ${d.talerCount} € Freiverzehr: ${d.talerCount} Residenztaler beim Einlass (je 1 €, pro gekauftem Artikel 1 Taler)`,

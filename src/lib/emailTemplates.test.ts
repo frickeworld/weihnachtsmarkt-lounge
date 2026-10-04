@@ -78,3 +78,20 @@ describe('Ticket-Mail', () => {
     expect(escapeHtml(`"a" & 'b' <c>`)).toBe('&quot;a&quot; &amp; &#39;b&#39; &lt;c&gt;');
   });
 });
+
+describe('Ticket-Mail: Wallet und PDF', () => {
+  it('zeigt Wallet-Buttons nur, wenn eingerichtet', () => {
+    expect(renderTicketEmail(base).html).not.toContain('Wallet');
+    const { html, text } = renderTicketEmail({
+      ...base,
+      pdfUrl: 'https://x.supabase.co/functions/v1/ticket-files?token=tok&format=pdf',
+      appleWalletUrl: 'https://x.supabase.co/functions/v1/ticket-files?token=tok&format=apple',
+      googleWalletUrl: 'https://x.supabase.co/functions/v1/ticket-files?token=tok&format=google',
+    });
+    expect(html).toContain('Zu Apple Wallet hinzufügen');
+    expect(html).toContain('In Google Wallet speichern');
+    expect(html).toContain('format=apple');
+    expect(html).toContain('Ticket als PDF herunterladen');
+    expect(text).toContain('In Google Wallet speichern: https://');
+  });
+});
