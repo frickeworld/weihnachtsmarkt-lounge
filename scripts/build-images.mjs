@@ -127,6 +127,11 @@ for (const width of [800, 1200]) {
     .resize({ width })
     .webp({ quality: 74 })
     .toFile(`src/assets/hero-${width}.webp`);
+  // AVIF ist rund ein Drittel kleiner; WebP bleibt als Rückfall für ältere Browser
+  await sharp('assets/weihnachtsmarkt/foto-gaeste-gluehwein-stadt-detmold.webp')
+    .resize({ width })
+    .avif({ quality: 50, effort: 6 })
+    .toFile(`src/assets/hero-${width}.avif`);
 }
 await sharp('assets/weihnachtsmarkt/gold-glitzer.webp')
   .resize({ width: 640 })

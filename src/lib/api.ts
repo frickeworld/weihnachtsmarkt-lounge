@@ -4,7 +4,7 @@ import type { PublicSettings } from './settings';
 import { DEMO } from './demo';
 import { DEMO_TICKET_TOKEN, demoAvailability, demoSettings } from './demoApi';
 import { env } from './env';
-import { supabase } from './supabase';
+import { restConfigured, rpc } from './rest';
 
 export class ApiUnavailableError extends Error {
   constructor() {
@@ -12,9 +12,8 @@ export class ApiUnavailableError extends Error {
   }
 }
 
-function client() {
-  if (!supabase) throw new ApiUnavailableError();
-  return supabase;
+function ensureConfigured() {
+  if (!restConfigured()) throw new ApiUnavailableError();
 }
 
 interface SettingsRow {
@@ -30,8 +29,8 @@ interface SettingsRow {
 
 export async function fetchPublicSettings(): Promise<PublicSettings> {
   if (DEMO) return demoSettings();
-  const { data, error } = await client().rpc('get_public_settings').single<SettingsRow>();
-  if (error) throw error;
+  ensureConfigured();
+  const data = (await rpc<SettingsRow>('get_public_settings', {}, 'single'))!;
   // Unvollständige Antworten nie übernehmen – dann bleiben die Startwerte stehen.
   const ints = [
     data.price_cents,
@@ -64,9 +63,10 @@ interface AvailabilityRow {
 
 export async function fetchAvailability(from: IsoDate, to: IsoDate): Promise<SlotAvailability[]> {
   if (DEMO) return demoAvailability(from, to);
-  const { data, error } = await client().rpc('get_availability', { from_date: from, to_date: to });
-  if (error) throw error;
-  return (data as AvailabilityRow[]).map((r) => ({
+  ensureConfigured();
+  const data =
+    (await rpc<AvailabilityRow[]>('get_availability', { from_date: from, to_date: to })) ?? [];
+  return data.map((r) => ({
     date: r.slot_date,
     startTime: r.start_time.slice(0, 5),
     endTime: r.end_time.slice(0, 5),
@@ -78,8 +78,8 @@ export async function trackEvent(
   eventType: 'page_view' | 'book_click',
   device: 'mobile' | 'desktop',
 ) {
-  if (!supabase) return;
-  await supabase.rpc('track_event', { event_type: eventType, device });
+  if (!restConfigured()) return;
+  await rpc('track_event', { event_type: eventType, device }).catch(() => undefined);
 }
 
 // ---------------------------------------------------------------------------------------
@@ -194,17 +194,15 @@ export async function fetchSuccessInfo(sessionId: string): Promise<SuccessInfo |
       status: 'paid',
     };
   }
-  const { data, error } = await client()
-    .rpc('get_success_info', { p_session_id: sessionId })
-    .maybeSingle<{
-      first_name: string;
-      slot_date: string;
-      start_time: string;
-      end_time: string;
-      booking_code: string;
-      status: SuccessInfo['status'];
-    }>();
-  if (error) throw error;
+  ensureConfigured();
+  const data = await rpc<{
+    first_name: string;
+    slot_date: string;
+    start_time: string;
+    end_time: string;
+    booking_code: string;
+    status: SuccessInfo['status'];
+  }>('get_success_info', { p_session_id: sessionId }, 'maybe');
   if (!data) return null;
   return {
     firstName: data.first_name,
@@ -246,7 +244,8 @@ export async function fetchTicket(token: string): Promise<TicketInfo | null> {
       checkedInAt: null,
     };
   }
-  const { data, error } = await client().rpc('get_ticket', { p_token: token }).maybeSingle<{
+  ensureConfigured();
+  const data = await rpc<{
     first_name: string;
     booking_code: string;
     slot_date: string;
@@ -255,8 +254,7 @@ export async function fetchTicket(token: string): Promise<TicketInfo | null> {
     persons: number;
     status: TicketInfo['status'];
     checked_in_at: string | null;
-  }>();
-  if (error) throw error;
+  }>('get_ticket', { p_token: token }, 'maybe');
   if (!data) return null;
   return {
     firstName: data.first_name,
@@ -298,10 +296,9 @@ export async function fetchWalletInfo(): Promise<{ apple: boolean; google: boole
 /** Erfolgsseite: Ticket-Token zur Stripe-Session (nur bezahlt). */
 export async function fetchSuccessTicketToken(sessionId: string): Promise<string | null> {
   if (DEMO) return DEMO_TICKET_TOKEN;
-  const { data, error } = await client().rpc('get_success_ticket_token', {
-    p_session_id: sessionId,
-  });
-  if (error) return null;
+  const data = await rpc<string>('get_success_ticket_token', { p_session_id: sessionId }).catch(
+    () => null,
+  );
   return typeof data === 'string' && /^[A-Za-z0-9]{32}$/.test(data) ? data : null;
 }
 
@@ -316,15 +313,15 @@ export async function sendContact(values: Record<string, unknown>): Promise<Cont
     await new Promise((r) => setTimeout(r, 500));
     return { ok: true };
   }
-  const { error } = await client().functions.invoke('contact', { body: values });
-  if (!error) return { ok: true };
-  const ctx = (error as { context?: Response }).context;
-  const body =
-    ctx && typeof ctx.json === 'function'
-      ? ((await ctx.json().catch(() => ({}))) as {
-          message?: string;
-          fields?: Record<string, string>;
-        })
-      : {};
-  return { ok: false, message: body.message ?? GENERIC_ERROR, fields: body.fields };
+  try {
+    const { status, data } = await callFunction('contact', values);
+    if (status === 200 && data.ok === true) return { ok: true };
+    return {
+      ok: false,
+      message: typeof data.message === 'string' ? data.message : GENERIC_ERROR,
+      fields: data.fields as Record<string, string> | undefined,
+    };
+  } catch {
+    return { ok: false, message: GENERIC_ERROR };
+  }
 }

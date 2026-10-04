@@ -1,4 +1,6 @@
+import hero1200Avif from '@/assets/hero-1200.avif';
 import hero1200 from '@/assets/hero-1200.webp';
+import hero800Avif from '@/assets/hero-800.avif';
 import hero800 from '@/assets/hero-800.webp';
 import { GlitterBand } from '@/components/GlitterBand';
 import { Snowfall } from '@/components/Snowfall';
@@ -21,16 +23,23 @@ export function Hero() {
       </GlitterBand>
 
       <div className="on-dark relative isolate overflow-hidden bg-brown text-on-dark">
-        <img
-          src={hero1200}
-          srcSet={`${hero800} 800w, ${hero1200} 1200w`}
-          sizes="100vw"
-          alt="Drei gut gelaunte Gäste mit Glühwein an einem Stand des Weihnachtsmarkts"
-          width={1200}
-          height={800}
-          fetchPriority="high"
-          className="absolute inset-0 -z-10 h-full w-full object-cover object-[60%_30%]"
-        />
+        <picture className="contents">
+          <source
+            type="image/avif"
+            srcSet={`${hero800Avif} 800w, ${hero1200Avif} 1200w`}
+            sizes="100vw"
+          />
+          <img
+            src={hero1200}
+            srcSet={`${hero800} 800w, ${hero1200} 1200w`}
+            sizes="100vw"
+            alt="Drei gut gelaunte Gäste mit Glühwein an einem Stand des Weihnachtsmarkts"
+            width={1200}
+            height={800}
+            fetchPriority="high"
+            className="absolute inset-0 -z-10 h-full w-full object-cover object-[60%_30%]"
+          />
+        </picture>
         <div
           aria-hidden="true"
           className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(20,19,17,0.15)_0%,rgba(20,19,17,0.55)_45%,rgba(20,19,17,0.92)_100%)] md:bg-[linear-gradient(90deg,rgba(20,19,17,0.92)_0%,rgba(20,19,17,0.7)_42%,rgba(20,19,17,0.1)_75%)]"
