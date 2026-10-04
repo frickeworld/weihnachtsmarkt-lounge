@@ -7,8 +7,11 @@ import { NewsletterConfirmedPage } from './pages/NewsletterConfirmedPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { TicketPage } from './pages/TicketPage';
 
-// Weitere Routen (/login, /admin, /haendler, /scan)
-// kommen in den jeweiligen Phasen dazu.
+// Backoffice (Login, Admin, Händler) als eigene Bundles – die öffentliche Seite lädt davon nichts.
+const lazyDefault = (load: () => Promise<{ default: React.ComponentType }>) => async () => ({
+  Component: (await load()).default,
+});
+
 const routes: RouteObject[] = [
   { path: '/', element: <HomePage /> },
   { path: '/buchung/erfolg', element: <BookingSuccessPage /> },
@@ -17,6 +20,9 @@ const routes: RouteObject[] = [
   { path: '/impressum', element: <LegalPlaceholderPage title="Impressum" /> },
   { path: '/datenschutz', element: <LegalPlaceholderPage title="Datenschutz" /> },
   { path: '/agb', element: <LegalPlaceholderPage title="AGB" /> },
+  { path: '/login/*', lazy: lazyDefault(() => import('./backoffice/LoginRoutes')) },
+  { path: '/admin/*', lazy: lazyDefault(() => import('./backoffice/admin/AdminRoutes')) },
+  { path: '/haendler/*', lazy: lazyDefault(() => import('./backoffice/haendler/HaendlerRoutes')) },
   { path: '*', element: <NotFoundPage /> },
 ];
 

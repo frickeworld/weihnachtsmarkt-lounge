@@ -21,6 +21,7 @@
   --color-on-dark: #f8f3e8; /* Text auf Dunkelbraun */
   --color-haendler-red: #cd131c; /* Händler-Rot, gemessen aus dem Logo-Schriftzug */
   --color-fir: #1f3a2e;
+  --color-chart: #a8761c; /* Diagramm-Balken (Kontrast ≥ 3:1, geprüft mit dem Paletten-Validator) */
 
   --font-display: 'Jost', 'Jost Fallback', 'Century Gothic', 'Avenir Next', sans-serif;
   --font-sans: 'Manrope', 'Manrope Fallback', system-ui, -apple-system, 'Segoe UI', sans-serif;
