@@ -16,7 +16,11 @@ const out = [
   ...assets,
   body.trim(),
   '',
-].join('\n');
+]
+  .join('\n')
+  // U+FFFD steht in pdf-lib als Zeichen in Template-Strings; als Escape ist es gleichwertig
+  // und wird vom Artifact-Upload nicht als kaputtes Zeichen abgelehnt.
+  .replaceAll('\uFFFD', '\\uFFFD');
 
 await writeFile(target, out);
 console.log(`${target}: ${(out.length / 1024).toFixed(0)} KB`);
