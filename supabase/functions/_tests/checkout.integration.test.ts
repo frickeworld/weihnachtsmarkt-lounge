@@ -131,7 +131,11 @@ Deno.test({
     });
 
     await t.step('Buchung ohne Anlass (optional) wird angenommen', async () => {
-      const r = await post(FN.checkout, { date: day, startTime: '19:00', form: { ...form, occasion: null } });
+      const r = await post(FN.checkout, {
+        date: day,
+        startTime: '19:00',
+        form: { ...form, occasion: null },
+      });
       assertEquals(r.status, 200, JSON.stringify(r.body));
       assertEquals((await booking(r.body.bookingId)).occasion, null);
       await post(FN.release, { bookingId: r.body.bookingId });
