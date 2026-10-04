@@ -104,7 +104,14 @@ async function manualBooking(
   );
   if (!slot)
     return json({ ok: false, message: 'Dieses Zeitfenster gibt es an diesem Tag nicht.' }, 422);
-  if (slot.status === 'taken') {
+  // get_availability meldet für vergangene/geschlossene Tage nicht „taken“ – darum direkt prüfen.
+  const { count: existing } = await db
+    .from('bookings')
+    .select('id', { count: 'exact', head: true })
+    .eq('date', date)
+    .eq('start_time', slot.start_time)
+    .in('status', ['pending', 'paid']);
+  if (slot.status === 'taken' || (existing ?? 0) > 0) {
     return json(
       { ok: false, message: 'Dieses Zeitfenster ist bereits gebucht oder reserviert.' },
       409,
