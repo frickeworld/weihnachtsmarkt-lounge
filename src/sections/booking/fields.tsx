@@ -21,7 +21,7 @@ export function Field({
       </label>
       {children}
       {hint && !error && (
-        <p id={`${id}-hint`} className="mt-1.5 text-sm text-cream/55">
+        <p id={`${id}-hint`} className="mt-1.5 text-sm text-ink-soft">
           {hint}
         </p>
       )}

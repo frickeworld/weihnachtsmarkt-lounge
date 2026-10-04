@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
-import { LightString } from '@/components/LightString';
+import { GlitterBand } from '@/components/GlitterBand';
 import { useNoindex } from '@/lib/useNoindex';
 
 /** Ziel des Brevo-Double-Opt-in-Links. */
@@ -15,13 +15,13 @@ export function NewsletterConfirmedPage() {
   return (
     <>
       <Header home={false} />
-      <main className="min-h-[60vh] px-4 pb-20 sm:px-6">
-        <LightString variant="hero" />
+      <GlitterBand className="h-3" />
+      <main className="min-h-[60vh] px-4 pt-6 pb-20 sm:px-6">
         <div className="mx-auto max-w-xl text-center">
-          <h1 className="mt-10 text-4xl leading-tight font-semibold sm:text-5xl">
+          <h1 className="mt-10 text-4xl leading-tight font-medium sm:text-5xl">
             Danke! Du bist jetzt im STUDIO/F-Newsletter.
           </h1>
-          <p className="mt-6 text-lg text-cream/80">
+          <p className="mt-6 text-lg text-ink-soft">
             Wir melden uns mit Events und Angeboten. Abmelden kannst du dich jederzeit über den Link
             in jeder Mail.
           </p>

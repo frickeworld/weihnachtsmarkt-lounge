@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
-import { LightString } from '@/components/LightString';
+import { GlitterBand } from '@/components/GlitterBand';
 import { fetchSuccessInfo, type SuccessInfo } from '@/lib/api';
 import { formatLongDate } from '@/lib/dates';
 import { useSettings } from '@/lib/settingsContext';
@@ -65,11 +65,11 @@ export function BookingSuccessPage() {
   return (
     <>
       <Header home={false} />
-      <main className="relative min-h-[70vh] px-4 pb-20 sm:px-6">
-        <LightString variant="hero" />
+      <GlitterBand className="h-3" />
+      <main className="relative min-h-[70vh] px-4 pt-6 pb-20 sm:px-6">
         <div className="mx-auto max-w-xl text-center">
           {view.kind === 'loading' && (
-            <p role="status" className="mt-16 text-lg text-cream/80">
+            <p role="status" className="mt-16 text-lg text-ink-soft">
               Einen Moment, wir bestätigen deine Buchung …
             </p>
           )}
@@ -77,23 +77,21 @@ export function BookingSuccessPage() {
           {view.kind === 'paid' && (
             <div className="mt-10" role="status">
               <p className="eyebrow mb-4">Buchung bestätigt</p>
-              <h1 className="gold-shimmer-text text-4xl leading-tight font-semibold sm:text-5xl">
+              <h1 className="text-4xl leading-tight font-medium sm:text-5xl">
                 Danke, {view.info.firstName}! Deine Lounge ist gebucht.
               </h1>
               <div className="card mx-auto mt-10 max-w-md p-7">
-                <p className="font-display text-3xl font-semibold text-champagne">
+                <p className="font-display text-3xl font-medium">
                   {formatLongDate(view.info.date)}
                 </p>
                 <p className="mt-1 text-xl">
                   {view.info.startTime}–{view.info.endTime} Uhr
                 </p>
-                <div className="mx-auto my-5 h-px w-16 bg-gold/50" aria-hidden="true" />
-                <p className="text-sm text-cream/70">Buchungscode</p>
+                <div className="mx-auto my-5 h-1 w-12 rounded-full bg-gold" aria-hidden="true" />
+                <p className="text-sm text-ink-soft">Buchungscode</p>
                 <p className="mt-1 font-mono text-lg tracking-wider">{view.info.bookingCode}</p>
               </div>
-              <p className="mt-8 text-lg text-cream/85">
-                Dein Ticket ist auf dem Weg in dein Postfach.
-              </p>
+              <p className="mt-8 text-lg text-ink">Dein Ticket ist auf dem Weg in dein Postfach.</p>
               {DEMO && (
                 <Link to={`/ticket/${DEMO_TICKET_TOKEN}`} className="btn-gold mt-6">
                   Vorschau: Online-Ticket ansehen
@@ -104,12 +102,12 @@ export function BookingSuccessPage() {
 
           {view.kind === 'confirming' && (
             <div className="mt-10" role="status">
-              <h1 className="text-4xl leading-tight font-semibold">Fast geschafft</h1>
-              <p className="mt-6 text-lg text-cream/85">
+              <h1 className="text-4xl leading-tight font-medium">Fast geschafft</h1>
+              <p className="mt-6 text-lg text-ink">
                 Deine Zahlung wird bestätigt – du bekommst gleich eine E-Mail.
               </p>
               {view.info && (
-                <p className="mt-4 text-cream/70">
+                <p className="mt-4 text-ink-soft">
                   {formatLongDate(view.info.date)}, {view.info.startTime}–{view.info.endTime} Uhr
                 </p>
               )}
@@ -118,16 +116,16 @@ export function BookingSuccessPage() {
 
           {view.kind === 'conflict' && (
             <div className="mt-10" role="alert">
-              <h1 className="text-4xl leading-tight font-semibold">Das tut uns leid</h1>
-              <p className="mt-6 text-lg text-cream/85">
+              <h1 className="text-4xl leading-tight font-medium">Das tut uns leid</h1>
+              <p className="mt-6 text-lg text-ink">
                 Deine Zahlung kam erst an, nachdem die Reservierung abgelaufen war – und das
                 Zeitfenster wurde inzwischen vergeben. Wir erstatten dir den vollen Betrag.
               </p>
-              <p className="mt-4 text-cream/75">
+              <p className="mt-4 text-ink-soft">
                 Bei Fragen erreichst du uns unter{' '}
                 <a
                   href={`mailto:${contactEmail}`}
-                  className="text-champagne underline underline-offset-4"
+                  className="font-semibold text-gold-deep underline underline-offset-4"
                 >
                   {contactEmail}
                 </a>{' '}
@@ -138,13 +136,13 @@ export function BookingSuccessPage() {
 
           {view.kind === 'unknown' && (
             <div className="mt-10" role="alert">
-              <h1 className="text-4xl leading-tight font-semibold">Buchung nicht gefunden</h1>
-              <p className="mt-6 text-lg text-cream/85">
+              <h1 className="text-4xl leading-tight font-medium">Buchung nicht gefunden</h1>
+              <p className="mt-6 text-lg text-ink">
                 Wir konnten diese Buchung gerade nicht finden. Falls du bezahlt hast, kommt dein
                 Ticket per E-Mail. Bei Fragen erreichst du uns unter{' '}
                 <a
                   href={`mailto:${contactEmail}`}
-                  className="text-champagne underline underline-offset-4"
+                  className="font-semibold text-gold-deep underline underline-offset-4"
                 >
                   {contactEmail}
                 </a>

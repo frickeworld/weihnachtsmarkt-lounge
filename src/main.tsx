@@ -17,7 +17,7 @@ createRoot(root).render(
     <LazyMotion features={loadMotionFeatures} strict>
       <SettingsProvider>
         {DEMO && (
-          <div className="bg-gold px-4 py-1.5 text-center text-xs font-semibold text-night">
+          <div className="bg-gold px-4 py-1.5 text-center text-xs font-semibold text-ink">
             Vorschau mit Beispieldaten – Buchungen werden nicht gespeichert, es wird nichts bezahlt.
           </div>
         )}

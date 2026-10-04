@@ -13,8 +13,8 @@ export function LegalPlaceholderPage({ title }: { title: string }) {
     <>
       <Header home={false} />
       <main className="mx-auto min-h-[60vh] max-w-3xl px-4 py-16 sm:px-6">
-        <h1 className="mb-6 text-5xl font-semibold">{title}</h1>
-        <p className="text-cream/75">Der Inhalt dieser Seite folgt in Kürze.</p>
+        <h1 className="mb-6 text-5xl font-medium">{title}</h1>
+        <p className="text-ink-soft">Der Inhalt dieser Seite folgt in Kürze.</p>
       </main>
       <Footer />
     </>

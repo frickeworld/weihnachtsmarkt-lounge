@@ -12,7 +12,7 @@ interface Flake {
 }
 
 /**
- * Schneefall auf einem einzigen Canvas über der ganzen Seite.
+ * Schneefall auf einem einzigen Canvas, begrenzt auf den umgebenden Bereich (Hero).
  * ca. 70 Flocken mobil, 140 auf dem Desktop. Pausiert bei verstecktem Tab, aus bei „Bewegung reduzieren“.
  */
 export function Snowfall() {
@@ -43,12 +43,13 @@ export function Snowfall() {
 
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-      width = window.innerWidth;
-      height = window.innerHeight;
+      const rect = canvas.parentElement!.getBoundingClientRect();
+      width = rect.width;
+      height = rect.height;
       canvas.width = Math.round(width * dpr);
       canvas.height = Math.round(height * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      const count = width < 768 ? 70 : 140;
+      const count = width < 768 ? 60 : 110;
       flakes = Array.from({ length: count }, (_, i) => flakes[i] ?? makeFlake(true));
     };
 
@@ -93,7 +94,7 @@ export function Snowfall() {
     <canvas
       ref={canvasRef}
       aria-hidden="true"
-      className="pointer-events-none fixed inset-0 z-30 h-full w-full"
+      className="pointer-events-none absolute inset-0 z-10 h-full w-full"
     />
   );
 }

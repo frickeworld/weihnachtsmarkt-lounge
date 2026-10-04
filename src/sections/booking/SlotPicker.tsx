@@ -32,18 +32,18 @@ export function SlotPicker({
             onClick={() => onSelect(s.startTime)}
             aria-pressed={active}
             className={[
-              'flex min-h-20 flex-col items-center justify-center rounded-[3px] border px-4 py-3 transition-colors',
+              'flex min-h-20 flex-col items-center justify-center rounded-2xl border px-4 py-3 transition-colors',
               active
-                ? 'border-gold bg-gold text-night'
+                ? 'border-gold-deep bg-gold text-ink'
                 : free
-                  ? 'border-gold/40 bg-night/60 hover:border-champagne hover:bg-gold/10'
-                  : 'cursor-not-allowed border-cream/10 bg-night/30 text-cream/40 line-through decoration-cream/30',
+                  ? 'border-line bg-surface hover:border-gold hover:bg-gold/15'
+                  : 'cursor-not-allowed border-transparent bg-sand text-ink/45 line-through decoration-ink/30',
             ].join(' ')}
           >
-            <span className="font-display text-2xl font-semibold">
+            <span className="font-display text-2xl font-medium">
               {formatTime(s.startTime)}–{formatTime(s.endTime)} Uhr
             </span>
-            <span className={`text-sm ${active ? 'text-night/80' : 'text-cream/65'}`}>
+            <span className={`text-sm ${active ? 'text-ink/80' : 'text-ink-soft'}`}>
               {statusLabel[s.status]}
             </span>
           </button>

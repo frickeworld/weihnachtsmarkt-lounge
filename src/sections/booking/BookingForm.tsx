@@ -160,7 +160,7 @@ export function BookingForm({ date, startTime, endTime, onSlotUnavailable }: Pro
                 className="peer sr-only"
                 {...register('occasion')}
               />
-              <span className="inline-flex min-h-11 items-center rounded-full border border-gold/40 px-4 text-sm transition-colors peer-checked:border-gold peer-checked:bg-gold peer-checked:font-semibold peer-checked:text-night peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-champagne hover:border-champagne">
+              <span className="inline-flex min-h-11 items-center rounded-full border border-line bg-surface px-4 text-sm transition-colors peer-checked:border-gold-deep peer-checked:bg-gold peer-checked:font-semibold peer-checked:text-ink peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-gold-deep hover:border-gold">
                 {o.label}
               </span>
             </label>
@@ -173,7 +173,7 @@ export function BookingForm({ date, startTime, endTime, onSlotUnavailable }: Pro
         )}
       </fieldset>
 
-      <div className="space-y-5 rounded-[3px] border border-gold/15 bg-night/40 p-5">
+      <div className="space-y-5 rounded-2xl border border-line bg-paper p-5">
         <Field id="companyName" label="Firmenname (optional)" error={errors.companyName}>
           <input
             className="field-input"
@@ -185,7 +185,7 @@ export function BookingForm({ date, startTime, endTime, onSlotUnavailable }: Pro
         <label className="flex min-h-11 cursor-pointer items-center gap-3">
           <input
             type="checkbox"
-            className="h-5 w-5 shrink-0 accent-[#C9A24D]"
+            className="h-5 w-5 shrink-0 accent-[#7a5a1e]"
             {...register('invoiceRequested')}
           />
           <span>Ich benötige eine Rechnung</span>
@@ -253,11 +253,11 @@ export function BookingForm({ date, startTime, endTime, onSlotUnavailable }: Pro
 
       {/* Zusammenfassung */}
       <div
-        className="rounded-[3px] border border-gold/40 bg-coal p-5 sm:p-6"
+        className="rounded-2xl border border-gold bg-gold/10 p-5 sm:p-6"
         aria-label="Zusammenfassung"
       >
-        <h4 className="mb-4 text-2xl font-semibold">Deine Buchung</h4>
-        <dl className="space-y-1.5 text-cream/85">
+        <h4 className="mb-4 text-2xl font-medium">Deine Buchung</h4>
+        <dl className="space-y-1.5 text-ink">
           <div className="flex justify-between gap-4">
             <dt>Datum</dt>
             <dd className="text-right">{formatLongDate(date)}</dd>
@@ -273,7 +273,7 @@ export function BookingForm({ date, startTime, endTime, onSlotUnavailable }: Pro
             <dd>{persons ? String(persons) : '–'}</dd>
           </div>
         </dl>
-        <div className="my-4 h-px bg-gold/25" aria-hidden="true" />
+        <div className="my-4 h-px bg-gold/50" aria-hidden="true" />
         <dl className="space-y-1.5">
           <div className="flex justify-between gap-4">
             <dt>Lounge</dt>
@@ -283,7 +283,7 @@ export function BookingForm({ date, startTime, endTime, onSlotUnavailable }: Pro
             <dt>Vorverkaufsgebühr</dt>
             <dd>{formatCents(settings.feeCents)}</dd>
           </div>
-          <div className="flex justify-between gap-4 pt-2 text-xl font-bold text-champagne">
+          <div className="flex justify-between gap-4 pt-2 text-xl font-bold text-ink">
             <dt>Gesamt</dt>
             <dd>{total}</dd>
           </div>
@@ -295,7 +295,7 @@ export function BookingForm({ date, startTime, endTime, onSlotUnavailable }: Pro
           <label className="flex cursor-pointer items-start gap-3">
             <input
               type="checkbox"
-              className="mt-0.5 h-5 w-5 shrink-0 accent-[#C9A24D]"
+              className="mt-0.5 h-5 w-5 shrink-0 accent-[#7a5a1e]"
               aria-invalid={errors.termsAccepted ? true : undefined}
               aria-describedby={errors.termsAccepted ? 'termsAccepted-error' : undefined}
               {...register('termsAccepted')}
@@ -305,7 +305,7 @@ export function BookingForm({ date, startTime, endTime, onSlotUnavailable }: Pro
               <Link
                 to="/agb"
                 target="_blank"
-                className="text-champagne underline underline-offset-4"
+                className="font-semibold text-gold-deep underline underline-offset-4"
               >
                 AGB
               </Link>{' '}
@@ -313,7 +313,7 @@ export function BookingForm({ date, startTime, endTime, onSlotUnavailable }: Pro
               <Link
                 to="/datenschutz"
                 target="_blank"
-                className="text-champagne underline underline-offset-4"
+                className="font-semibold text-gold-deep underline underline-offset-4"
               >
                 Datenschutzerklärung
               </Link>{' '}
@@ -330,17 +330,17 @@ export function BookingForm({ date, startTime, endTime, onSlotUnavailable }: Pro
         <label className="flex cursor-pointer items-start gap-3">
           <input
             type="checkbox"
-            className="mt-0.5 h-5 w-5 shrink-0 accent-[#C9A24D]"
+            className="mt-0.5 h-5 w-5 shrink-0 accent-[#7a5a1e]"
             {...register('newsletterOptIn')}
           />
-          <span className="text-sm leading-relaxed text-cream/80">
+          <span className="text-sm leading-relaxed text-ink-soft">
             Ja, ich möchte den STUDIO/F-Newsletter mit Events und Angeboten erhalten. Abmeldung
             jederzeit möglich.
           </span>
         </label>
       </div>
 
-      <p className="text-sm leading-relaxed text-cream/65">
+      <p className="text-sm leading-relaxed text-ink-soft">
         Hinweis: Die Lounge-Buchung ist eine termingebundene Freizeitleistung. Ein Widerrufsrecht
         besteht daher nicht. Die Buchung ist verbindlich.
       </p>
@@ -353,16 +353,13 @@ export function BookingForm({ date, startTime, endTime, onSlotUnavailable }: Pro
       >
         {busy ? 'Weiter zur Zahlung …' : `Zahlungspflichtig buchen – ${total}`}
       </button>
-      <p className="text-sm text-cream/60">
+      <p className="text-sm text-ink-soft">
         Sichere Zahlung über Stripe mit Karte, Apple Pay, Google Pay oder PayPal. Dein Termin ist
         während der Zahlung 30 Minuten für dich reserviert.
       </p>
 
       {submitError && (
-        <div
-          role="alert"
-          className="rounded-[3px] border border-rose-300/40 bg-rose-950/30 p-4 text-cream"
-        >
+        <div role="alert" className="rounded-xl border border-red-300 bg-red-50 p-4 text-red-900">
           {submitError}
         </div>
       )}

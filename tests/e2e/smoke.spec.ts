@@ -8,7 +8,10 @@ test.beforeEach(async ({ page }) => {
 test('Startseite lädt mit Titel, Logo und ohne seitliches Scrollen', async ({ page }) => {
   await page.goto('/');
   await expect(page).toHaveTitle(/Lounge buchen – Weihnachtsmarkt im Schlosspark Detmold/);
-  await expect(page.locator('#start').getByAltText(/Die Händler/)).toBeVisible();
+  await expect(page.getByRole('banner').getByAltText(/Die Händler/)).toBeVisible();
+  await expect(
+    page.locator('#start').getByAltText('Weihnachtsmarkt im Schlosspark Detmold'),
+  ).toBeVisible();
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
   );

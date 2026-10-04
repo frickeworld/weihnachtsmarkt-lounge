@@ -33,9 +33,9 @@ const monthEnd = (v: YM): IsoDate =>
 
 function Step({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {
   return (
-    <div className="card p-5 sm:p-8">
-      <h3 className="mb-6 flex items-center gap-3 text-2xl font-semibold sm:text-3xl">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-gold font-sans text-base text-champagne">
+    <div className="card p-5 shadow-[0_24px_50px_-40px_rgba(36,34,30,0.6)] sm:p-8">
+      <h3 className="mb-6 flex items-center gap-3 text-2xl font-medium sm:text-3xl">
+        <span className="glitter flex h-9 w-9 shrink-0 items-center justify-center rounded-full font-sans text-base font-bold">
           {n}
         </span>
         {title}
@@ -149,7 +149,7 @@ export function Booking() {
   };
 
   return (
-    <section ref={sectionRef} id="buchen" className="scroll-mt-20 px-4 py-20 sm:px-6 sm:py-28">
+    <section ref={sectionRef} id="buchen" className="scroll-mt-20 px-4 py-20 sm:px-6 sm:py-24">
       <div className="mx-auto max-w-3xl">
         <SectionHeading eyebrow="Buchung" title="Wähle deinen Abend" />
         <Reveal className="space-y-6">
@@ -167,14 +167,14 @@ export function Booking() {
                 onSelect={selectDate}
               />
               {state === 'loading' && (
-                <p className="mt-4 text-sm text-cream/65" role="status">
+                <p className="mt-4 text-sm text-ink-soft" role="status">
                   Verfügbarkeit wird geladen …
                 </p>
               )}
               {(state === 'error' || state === 'unconfigured') && (
                 <div
                   role="alert"
-                  className="mt-4 rounded-[3px] border border-rose-300/40 bg-rose-950/30 p-4"
+                  className="mt-4 rounded-xl border border-red-300 bg-red-50 p-4 text-red-900"
                 >
                   <p>
                     Die freien Termine können gerade nicht geladen werden. Bitte prüfe deine
@@ -193,7 +193,10 @@ export function Booking() {
               )}
             </div>
             {notice && (
-              <p role="alert" className="mt-4 rounded-[3px] border border-gold/50 bg-gold/10 p-4">
+              <p
+                role="alert"
+                className="mt-4 rounded-xl border border-gold bg-gold/15 p-4 font-medium"
+              >
                 {notice}
               </p>
             )}
@@ -202,7 +205,7 @@ export function Booking() {
           {date && (
             <div ref={slotsRef} className="scroll-mt-20">
               <Step n={2} title="Zeitfenster wählen">
-                <p className="mb-4 text-cream/75">{formatLongDate(date)}</p>
+                <p className="mb-4 text-ink-soft">{formatLongDate(date)}</p>
                 <SlotPicker slots={daySlots} selected={slotStart} onSelect={selectSlot} />
               </Step>
             </div>
@@ -211,7 +214,7 @@ export function Booking() {
           {date && slot && (
             <div ref={formRef} className="scroll-mt-20">
               <Step n={3} title="Deine Angaben">
-                <Suspense fallback={<p className="text-cream/70">Formular wird geladen …</p>}>
+                <Suspense fallback={<p className="text-ink-soft">Formular wird geladen …</p>}>
                   <BookingForm
                     date={date}
                     startTime={slot.startTime}

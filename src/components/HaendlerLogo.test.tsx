@@ -1,10 +1,10 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { LogoPlaque } from './LogoPlaque';
+import { HaendlerLogo } from './HaendlerLogo';
 
-describe('LogoPlaque', () => {
+describe('HaendlerLogo', () => {
   it('zeigt das Händler-Logo mit Alternativtext', () => {
-    render(<LogoPlaque />);
+    render(<HaendlerLogo />);
     expect(screen.getByAltText(/Die Händler/)).toBeInTheDocument();
   });
 });

@@ -56,16 +56,19 @@ Mobile-first One-Page-Website, über die eine überdachte Lounge auf dem Weihnac
 - Deployment: GitHub Action spielt bei Push auf `main` Migrations + Functions ein.
 - Tests: Vitest (Kernlogik: Preise, Abrechnung, Zeitfenster, Zeitzone), pgTAP/SQL-Tests (RLS, Doppelbuchung), Playwright (Buchung mit Stripe-Testkarte). CI bei jedem Push.
 
-## Design
+## Design (Stand Design-Runde 1, 04.10.2026)
 
-- Look: Die Händler × Weihnachtsmarkt im Schlosspark. Edel, warm, festlich.
-- Farben: Nachtschwarz `#0F0D0B` (Hintergrund), Kohle `#1A1714` (Flächen), Gold `#C9A24D`, Champagner `#E9D8A6`, Creme `#F6EFE3` (Text), Händler-Rot `#CD131C` (gemessen aus dem Logo-Schriftzug; nur Logo-Umfeld und kleine Akzente), Tannengrün `#1F3A2E` (sparsam).
-- Händler-Logo **unverändert** in Originalfarben auf **Creme-Plakette mit Goldrand** (Unterzeile ist dunkelgrau und auf Schwarz nicht lesbar).
-- Schriften: Cormorant Garamond (Überschriften), Manrope (Text).
+- Look: **hell & festlich** im Stil von weihnachtsmarkt-detmold.de. Creme-Papier als Grundfläche, dunkle Schrift, Gold-Glitzer als Akzent (Bänder, Preis-Karte, Schritt-Nummern). Dunkelbraun nur für Header, Hero-Foto und Footer. **Keine dunklen Elemente auf dunklem Grund.**
+- Tokens (nur in `src/styles/index.css` pflegen): Papier `#FBF7EF`, Fläche `#FFFFFF`, Sand `#F3EBDC`, Linie `#E4D8C2`, Tinte `#23201B`, Tinte weich `#5F574B`, Gold `#C6A45C` (Flächen), Gold tief `#7A5A1E` (Text auf hell), Gold hell `#E8D6A8` (auf dunkel), Braun `#24221E`, Text auf dunkel `#F8F3E8`, Händler-Rot `#CD131C` (sparsam).
+- Gold-Glitzer-Textur und Markt-Schriftzug stammen von weihnachtsmarkt-detmold.de (Platzhalter, Nutzung vor Livegang klären).
+- **Händler-Logo überall komplett weiß** (Signet-Quadrate als Weißtöne). Auf hellem Grund nur mit dunkelbrauner Unterlage (`plate`).
+- Schriften: Jost (Überschriften, geometrisch wie die Markt-Seite), Manrope (Text). Selbst gehostet.
+- Hero: Glitzer-Band mit Markt-Schriftzug, darunter großes Foto (Platzhalter „Symbolbild · Bildquelle: Stadt Detmold“) mit Schnee (Canvas nur im Hero).
+- Keine Lichterkette mehr.
+- Footer: Sponsoren & Partner (weiße Logos), Instagram @diehaendlerdetmold, Link weihnachtsmarkt-detmold.de, „Powered by STUDIO/F“.
 - Ansprache „Du“, warm, hochwertig, erwachsen (30–65). Keine Jugendsprache, keine Emojis. Alle Texte Deutsch.
-- Animationen: ein Canvas-Schneefall (70 mobil / 140 Desktop, pausiert bei verstecktem Tab), SVG-Lichterkette mit funkelnden Lämpchen, Gold-Sweep über H1 und Haupt-Buttons, Scroll-Reveal. `prefers-reduced-motion`: nur weiche Einblendungen.
+- `prefers-reduced-motion`: Schnee, Glanz und Funkeln aus, nur weiche Einblendungen.
 - Mobile-first, große Touch-Flächen (≥ 44 px), WCAG AA, Lighthouse mobil ≥ 85.
-- Hero vorerst grafisch; KI-Bilder bzw. echte Fotos werden eingebaut, sobald vorhanden (Vermerk „Symbolbild“ bei KI-Bild).
 
 ## Arbeitsweise
 

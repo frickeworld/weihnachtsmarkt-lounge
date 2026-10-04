@@ -1,23 +1,34 @@
 @import 'tailwindcss';
 @import './fonts.css';
 
-/* Design-Tokens – siehe CLAUDE.md „Design“. Werte nur hier pflegen. */
+/*
+ * Design-Tokens – siehe CLAUDE.md „Design“. Werte nur hier pflegen.
+ * Hell & festlich: Creme-Papier, dunkle Schrift, Gold-Glitzer als Akzent (angelehnt an
+ * weihnachtsmarkt-detmold.de). Dunkelbraun nur für Header, Hero und Footer.
+ */
 @theme {
-  --color-night: #0f0d0b; /* Nachtschwarz – Hintergrund */
-  --color-coal: #1a1714; /* Kohle – Flächen */
-  --color-gold: #c9a24d; /* Gold – Akzente, Linien, Buttons */
-  --color-champagne: #e9d8a6; /* Champagner – helles Gold */
-  --color-cream: #f6efe3; /* Creme – Text, Logo-Plakette */
+  --color-paper: #fbf7ef; /* Seitenhintergrund, warmes Creme-Weiß */
+  --color-surface: #ffffff; /* Karten, Formularfelder */
+  --color-sand: #f3ebdc; /* abgesetzte Abschnitte */
+  --color-line: #e4d8c2; /* feine Linien, Rahmen */
+  --color-ink: #23201b; /* Text */
+  --color-ink-soft: #5f574b; /* Nebentext (Kontrast > 6:1 auf Papier) */
+  --color-gold: #c6a45c; /* Gold der Markt-Seite – Flächen, Rahmen, Buttons */
+  --color-gold-deep: #7a5a1e; /* Gold als Textfarbe auf hellem Grund (Kontrast ~6:1) */
+  --color-gold-light: #e8d6a8; /* Gold auf dunklem Grund */
+  --color-brown: #24221e; /* Dunkle Flächen: Header, Hero, Footer */
+  --color-brown-deep: #141311;
+  --color-on-dark: #f8f3e8; /* Text auf Dunkelbraun */
   --color-haendler-red: #cd131c; /* Händler-Rot, gemessen aus dem Logo-Schriftzug */
-  --color-fir: #1f3a2e; /* Tannengrün – sparsam */
+  --color-fir: #1f3a2e;
 
-  --font-display: 'Cormorant Garamond', 'Cormorant Fallback', Georgia, serif;
+  --font-display: 'Jost', 'Jost Fallback', 'Century Gothic', 'Avenir Next', sans-serif;
   --font-sans: 'Manrope', 'Manrope Fallback', system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
 
 @layer base {
   html {
-    color-scheme: dark;
+    color-scheme: light;
     -webkit-text-size-adjust: 100%;
     scroll-behavior: smooth;
   }
@@ -29,7 +40,10 @@
   }
 
   body {
-    @apply bg-night text-cream font-sans antialiased;
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
     min-height: 100dvh;
     overflow-x: hidden;
   }
@@ -40,41 +54,34 @@
   h4,
   .font-display {
     font-family: var(--font-display);
-    font-variant-numeric: lining-nums; /* Cormorant hat sonst Mediävalziffern (178,50 wirkt unruhig) */
     text-wrap: balance;
+    letter-spacing: -0.01em;
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-champagne);
+    outline: 2px solid var(--color-gold-deep);
     outline-offset: 3px;
     border-radius: 2px;
   }
+
+  .on-dark :focus-visible {
+    outline-color: var(--color-gold-light);
+  }
 }
 
-/* ---------- Festliche Effekte ---------- */
+/* ---------- Bausteine ---------- */
 
 @layer components {
-  /* Goldener Glanz-Sweep über Text (H1). Läuft etwa alle 6 s. */
-  .gold-shimmer-text {
-    background-image: linear-gradient(
-      110deg,
-      var(--color-cream) 0%,
-      var(--color-cream) 42%,
-      var(--color-champagne) 48%,
-      #fff7e0 50%,
-      var(--color-champagne) 52%,
-      var(--color-cream) 58%,
-      var(--color-cream) 100%
-    );
-    background-size: 300% 100%;
-    background-position: 100% 0;
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    animation: shimmer-text 6s ease-in-out infinite;
+  /* Gold-Glitzer-Fläche wie auf weihnachtsmarkt-detmold.de */
+  .glitter {
+    background-color: var(--color-gold);
+    background-image: url('../assets/gold-glitzer.webp');
+    background-size: cover;
+    background-position: center;
+    color: var(--color-ink);
   }
 
-  /* Haupt-Button in Gold mit Glanz-Sweep. */
+  /* Haupt-Button: Gold mit dunkler Schrift und Glanz-Sweep */
   .btn-gold {
     position: relative;
     isolation: isolate;
@@ -84,15 +91,13 @@
     justify-content: center;
     gap: 0.5rem;
     min-height: 3rem;
-    padding: 0.75rem 1.5rem;
-    border-radius: 2px;
-    background: linear-gradient(180deg, #d8b462 0%, var(--color-gold) 55%, #b38c3c 100%);
-    color: var(--color-night);
+    padding: 0.75rem 1.6rem;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #d6b673 0%, var(--color-gold) 60%, #b38f45 100%);
+    color: var(--color-ink);
     font-weight: 700;
-    letter-spacing: 0.02em;
-    box-shadow:
-      0 0 0 1px rgba(233, 216, 166, 0.35) inset,
-      0 8px 30px -12px rgba(201, 162, 77, 0.6);
+    letter-spacing: 0.01em;
+    box-shadow: 0 10px 24px -14px rgba(122, 90, 30, 0.9);
     transition:
       transform 200ms ease,
       box-shadow 200ms ease,
@@ -106,7 +111,7 @@
     background: linear-gradient(
       105deg,
       transparent 35%,
-      rgba(255, 249, 230, 0.75) 50%,
+      rgba(255, 250, 235, 0.8) 50%,
       transparent 65%
     );
     transform: translateX(-120%);
@@ -114,42 +119,49 @@
   }
   .btn-gold:hover {
     transform: translateY(-1px);
-    filter: brightness(1.06);
-    box-shadow:
-      0 0 0 1px rgba(233, 216, 166, 0.5) inset,
-      0 12px 34px -12px rgba(201, 162, 77, 0.8);
+    filter: brightness(1.05);
+    box-shadow: 0 14px 28px -14px rgba(122, 90, 30, 1);
   }
   .btn-gold:disabled {
     cursor: not-allowed;
-    filter: grayscale(0.6) brightness(0.7);
+    filter: grayscale(0.5) brightness(0.9);
     transform: none;
   }
 
-  /* Sekundärer Button: Goldrahmen. */
+  /* Sekundär-Button: Umriss */
   .btn-outline {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 0.5rem;
     min-height: 3rem;
     padding: 0.75rem 1.5rem;
-    border-radius: 2px;
-    border: 1px solid rgba(201, 162, 77, 0.7);
-    color: var(--color-champagne);
+    border-radius: 999px;
+    border: 1.5px solid var(--color-ink);
+    color: var(--color-ink);
     font-weight: 600;
     transition:
       background-color 200ms ease,
-      border-color 200ms ease;
+      color 200ms ease;
   }
   .btn-outline:hover {
-    background-color: rgba(201, 162, 77, 0.1);
-    border-color: var(--color-champagne);
+    background-color: var(--color-ink);
+    color: var(--color-paper);
+  }
+  .on-dark .btn-outline {
+    border-color: var(--color-on-dark);
+    color: var(--color-on-dark);
+  }
+  .on-dark .btn-outline:hover {
+    background-color: var(--color-on-dark);
+    color: var(--color-brown);
   }
 
-  /* Karte mit feinem Goldrand, hebt sich beim Hover leicht an. */
+  /* Karte: weiß mit feiner Linie, hebt sich beim Hover leicht an */
   .card {
-    border: 1px solid rgba(201, 162, 77, 0.28);
-    background: linear-gradient(180deg, rgba(26, 23, 20, 0.92), rgba(15, 13, 11, 0.92));
-    border-radius: 3px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: 18px;
     transition:
       transform 300ms ease,
       border-color 300ms ease,
@@ -157,16 +169,19 @@
   }
   .card-hover:hover {
     transform: translateY(-4px);
-    border-color: rgba(233, 216, 166, 0.7);
-    box-shadow: 0 18px 40px -24px rgba(201, 162, 77, 0.55);
+    border-color: var(--color-gold);
+    box-shadow: 0 22px 40px -28px rgba(36, 34, 30, 0.45);
   }
 
   .eyebrow {
     font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.25em;
+    font-weight: 700;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: var(--color-champagne);
+    color: var(--color-gold-deep);
+  }
+  .on-dark .eyebrow {
+    color: var(--color-gold-light);
   }
 
   /* Formularfelder */
@@ -174,67 +189,42 @@
     display: block;
     margin-bottom: 0.375rem;
     font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--color-cream);
+    font-weight: 700;
+    color: var(--color-ink);
   }
   .field-input {
     width: 100%;
     min-height: 3rem;
     padding: 0.75rem 0.875rem;
-    border-radius: 2px;
-    border: 1px solid rgba(233, 216, 166, 0.3);
-    background: rgba(15, 13, 11, 0.7);
-    color: var(--color-cream);
+    border-radius: 10px;
+    border: 1px solid #cbbd9f;
+    background: var(--color-surface);
+    color: var(--color-ink);
     font-size: 1rem; /* verhindert Zoom auf iOS */
-    transition: border-color 150ms ease;
+    transition:
+      border-color 150ms ease,
+      box-shadow 150ms ease;
   }
   .field-input::placeholder {
-    color: rgba(246, 239, 227, 0.4);
+    color: #8c8273;
   }
   .field-input:focus {
     outline: none;
-    border-color: var(--color-gold);
-    box-shadow: 0 0 0 3px rgba(201, 162, 77, 0.25);
+    border-color: var(--color-gold-deep);
+    box-shadow: 0 0 0 3px rgba(198, 164, 92, 0.35);
   }
   .field-input[aria-invalid='true'] {
-    border-color: #e5736f;
+    border-color: #b42318;
   }
   .field-error {
     margin-top: 0.375rem;
     font-size: 0.875rem;
-    color: #f2a09c;
+    font-weight: 600;
+    color: #b42318;
   }
 }
 
-/* Lämpchen der Lichterkette */
-.bulb {
-  animation: twinkle var(--twinkle-duration, 3s) ease-in-out var(--twinkle-delay, 0s) infinite;
-  transform-box: fill-box;
-  transform-origin: center;
-}
-
-@keyframes twinkle {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  45% {
-    opacity: 0.45;
-  }
-  55% {
-    opacity: 0.6;
-  }
-}
-
-@keyframes shimmer-text {
-  0%,
-  60% {
-    background-position: 100% 0;
-  }
-  100% {
-    background-position: 0% 0;
-  }
-}
+/* ---------- Bewegung ---------- */
 
 @keyframes shimmer-button {
   0%,
@@ -246,30 +236,26 @@
   }
 }
 
-@keyframes glow-pulse {
+@keyframes sparkle {
   0%,
   100% {
-    opacity: 0.55;
+    opacity: 0.25;
+    transform: scale(0.85);
   }
   50% {
-    opacity: 0.9;
+    opacity: 1;
+    transform: scale(1);
   }
 }
 
-.glow-pulse {
-  animation: glow-pulse 7s ease-in-out infinite;
+.sparkle {
+  animation: sparkle 3.6s ease-in-out infinite;
 }
 
-/* Bewegung reduzieren: Funkeln, Glanz und Pulsieren aus. */
 @media (prefers-reduced-motion: reduce) {
-  .bulb,
-  .glow-pulse,
-  .gold-shimmer-text,
+  .sparkle,
   .btn-gold::after {
     animation: none !important;
-  }
-  .gold-shimmer-text {
-    background-position: 100% 0;
   }
   .card-hover:hover,
   .btn-gold:hover {

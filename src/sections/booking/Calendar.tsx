@@ -38,11 +38,11 @@ export function Calendar({
           onClick={onPrev}
           disabled={!canPrev}
           aria-label="Vorheriger Monat"
-          className="flex h-11 w-11 items-center justify-center rounded-full border border-gold/40 text-gold transition-colors hover:bg-gold/10 disabled:invisible"
+          className="flex h-11 w-11 items-center justify-center rounded-full border border-line text-ink transition-colors hover:border-gold hover:bg-gold/15 disabled:invisible"
         >
           <IconChevron className="h-5 w-5 rotate-180" />
         </button>
-        <h3 className="text-2xl font-semibold" aria-live="polite">
+        <h3 className="text-2xl font-medium" aria-live="polite">
           {formatMonth(year, month)}
         </h3>
         <button
@@ -50,7 +50,7 @@ export function Calendar({
           onClick={onNext}
           disabled={!canNext}
           aria-label="Nächster Monat"
-          className="flex h-11 w-11 items-center justify-center rounded-full border border-gold/40 text-gold transition-colors hover:bg-gold/10 disabled:invisible"
+          className="flex h-11 w-11 items-center justify-center rounded-full border border-line text-ink transition-colors hover:border-gold hover:bg-gold/15 disabled:invisible"
         >
           <IconChevron className="h-5 w-5" />
         </button>
@@ -63,7 +63,7 @@ export function Calendar({
               <th
                 key={w}
                 scope="col"
-                className="pb-2 text-xs font-semibold tracking-wider text-cream/55 uppercase"
+                className="pb-2 text-xs font-bold tracking-wider text-ink-soft uppercase"
               >
                 {w}
               </th>
@@ -89,21 +89,21 @@ export function Calendar({
                       aria-label={label}
                       aria-pressed={isSelected}
                       className={[
-                        'relative flex aspect-square w-full min-h-11 flex-col items-center justify-center rounded-[3px] text-base transition-colors',
+                        'relative flex aspect-square w-full min-h-11 flex-col items-center justify-center rounded-xl text-base transition-colors',
                         isSelected
-                          ? 'bg-gold font-bold text-night'
+                          ? 'bg-gold font-bold text-ink shadow-[inset_0_0_0_2px_#7a5a1e]'
                           : selectable
-                            ? 'border border-gold/30 bg-night/60 hover:border-champagne hover:bg-gold/10'
+                            ? 'border border-line bg-surface font-semibold hover:border-gold hover:bg-gold/15'
                             : status === 'unavailable'
-                              ? 'text-cream/25'
-                              : 'border border-transparent bg-night/30 text-cream/45',
+                              ? 'text-ink/25'
+                              : 'bg-sand text-ink/45',
                       ].join(' ')}
                     >
                       {parseIsoDate(d).getUTCDate()}
                       {meta && (
                         <span
                           aria-hidden="true"
-                          className={`absolute bottom-1.5 h-1.5 w-1.5 rounded-full ${isSelected ? 'bg-night' : meta.dot}`}
+                          className={`absolute bottom-1.5 h-1.5 w-1.5 rounded-full ${isSelected ? 'bg-ink' : meta.dot}`}
                         />
                       )}
                     </button>
@@ -116,7 +116,7 @@ export function Calendar({
       </table>
 
       <ul
-        className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm text-cream/75"
+        className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm text-ink-soft"
         aria-label="Legende"
       >
         {Object.values(DAY_STATUS_META).map((m) => (

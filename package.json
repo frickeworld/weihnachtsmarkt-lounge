@@ -17,10 +17,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "build:preview": "vite build --mode vorschau"
+    "build:preview": "vite build --mode vorschau && node scripts/build-preview-artifact.mjs"
   },
   "dependencies": {
-    "@fontsource/cormorant-garamond": "^5.3.0",
+    "@fontsource/jost": "^5.3.0",
     "@fontsource/manrope": "^5.3.0",
     "@hookform/resolvers": "^5.9.1",
     "@supabase/supabase-js": "^2.117.2",

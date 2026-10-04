@@ -28,7 +28,7 @@ export function Faq() {
           an{' '}
           <a
             href={`mailto:${contactEmail}`}
-            className="text-champagne underline underline-offset-4"
+            className="font-semibold text-gold-deep underline underline-offset-4"
           >
             {contactEmail}
           </a>
@@ -53,15 +53,15 @@ export function Faq() {
   return (
     <section id="faq" className="scroll-mt-20 px-4 py-20 sm:px-6 sm:py-28">
       <div className="mx-auto max-w-3xl">
-        <SectionHeading title="Häufige Fragen" />
-        <Reveal className="divide-y divide-gold/20 border-y border-gold/20">
+        <SectionHeading eyebrow="FAQ" title="Häufige Fragen" />
+        <Reveal className="divide-y divide-line overflow-hidden rounded-[20px] border border-line bg-surface">
           {items.map((item) => (
             <details key={item.q} className="group">
-              <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 py-4 text-left text-lg font-semibold transition-colors hover:text-champagne [&::-webkit-details-marker]:hidden">
+              <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-left text-lg font-semibold transition-colors hover:text-gold-deep sm:px-6 [&::-webkit-details-marker]:hidden">
                 {item.q}
-                <IconChevron className="h-5 w-5 shrink-0 text-gold transition-transform duration-300 group-open:rotate-90" />
+                <IconChevron className="h-5 w-5 shrink-0 text-gold-deep transition-transform duration-300 group-open:rotate-90" />
               </summary>
-              <div className="pb-5 leading-relaxed text-cream/80">{item.a}</div>
+              <div className="px-5 pb-5 leading-relaxed text-ink-soft sm:px-6">{item.a}</div>
             </details>
           ))}
         </Reveal>

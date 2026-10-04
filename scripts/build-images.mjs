@@ -62,3 +62,78 @@ await sharp(Buffer.from(svg))
   .toFile('public/og-image.png');
 
 console.log('Bilder erzeugt:', (await readFile('public/og-image.png')).length, 'Bytes OG');
+
+// ---------------------------------------------------------------------------------------
+// Design-Runde 1: helles Design mit Gold-Glitzer (Material von weihnachtsmarkt-detmold.de)
+// ---------------------------------------------------------------------------------------
+import { readdir } from 'node:fs/promises';
+
+await mkdir('src/assets/sponsoren', { recursive: true });
+
+// Händler-Logo komplett weiß. Die vier Quadrate des Signets bekommen abgestufte Deckkraft,
+// damit das Raster als Weiß-Ton-Fläche erkennbar bleibt.
+{
+  const { data, info } = await sharp(trimmed)
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  const base = [
+    { rgb: [205, 19, 28], a: 1 }, // Rot
+    { rgb: [255, 203, 0], a: 0.82 }, // Gelb
+    { rgb: [180, 159, 131], a: 0.62 }, // Beige
+    { rgb: [255, 255, 255], a: 0.38 }, // Weiß
+    { rgb: [74, 74, 73], a: 1 }, // Schriftzug grau
+  ];
+  for (let i = 0; i < data.length; i += 4) {
+    const px = [data[i], data[i + 1], data[i + 2]];
+    let best = base[0];
+    let bestD = Infinity;
+    for (const b of base) {
+      const d = (px[0] - b.rgb[0]) ** 2 + (px[1] - b.rgb[1]) ** 2 + (px[2] - b.rgb[2]) ** 2;
+      if (d < bestD) [best, bestD] = [b, d];
+    }
+    data[i] = data[i + 1] = data[i + 2] = 255;
+    data[i + 3] = Math.round(data[i + 3] * best.a);
+  }
+  const white = sharp(data, { raw: info });
+  for (const width of [480, 960]) {
+    await white
+      .clone()
+      .resize({ width })
+      .webp({ quality: 92, alphaQuality: 100 })
+      .toFile(`src/assets/haendler-logo-weiss-${width}.webp`);
+  }
+  await white
+    .clone()
+    .resize({ width: 440 })
+    .png({ compressionLevel: 9 })
+    .toFile('public/email/haendler-logo-weiss.png');
+}
+
+// Hero-Foto (Platzhalter, Bildquelle: Stadt Detmold) und Gold-Glitzer-Textur
+for (const width of [800, 1200]) {
+  await sharp('assets/weihnachtsmarkt/foto-gaeste-gluehwein-stadt-detmold.webp')
+    .resize({ width })
+    .webp({ quality: 74 })
+    .toFile(`src/assets/hero-${width}.webp`);
+}
+await sharp('assets/weihnachtsmarkt/gold-glitzer.webp')
+  .resize({ width: 640 })
+  .webp({ quality: 45 })
+  .toFile('src/assets/gold-glitzer.webp');
+
+// Sponsorenlogos einheitlich weiß, 80 px hoch
+for (const file of await readdir('assets/sponsoren')) {
+  if (!file.endsWith('.png')) continue;
+  const { data, info } = await sharp(`assets/sponsoren/${file}`)
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  for (let i = 0; i < data.length; i += 4) data[i] = data[i + 1] = data[i + 2] = 255;
+  const name = file.replace(/(-logo)?(-weiss)?(-72dpi)?(-1)?\.png$/, '').replace(/_logo$/, '');
+  await sharp(data, { raw: info })
+    .trim({ threshold: 1 })
+    .resize({ height: 80, withoutEnlargement: true })
+    .webp({ quality: 90, alphaQuality: 100 })
+    .toFile(`src/assets/sponsoren/${name}.webp`);
+}

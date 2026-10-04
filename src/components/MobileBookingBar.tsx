@@ -39,7 +39,7 @@ export function MobileBookingBar() {
           animate={{ y: 0 }}
           exit={{ y: '110%' }}
           transition={{ duration: 0.3, ease: 'easeOut' }}
-          className="fixed inset-x-0 bottom-0 z-40 border-t border-gold/25 bg-night/90 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-md md:hidden"
+          className="fixed inset-x-0 bottom-0 z-40 bg-brown/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-md md:hidden"
         >
           <a href="#buchen" onClick={trackBookClick} className="btn-gold w-full">
             Lounge buchen · {formatCents(totalCents(settings))}

@@ -1,6 +1,8 @@
 /* Selbst gehostete Schriften (@fontsource) – kein Google-Fonts-CDN. Latin deckt Umlaute und ß ab. */
-@import '@fontsource/cormorant-garamond/latin-500.css';
-@import '@fontsource/cormorant-garamond/latin-600.css';
+/* Überschriften: Jost (geometrisch, nah an der Schrift von weihnachtsmarkt-detmold.de). Text: Manrope. */
+@import '@fontsource/jost/latin-400.css';
+@import '@fontsource/jost/latin-500.css';
+@import '@fontsource/jost/latin-600.css';
 @import '@fontsource/manrope/latin-400.css';
 @import '@fontsource/manrope/latin-500.css';
 @import '@fontsource/manrope/latin-600.css';
@@ -11,11 +13,11 @@
  * Das verhindert Layout-Sprünge (CLS) im Hero.
  */
 @font-face {
-  font-family: 'Cormorant Fallback';
-  src: local('Georgia'), local('Times New Roman');
-  size-adjust: 88%;
-  ascent-override: 105%;
-  descent-override: 33%;
+  font-family: 'Jost Fallback';
+  src: local('Arial'), local('Helvetica');
+  size-adjust: 94%;
+  ascent-override: 112%;
+  descent-override: 38%;
   line-gap-override: 0%;
 }
 

@@ -26,19 +26,53 @@ function noindex(enabled: boolean): Plugin {
 }
 
 /**
- * Lädt die Schriften für den sichtbaren Hero-Bereich vorab (verhindert Layout-Sprünge beim Schriftwechsel).
+ * Lädt Schriften, Hero-Foto und Glitzer-Textur für den sichtbaren Bereich vorab (verhindert Layout-Sprünge beim Schriftwechsel).
  */
 function preloadFonts(patterns: RegExp[]): Plugin {
   return {
     name: 'preload-fonts',
     apply: 'build',
     transformIndexHtml(_html, ctx) {
-      const files = Object.keys(ctx.bundle ?? {}).filter((f) => patterns.some((p) => p.test(f)));
-      return files.map((f) => ({
-        tag: 'link',
-        attrs: { rel: 'preload', href: `/${f}`, as: 'font', type: 'font/woff2', crossorigin: '' },
-        injectTo: 'head' as const,
-      }));
+      const files = Object.keys(ctx.bundle ?? {});
+      const fonts = files
+        .filter((f) => patterns.some((p) => p.test(f)))
+        .map((f) => ({
+          tag: 'link',
+          attrs: { rel: 'preload', href: `/${f}`, as: 'font', type: 'font/woff2', crossorigin: '' },
+          injectTo: 'head' as const,
+        }));
+      // Hero-Foto (größtes sichtbares Element) und Glitzer-Band früh laden
+      const hero800 = files.find((f) => /hero-800-.*\.webp$/.test(f));
+      const hero1200 = files.find((f) => /hero-1200-.*\.webp$/.test(f));
+      const glitter = files.find((f) => /gold-glitzer-.*\.webp$/.test(f));
+      const images = [
+        ...(hero800 && hero1200
+          ? [
+              {
+                tag: 'link',
+                attrs: {
+                  rel: 'preload',
+                  as: 'image',
+                  type: 'image/webp',
+                  imagesrcset: `/${hero800} 800w, /${hero1200} 1200w`,
+                  imagesizes: '100vw',
+                  fetchpriority: 'high',
+                },
+                injectTo: 'head' as const,
+              },
+            ]
+          : []),
+        ...(glitter
+          ? [
+              {
+                tag: 'link',
+                attrs: { rel: 'preload', as: 'image', href: `/${glitter}` },
+                injectTo: 'head' as const,
+              },
+            ]
+          : []),
+      ];
+      return [...fonts, ...images];
     },
   };
 }
@@ -56,7 +90,7 @@ export default defineConfig(({ mode }) => {
       tailwindcss(),
       noindex(env.VITE_NOINDEX !== 'false'),
       preloadFonts([
-        /cormorant-garamond-latin-600-normal-.*\.woff2$/,
+        /jost-latin-500-normal-.*\.woff2$/,
         /manrope-latin-400-normal-.*\.woff2$/,
         /manrope-latin-600-normal-.*\.woff2$/,
       ]),

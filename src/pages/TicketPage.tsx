@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { LogoPlaque } from '@/components/LogoPlaque';
+import { HaendlerLogo } from '@/components/HaendlerLogo';
 import { fetchTicket, type TicketInfo } from '@/lib/api';
 import { formatLongDate } from '@/lib/dates';
 import { useNoindex } from '@/lib/useNoindex';
@@ -50,12 +50,12 @@ export function TicketPage() {
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col items-center px-4 py-8 text-center">
       <Link to="/" aria-label="Zur Startseite">
-        <LogoPlaque size="md" />
+        <HaendlerLogo size="md" plate />
       </Link>
       <p className="eyebrow mt-6">Weihnachtsmarkt-Lounge</p>
 
       {state.kind === 'loading' && (
-        <p role="status" className="mt-16 text-cream/80">
+        <p role="status" className="mt-16 text-ink-soft">
           Ticket wird geladen …
         </p>
       )}
@@ -64,8 +64,8 @@ export function TicketPage() {
 
       {state.kind === 'notfound' && (
         <div role="alert" className="mt-12">
-          <h1 className="text-3xl font-semibold">Ticket nicht gefunden</h1>
-          <p className="mt-4 text-cream/80">
+          <h1 className="text-3xl font-medium">Ticket nicht gefunden</h1>
+          <p className="mt-4 text-ink-soft">
             Bitte öffne den Link aus deiner Ticket-Mail oder zeig am Einlass deinen Buchungscode.
           </p>
         </div>
@@ -73,8 +73,8 @@ export function TicketPage() {
 
       {state.kind === 'error' && (
         <div role="alert" className="mt-12">
-          <h1 className="text-3xl font-semibold">Keine Verbindung</h1>
-          <p className="mt-4 text-cream/80">
+          <h1 className="text-3xl font-medium">Keine Verbindung</h1>
+          <p className="mt-4 text-ink-soft">
             Das Ticket konnte gerade nicht geladen werden. Den QR-Code findest du auch im PDF aus
             deiner Ticket-Mail.
           </p>
@@ -87,17 +87,17 @@ export function TicketPage() {
 function TicketView({ ticket, qr }: { ticket: TicketInfo; qr: string }) {
   const cancelled = ticket.status === 'cancelled';
   const status = cancelled
-    ? { label: 'Storniert', className: 'bg-rose-500/15 text-rose-200 ring-rose-300/40' }
+    ? { label: 'Storniert', className: 'bg-rose-50 text-rose-800 ring-rose-300' }
     : ticket.checkedInAt
       ? {
           label: `Eingecheckt um ${timeFmt.format(new Date(ticket.checkedInAt))} Uhr`,
-          className: 'bg-amber-400/15 text-amber-100 ring-amber-300/40',
+          className: 'bg-amber-50 text-amber-900 ring-amber-300',
         }
-      : { label: 'Gültig', className: 'bg-emerald-500/15 text-emerald-200 ring-emerald-300/40' };
+      : { label: 'Gültig', className: 'bg-emerald-50 text-emerald-800 ring-emerald-300' };
 
   return (
     <>
-      <h1 className="mt-2 text-3xl leading-tight font-semibold">{formatLongDate(ticket.date)}</h1>
+      <h1 className="mt-2 text-3xl leading-tight font-medium">{formatLongDate(ticket.date)}</h1>
       <p className="mt-1 text-xl">
         {ticket.startTime}–{ticket.endTime} Uhr
       </p>
@@ -108,7 +108,9 @@ function TicketView({ ticket, qr }: { ticket: TicketInfo; qr: string }) {
         {status.label}
       </span>
 
-      <div className={`mt-6 w-full rounded-md bg-white p-5 ${cancelled ? 'opacity-30' : ''}`}>
+      <div
+        className={`mt-6 w-full rounded-3xl border border-line bg-white p-5 shadow-[0_24px_50px_-36px_rgba(36,34,30,0.6)] ${cancelled ? 'opacity-30' : ''}`}
+      >
         <img
           src={qr}
           alt={`QR-Code für Buchung ${ticket.bookingCode}`}
@@ -116,21 +118,21 @@ function TicketView({ ticket, qr }: { ticket: TicketInfo; qr: string }) {
         />
       </div>
 
-      <p className="mt-5 text-sm text-cream/70">Buchungscode</p>
+      <p className="mt-5 text-sm text-ink-soft">Buchungscode</p>
       <p className="font-mono text-2xl tracking-[0.15em]">{ticket.bookingCode}</p>
 
-      <dl className="mt-6 w-full space-y-2 border-y border-gold/20 py-4 text-left">
+      <dl className="mt-6 w-full space-y-2 border-y border-line py-4 text-left">
         <div className="flex justify-between">
-          <dt className="text-cream/70">Name</dt>
+          <dt className="text-ink-soft">Name</dt>
           <dd>{ticket.firstName}</dd>
         </div>
         <div className="flex justify-between">
-          <dt className="text-cream/70">Personen</dt>
+          <dt className="text-ink-soft">Personen</dt>
           <dd>{ticket.persons}</dd>
         </div>
       </dl>
 
-      <p className="mt-6 text-sm leading-relaxed text-cream/70">
+      <p className="mt-6 text-sm leading-relaxed text-ink-soft">
         Zeig diesen QR-Code am Einlass. Bitte stell die Bildschirmhelligkeit hoch.
       </p>
     </>
