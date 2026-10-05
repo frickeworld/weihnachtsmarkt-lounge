@@ -137,7 +137,15 @@ export function BookingSuccessPage() {
                   <Link to={`/ticket/${view.token}`} className="btn-gold mt-6 w-full">
                     {DEMO ? 'Vorschau: Online-Ticket ansehen' : 'Ticket jetzt öffnen'}
                   </Link>
-                  <TicketDownloads token={view.token} />
+                  <TicketDownloads
+                    token={view.token}
+                    slot={{
+                      date: view.info.date,
+                      startTime: view.info.startTime,
+                      endTime: view.info.endTime,
+                      bookingCode: view.info.bookingCode,
+                    }}
+                  />
                 </div>
               )}
             </div>

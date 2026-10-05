@@ -48,6 +48,14 @@ test.describe('Online-Ticket', () => {
       `http://supabase.test/functions/v1/ticket-files?token=${TOKEN}&format=pdf`,
     );
     await expect(page.getByRole('link', { name: /Wallet/ })).toHaveCount(0);
+    await expect(
+      page.getByRole('link', { name: 'In den Kalender eintragen (iPhone, Outlook)' }),
+    ).toHaveAttribute('href', /format=ics$/);
+    // 17:30 Berliner Winterzeit = 16:30 UTC
+    await expect(page.getByRole('link', { name: 'In Google Kalender eintragen' })).toHaveAttribute(
+      'href',
+      /^https:\/\/calendar\.google\.com\/.*dates=20261205T163000Z%2F20261205T183000Z/,
+    );
 
     await mockSupabase(page, { ticket, wallet: { apple: true, google: true } });
     await page.reload();

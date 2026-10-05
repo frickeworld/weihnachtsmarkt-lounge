@@ -82,3 +82,28 @@ export function buildIcs(i: IcsInput): string {
   ];
   return lines.map(fold).join('\r\n') + '\r\n';
 }
+
+/** „In Google Kalender eintragen“ – öffnet die Termin-Vorlage, ohne Datei. */
+export function googleCalendarUrl(
+  i: Omit<IcsInput, 'uid' | 'now' | 'persons' | 'talerCount'> &
+    Partial<Pick<IcsInput, 'persons' | 'talerCount'>>,
+): string {
+  const start = utc(new Date(berlinIso(i.date, i.startTime)));
+  const end = utc(new Date(berlinIso(i.date, i.endTime)));
+  const details = [
+    i.persons && i.talerCount
+      ? `Deine Lounge für bis zu ${i.persons} Personen, inkl. ${i.talerCount} € Freiverzehr in Residenztalern.`
+      : 'Deine Lounge auf dem Weihnachtsmarkt im Schlosspark.',
+    `Buchungscode: ${i.bookingCode}`,
+    `Ticket: ${i.ticketUrl}`,
+  ].join('\n');
+  const p = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: 'Weihnachtsmarkt-Lounge der Händler',
+    dates: `${start}/${end}`,
+    location: i.location,
+    details,
+    ctz: 'Europe/Berlin',
+  });
+  return `https://calendar.google.com/calendar/render?${p.toString()}`;
+}

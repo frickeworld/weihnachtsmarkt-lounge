@@ -1,12 +1,49 @@
 import { useEffect, useState } from 'react';
 import { fetchWalletInfo, ticketFileUrl } from '@/lib/api';
 import { DEMO } from '@/lib/demo';
+import { googleCalendarUrl } from '../../supabase/functions/_shared/ics';
+
+/** Termin für den Kalender-Link (Google Kalender) */
+export interface CalendarSlot {
+  date: string;
+  startTime: string;
+  endTime: string;
+  bookingCode: string;
+}
+
+const LOCATION = 'Weihnachtsmarkt im Schlosspark, Detmold';
+
+function GoogleCalendarLink({ slot, token }: { slot: CalendarSlot; token: string }) {
+  const href = googleCalendarUrl({
+    ...slot,
+    location: LOCATION,
+    ticketUrl: `${window.location.origin}/ticket/${token}`,
+  });
+  return (
+    <a href={href} target="_blank" rel="noopener" className="btn-outline w-full">
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 24 24"
+        className="h-5 w-5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <rect x="4" y="5" width="16" height="15" rx="2" />
+        <path d="M8 3v4M16 3v4M4 10h16" />
+      </svg>
+      In Google Kalender eintragen
+    </a>
+  );
+}
 
 /**
  * PDF-Download und Wallet-Buttons zum Ticket. Wallet-Buttons erscheinen erst, wenn die
  * Zugangsdaten bei Apple bzw. Google hinterlegt sind.
  */
-export function TicketDownloads({ token }: { token: string }) {
+export function TicketDownloads({ token, slot }: { token: string; slot?: CalendarSlot }) {
   const [wallet, setWallet] = useState({ apple: false, google: false });
 
   useEffect(() => {
@@ -19,11 +56,14 @@ export function TicketDownloads({ token }: { token: string }) {
 
   if (DEMO) {
     return (
-      <p className="mt-6 text-sm text-ink-soft">
-        In der Vorschau gibt es keinen PDF-Download. Im Livebetrieb stehen hier „Ticket als PDF
-        herunterladen“, „In den Kalender eintragen“ und – sobald eingerichtet – die Buttons für
-        Apple und Google Wallet.
-      </p>
+      <div className="mt-6 flex w-full flex-col gap-3">
+        {slot && <GoogleCalendarLink slot={slot} token={token} />}
+        <p className="text-sm text-ink-soft">
+          In der Vorschau gibt es keinen PDF-Download. Im Livebetrieb stehen hier zusätzlich „Ticket
+          als PDF herunterladen“, „In den Kalender eintragen“ (Datei für iPhone und Outlook) und –
+          sobald bei Apple und Google eingerichtet – die Wallet-Buttons.
+        </p>
+      </div>
     );
   }
 
@@ -61,8 +101,9 @@ export function TicketDownloads({ token }: { token: string }) {
           <rect x="4" y="5" width="16" height="15" rx="2" />
           <path d="M8 3v4M16 3v4M4 10h16M12 13v4M10 15h4" />
         </svg>
-        In den Kalender eintragen
+        In den Kalender eintragen (iPhone, Outlook)
       </a>
+      {slot && <GoogleCalendarLink slot={slot} token={token} />}
       {wallet.apple && (
         <a href={ticketFileUrl(token, 'apple')} className={walletBtn}>
           <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">

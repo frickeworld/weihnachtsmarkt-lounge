@@ -1,6 +1,6 @@
 // Versand von Ticket- und Erinnerungsmails. Wird von send-ticket und send-reminders genutzt.
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { buildIcs } from './ics.ts';
+import { buildIcs, googleCalendarUrl } from './ics.ts';
 import {
   contactAttributes,
   requestNewsletterDoubleOptIn,
@@ -72,6 +72,16 @@ export async function deliverTicket(
       ticketUrl: `${siteUrl}/ticket/${b.ticket_token}`,
       pdfUrl: ticketFileUrl(supabaseUrl, b.ticket_token, 'pdf'),
       icsUrl: ticketFileUrl(supabaseUrl, b.ticket_token, 'ics'),
+      googleCalendarUrl: googleCalendarUrl({
+        date: b.date,
+        startTime: common.startTime,
+        endTime: common.endTime,
+        persons: b.persons,
+        talerCount: common.talerCount,
+        bookingCode: b.booking_code,
+        location: s.lounge_location,
+        ticketUrl: `${siteUrl}/ticket/${b.ticket_token}`,
+      }),
       appleWalletUrl: wallet.apple ? ticketFileUrl(supabaseUrl, b.ticket_token, 'apple') : null,
       googleWalletUrl: wallet.google ? ticketFileUrl(supabaseUrl, b.ticket_token, 'google') : null,
       invoiceUrl: b.stripe_invoice_url,

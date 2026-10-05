@@ -147,7 +147,17 @@ function TicketView({ ticket, qr, token }: { ticket: TicketInfo; qr: string; tok
         Zeig diesen QR-Code am Einlass. Bitte stell die Bildschirmhelligkeit hoch.
       </p>
 
-      {!cancelled && <TicketDownloads token={token} />}
+      {!cancelled && (
+        <TicketDownloads
+          token={token}
+          slot={{
+            date: ticket.date,
+            startTime: ticket.startTime,
+            endTime: ticket.endTime,
+            bookingCode: ticket.bookingCode,
+          }}
+        />
+      )}
     </>
   );
 }

@@ -16,6 +16,8 @@ export interface TicketMailData {
   pdfUrl?: string | null;
   /** Kalendereintrag (.ics) */
   icsUrl?: string | null;
+  /** „In Google Kalender eintragen“ */
+  googleCalendarUrl?: string | null;
   /** Nur gesetzt, wenn das jeweilige Wallet eingerichtet ist */
   appleWalletUrl?: string | null;
   googleWalletUrl?: string | null;
@@ -160,7 +162,11 @@ export function renderTicketEmail(d: TicketMailData): {
       }
       ${
         d.icsUrl
-          ? `<tr><td align="center" style="padding:8px 32px 0;"><a href="${escapeHtml(d.icsUrl)}" style="color:${C.goldDeep};font-size:14px;font-weight:bold;">In den Kalender eintragen</a></td></tr>`
+          ? `<tr><td align="center" style="padding:8px 32px 0;"><a href="${escapeHtml(d.icsUrl)}" style="color:${C.goldDeep};font-size:14px;font-weight:bold;">In den Kalender eintragen</a>${
+              d.googleCalendarUrl
+                ? ` &middot; <a href="${escapeHtml(d.googleCalendarUrl)}" style="color:${C.goldDeep};font-size:14px;font-weight:bold;">Google Kalender</a>`
+                : ''
+            }</td></tr>`
           : ''
       }
       ${
@@ -197,6 +203,7 @@ export function renderTicketEmail(d: TicketMailData): {
     ...(d.appleWalletUrl ? [`Zu Apple Wallet hinzufügen: ${d.appleWalletUrl}`] : []),
     ...(d.googleWalletUrl ? [`In Google Wallet speichern: ${d.googleWalletUrl}`] : []),
     ...(d.icsUrl ? [`In den Kalender eintragen: ${d.icsUrl}`] : []),
+    ...(d.googleCalendarUrl ? [`In Google Kalender eintragen: ${d.googleCalendarUrl}`] : []),
     '',
     'Was dich erwartet:',
     `- ${d.talerCount} € Freiverzehr: ${d.talerCount} Residenztaler beim Einlass (je 1 €, pro gekauftem Artikel 1 Taler)`,
