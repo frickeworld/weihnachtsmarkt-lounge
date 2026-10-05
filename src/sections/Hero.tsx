@@ -3,11 +3,13 @@ import hero1200 from '@/assets/hero-1200.webp';
 import hero800Avif from '@/assets/hero-800.avif';
 import hero800 from '@/assets/hero-800.webp';
 import { GlitterBand } from '@/components/GlitterBand';
+import { AdventCandles } from '@/components/AdventCandles';
 import { Snowfall } from '@/components/Snowfall';
 import { WeihnachtsmarktLogo } from '@/components/WeihnachtsmarktLogo';
 import { maxTalerCount } from '@/lib/settings';
 import { useSettings } from '@/lib/settingsContext';
 import { trackBookClick } from '@/lib/track';
+import { useSpecialDay } from '@/lib/useSpecialDay';
 
 /**
  * Hero: Gold-Glitzer-Band mit Markt-Schriftzug, darunter großes Foto mit Schnee.
@@ -15,6 +17,8 @@ import { trackBookClick } from '@/lib/track';
  */
 export function Hero() {
   const s = useSettings();
+  const day = useSpecialDay();
+  const advent = day && 'advent' in day ? day.advent : 0;
   return (
     <section id="start" aria-labelledby="hero-title">
       <GlitterBand className="py-5 sm:py-7">
@@ -45,10 +49,36 @@ export function Hero() {
           aria-hidden="true"
           className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(20,19,17,0.15)_0%,rgba(20,19,17,0.55)_45%,rgba(20,19,17,0.92)_100%)] md:bg-[linear-gradient(90deg,rgba(20,19,17,0.92)_0%,rgba(20,19,17,0.7)_42%,rgba(20,19,17,0.1)_75%)]"
         />
-        <Snowfall />
+        <Snowfall
+          gold={
+            day?.kind === 'nikolaus'
+              ? 'stars'
+              : day?.kind === 'opening' || day?.kind === 'last'
+                ? 'sparkle'
+                : 'none'
+          }
+        />
 
         <div className="relative z-20 mx-auto flex min-h-[78svh] max-w-6xl flex-col justify-end px-4 pt-40 pb-12 sm:px-6 md:min-h-[640px] md:justify-center md:pt-16">
           <div className="max-w-xl">
+            {day && (
+              <div
+                className="mb-5 inline-flex items-center gap-3 rounded-2xl bg-brown-deep/70 px-4 py-2.5 ring-1 ring-gold-light/40 backdrop-blur-sm"
+                data-testid="tagesgruss"
+              >
+                {advent > 0 && <AdventCandles lit={advent} className="h-7 w-16 shrink-0" />}
+                <span className="text-sm leading-snug">
+                  {day.kind === 'adventWeek' ? (
+                    <strong className="text-gold-light">{advent}. Adventswoche</strong>
+                  ) : (
+                    <>
+                      <strong className="block text-gold-light">{day.title}</strong>
+                      {day.text}
+                    </>
+                  )}
+                </span>
+              </div>
+            )}
             <p className="eyebrow mb-4">Schlosspark Detmold · Dezember 2026</p>
             <h1 id="hero-title" className="text-[2.6rem] leading-[1.05] font-medium sm:text-6xl">
               Deine Lounge mitten im Weihnachtsmarkt

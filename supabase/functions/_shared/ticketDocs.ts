@@ -97,7 +97,7 @@ export async function buildTicketPdf(
 export function ticketFileUrl(
   supabaseUrl: string,
   token: string,
-  format: 'pdf' | 'apple' | 'google',
+  format: 'pdf' | 'ics' | 'apple' | 'google',
 ) {
   return `${supabaseUrl.replace(/\/$/, '')}/functions/v1/ticket-files?token=${token}&format=${format}`;
 }

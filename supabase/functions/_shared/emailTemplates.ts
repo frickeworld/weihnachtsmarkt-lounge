@@ -14,6 +14,8 @@ export interface TicketMailData {
   ticketUrl: string;
   /** PDF zum Herunterladen (zusätzlich zum Anhang) */
   pdfUrl?: string | null;
+  /** Kalendereintrag (.ics) */
+  icsUrl?: string | null;
   /** Nur gesetzt, wenn das jeweilige Wallet eingerichtet ist */
   appleWalletUrl?: string | null;
   googleWalletUrl?: string | null;
@@ -157,6 +159,11 @@ export function renderTicketEmail(d: TicketMailData): {
           : ''
       }
       ${
+        d.icsUrl
+          ? `<tr><td align="center" style="padding:8px 32px 0;"><a href="${escapeHtml(d.icsUrl)}" style="color:${C.goldDeep};font-size:14px;font-weight:bold;">In den Kalender eintragen</a></td></tr>`
+          : ''
+      }
+      ${
         d.invoiceUrl
           ? `<tr><td align="center" style="padding:8px 32px 0;"><a href="${escapeHtml(d.invoiceUrl)}" style="color:${C.goldDeep};font-size:14px;font-weight:bold;">Rechnung ansehen</a></td></tr>`
           : ''
@@ -189,6 +196,7 @@ export function renderTicketEmail(d: TicketMailData): {
     'Das Ticket hängt zusätzlich als PDF an. Zeig den QR-Code am Einlass.',
     ...(d.appleWalletUrl ? [`Zu Apple Wallet hinzufügen: ${d.appleWalletUrl}`] : []),
     ...(d.googleWalletUrl ? [`In Google Wallet speichern: ${d.googleWalletUrl}`] : []),
+    ...(d.icsUrl ? [`In den Kalender eintragen: ${d.icsUrl}`] : []),
     '',
     'Was dich erwartet:',
     `- ${d.talerCount} € Freiverzehr: ${d.talerCount} Residenztaler beim Einlass (je 1 €, pro gekauftem Artikel 1 Taler)`,

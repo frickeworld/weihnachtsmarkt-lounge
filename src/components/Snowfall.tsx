@@ -9,13 +9,14 @@ interface Flake {
   drift: number;
   phase: number;
   alpha: number;
+  gold: boolean;
 }
 
 /**
  * Schneefall auf einem einzigen Canvas, begrenzt auf den umgebenden Bereich (Hero).
  * ca. 70 Flocken mobil, 140 auf dem Desktop. Pausiert bei verstecktem Tab, aus bei „Bewegung reduzieren“.
  */
-export function Snowfall() {
+export function Snowfall({ gold = 'none' }: { gold?: 'none' | 'stars' | 'sparkle' }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const reduced = usePrefersReducedMotion();
 
@@ -39,6 +40,8 @@ export function Snowfall() {
       drift: 8 + Math.random() * 18,
       phase: Math.random() * Math.PI * 2,
       alpha: 0.35 + Math.random() * 0.5,
+      // An besonderen Tagen fällt ein Teil als goldene Sterne bzw. Funken
+      gold: gold !== 'none' && Math.random() < 0.22,
     });
 
     const resize = () => {
@@ -64,6 +67,11 @@ export function Snowfall() {
         f.x += Math.sin(f.phase) * f.drift * dt;
         if (f.y > height + 10 || f.x < -20 || f.x > width + 20) Object.assign(f, makeFlake(false));
         ctx.globalAlpha = f.alpha;
+        if (f.gold) {
+          drawStar(ctx, f.x, f.y, gold === 'stars' ? f.r * 2.6 : f.r * 1.8, f.phase);
+          ctx.fillStyle = '#fffaf0';
+          continue;
+        }
         ctx.beginPath();
         ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
         ctx.fill();
@@ -87,7 +95,7 @@ export function Snowfall() {
       window.removeEventListener('resize', resize);
       document.removeEventListener('visibilitychange', onVisibility);
     };
-  }, [reduced]);
+  }, [reduced, gold]);
 
   if (reduced) return null;
   return (
@@ -97,4 +105,22 @@ export function Snowfall() {
       className="pointer-events-none absolute inset-0 z-10 h-full w-full"
     />
   );
+}
+
+/** Goldener fünfzackiger Stern, dreht sich langsam mit `phase`. */
+function drawStar(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, phase: number) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(phase * 0.6);
+  ctx.fillStyle = '#E8C979';
+  ctx.globalAlpha = Math.min(ctx.globalAlpha + 0.3, 1);
+  ctx.beginPath();
+  for (let i = 0; i < 10; i++) {
+    const rr = i % 2 === 0 ? r : r * 0.45;
+    const a = (i * Math.PI) / 5 - Math.PI / 2;
+    ctx.lineTo(Math.cos(a) * rr, Math.sin(a) * rr);
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
 }

@@ -302,7 +302,7 @@ export async function fetchTicket(token: string): Promise<TicketInfo | null> {
 // ---------------------------------------------------------------------------------------
 // Ticket-Downloads (Edge Function ticket-files)
 // ---------------------------------------------------------------------------------------
-export type TicketFileFormat = 'pdf' | 'apple' | 'google';
+export type TicketFileFormat = 'pdf' | 'ics' | 'apple' | 'google';
 
 /** Direkter Link – öffnet PDF, Apple-Pass oder die Google-Wallet-Seite. Der Token ist das Ticket. */
 export function ticketFileUrl(token: string, format: TicketFileFormat): string {

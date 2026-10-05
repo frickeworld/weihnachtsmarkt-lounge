@@ -3,9 +3,13 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { GlitterBand } from '@/components/GlitterBand';
+import { Countdown } from '@/components/Countdown';
+import { TalerRain } from '@/components/TalerRain';
 import { TicketDownloads } from '@/components/TicketDownloads';
+import taler192 from '@/assets/taler-192.webp';
 import { fetchSuccessInfo, fetchSuccessTicketToken, type SuccessInfo } from '@/lib/api';
 import { formatLongDate } from '@/lib/dates';
+import { ticketDayNote } from '@/lib/specialDays';
 import { useSettings } from '@/lib/settingsContext';
 import { useNoindex } from '@/lib/useNoindex';
 import { DEMO } from '@/lib/demo';
@@ -26,11 +30,13 @@ type View =
  */
 export function BookingSuccessPage() {
   useNoindex();
-  const { contactEmail } = useSettings();
+  const { contactEmail, seasonStart, seasonEnd } = useSettings();
   const [params] = useSearchParams();
   const sessionId = params.get('session_id') ?? '';
   const validSession = sessionId.startsWith('cs_');
   const [view, setView] = useState<View>(validSession ? { kind: 'loading' } : { kind: 'unknown' });
+  // Taler-Regen: startet bei bestätigter Zahlung; ein Tipp auf den Taler lässt es noch einmal regnen.
+  const [rain, setRain] = useState(0);
 
   useEffect(() => {
     document.title = 'Buchung bestätigt – Weihnachtsmarkt-Lounge der Händler';
@@ -47,7 +53,10 @@ export function BookingSuccessPage() {
       if (cancelled) return;
       if (info?.status === 'paid') {
         const token = await fetchSuccessTicketToken(sessionId).catch(() => null);
-        if (!cancelled) setView({ kind: 'paid', info, token });
+        if (!cancelled) {
+          setView({ kind: 'paid', info, token });
+          setRain((n) => n + 1);
+        }
         return;
       }
       if (info?.status === 'cancelled') return setView({ kind: 'conflict', info });
@@ -70,6 +79,7 @@ export function BookingSuccessPage() {
     <>
       <Header home={false} />
       <GlitterBand className="h-3" />
+      <TalerRain play={rain} />
       <main className="relative min-h-[70vh] px-4 pt-6 pb-20 sm:px-6">
         <div className="mx-auto max-w-xl text-center">
           {view.kind === 'loading' && (
@@ -80,6 +90,20 @@ export function BookingSuccessPage() {
 
           {view.kind === 'paid' && (
             <div className="mt-10" role="status">
+              <button
+                type="button"
+                onClick={() => setRain((n) => n + 1)}
+                className="mx-auto mb-5 block rounded-full transition-transform hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold-deep motion-safe:animate-[taler-pop_900ms_ease-out]"
+                aria-label="Weihnachtsmarkt-Taler – noch einmal Taler regnen lassen"
+              >
+                <img
+                  src={taler192}
+                  alt=""
+                  width={96}
+                  height={96}
+                  className="h-24 w-24 drop-shadow-lg"
+                />
+              </button>
               <p className="eyebrow mb-4">Buchung bestätigt</p>
               <h1 className="text-4xl leading-tight font-medium sm:text-5xl">
                 Danke, {view.info.firstName}! Deine Lounge ist gebucht.
@@ -91,9 +115,21 @@ export function BookingSuccessPage() {
                 <p className="mt-1 text-xl">
                   {view.info.startTime}–{view.info.endTime} Uhr
                 </p>
+                {ticketDayNote(view.info.date, seasonStart, seasonEnd) && (
+                  <p className="mt-2 font-semibold text-gold-deep">
+                    {ticketDayNote(view.info.date, seasonStart, seasonEnd)}
+                  </p>
+                )}
                 <div className="mx-auto my-5 h-1 w-12 rounded-full bg-gold" aria-hidden="true" />
                 <p className="text-sm text-ink-soft">Buchungscode</p>
                 <p className="mt-1 font-mono text-lg tracking-wider">{view.info.bookingCode}</p>
+              </div>
+              <div className="mx-auto max-w-md">
+                <Countdown
+                  date={view.info.date}
+                  startTime={view.info.startTime}
+                  endTime={view.info.endTime}
+                />
               </div>
               <p className="mt-8 text-lg text-ink">Dein Ticket ist auf dem Weg in dein Postfach.</p>
               {view.token && (

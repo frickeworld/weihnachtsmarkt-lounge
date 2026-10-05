@@ -20,8 +20,9 @@ export function TicketDownloads({ token }: { token: string }) {
   if (DEMO) {
     return (
       <p className="mt-6 text-sm text-ink-soft">
-        In der Vorschau gibt es keinen PDF-Download. Im Livebetrieb steht hier „Ticket als PDF
-        herunterladen“ und – sobald eingerichtet – die Buttons für Apple und Google Wallet.
+        In der Vorschau gibt es keinen PDF-Download. Im Livebetrieb stehen hier „Ticket als PDF
+        herunterladen“, „In den Kalender eintragen“ und – sobald eingerichtet – die Buttons für
+        Apple und Google Wallet.
       </p>
     );
   }
@@ -45,6 +46,22 @@ export function TicketDownloads({ token }: { token: string }) {
           <path d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14" />
         </svg>
         Ticket als PDF herunterladen
+      </a>
+      <a href={ticketFileUrl(token, 'ics')} className="btn-outline w-full" download>
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 24 24"
+          className="h-5 w-5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <rect x="4" y="5" width="16" height="15" rx="2" />
+          <path d="M8 3v4M16 3v4M4 10h16M12 13v4M10 15h4" />
+        </svg>
+        In den Kalender eintragen
       </a>
       {wallet.apple && (
         <a href={ticketFileUrl(token, 'apple')} className={walletBtn}>

@@ -267,3 +267,30 @@ for (const file of await readdir('assets/sponsoren')) {
     }
   }
 }
+
+// Weihnachtsmarkt-Taler (Quelle: die-haendler-detmold.de) als runde Münze mit transparentem Rand –
+// für den Taler-Regen nach der Buchung und die Tages-Überraschungen.
+{
+  const SRC = 'assets/taler/weihnachtsmarkttaler.jpg';
+  const cx = 955;
+  const cy = 605;
+  const r = 560;
+  const coin = await sharp(SRC)
+    .extract({ left: cx - r, top: cy - r, width: 2 * r, height: 2 * r })
+    .composite([
+      {
+        input: Buffer.from(
+          `<svg width="${2 * r}" height="${2 * r}"><circle cx="${r}" cy="${r}" r="${r}" fill="#fff"/></svg>`,
+        ),
+        blend: 'dest-in',
+      },
+    ])
+    .png()
+    .toBuffer();
+  for (const size of [96, 192]) {
+    await sharp(coin)
+      .resize({ width: size })
+      .webp({ quality: 88, alphaQuality: 90 })
+      .toFile(`src/assets/taler-${size}.webp`);
+  }
+}

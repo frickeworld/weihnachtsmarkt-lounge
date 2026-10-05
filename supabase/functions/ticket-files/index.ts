@@ -1,11 +1,13 @@
 // ticket-files: öffentliche Downloads zum Ticket – nur mit dem geheimen ticket_token (Inhalt des QR-Codes).
 //   GET ?format=info                 → { apple, google } (welche Wallets eingerichtet sind)
 //   GET ?token=…&format=pdf          → PDF-Ticket
+//   GET ?token=…&format=ics          → Kalendereintrag (.ics)
 //   GET ?token=…&format=apple        → Apple-Wallet-Pass (.pkpass)
 //   GET ?token=…&format=google       → Weiterleitung zu „In Google Wallet speichern“
 import { buildPkpass, type PassImages } from '../_shared/applePass.ts';
 import { adminClient } from '../_shared/db.ts';
 import { googleSaveUrl } from '../_shared/googleWallet.ts';
+import { buildIcs } from '../_shared/ics.ts';
 import { corsHeaders, requireEnv } from '../_shared/http.ts';
 import {
   buildTicketPdf,
@@ -82,6 +84,27 @@ Deno.serve(async (req) => {
           ...noStore,
           'Content-Type': 'application/pdf',
           'Content-Disposition': `attachment; filename="Ticket-${b.booking_code}.pdf"`,
+        },
+      });
+    }
+
+    if (format === 'ics') {
+      const ics = buildIcs({
+        uid: `${b.id}@lounge`,
+        date: b.date,
+        startTime: common.startTime,
+        endTime: common.endTime,
+        persons: b.persons,
+        talerCount: common.talerCount,
+        bookingCode: b.booking_code,
+        location: s.lounge_location,
+        ticketUrl: `${siteUrl}/ticket/${b.ticket_token}`,
+      });
+      return new Response(ics, {
+        headers: {
+          ...noStore,
+          'Content-Type': 'text/calendar; charset=utf-8',
+          'Content-Disposition': `attachment; filename="Lounge-${b.booking_code}.ics"`,
         },
       });
     }

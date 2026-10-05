@@ -3,7 +3,10 @@ import { Link, useParams } from 'react-router-dom';
 import { HaendlerLogo } from '@/components/HaendlerLogo';
 import { TicketDownloads } from '@/components/TicketDownloads';
 import { fetchTicket, type TicketInfo } from '@/lib/api';
+import { Countdown } from '@/components/Countdown';
 import { formatLongDate } from '@/lib/dates';
+import { useSettings } from '@/lib/settingsContext';
+import { ticketDayNote } from '@/lib/specialDays';
 import { useNoindex } from '@/lib/useNoindex';
 
 const TOKEN = /^[A-Za-z0-9]{32}$/;
@@ -87,6 +90,8 @@ export function TicketPage() {
 
 function TicketView({ ticket, qr, token }: { ticket: TicketInfo; qr: string; token: string }) {
   const cancelled = ticket.status === 'cancelled';
+  const { seasonStart, seasonEnd } = useSettings();
+  const note = ticketDayNote(ticket.date, seasonStart, seasonEnd);
   const status = cancelled
     ? { label: 'Storniert', className: 'bg-rose-50 text-rose-800 ring-rose-300' }
     : ticket.checkedInAt
@@ -102,12 +107,17 @@ function TicketView({ ticket, qr, token }: { ticket: TicketInfo; qr: string; tok
       <p className="mt-1 text-xl">
         {ticket.startTime}–{ticket.endTime} Uhr
       </p>
+      {note && <p className="mt-2 font-semibold text-gold-deep">{note}</p>}
 
       <span
         className={`mt-4 inline-flex rounded-full px-4 py-1.5 text-sm font-semibold ring-1 ${status.className}`}
       >
         {status.label}
       </span>
+
+      {!cancelled && !ticket.checkedInAt && (
+        <Countdown date={ticket.date} startTime={ticket.startTime} endTime={ticket.endTime} />
+      )}
 
       <div
         className={`mt-6 w-full rounded-3xl border border-line bg-white p-5 shadow-[0_24px_50px_-36px_rgba(36,34,30,0.6)] ${cancelled ? 'opacity-30' : ''}`}

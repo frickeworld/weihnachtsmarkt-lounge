@@ -1,5 +1,6 @@
 // Versand von Ticket- und Erinnerungsmails. Wird von send-ticket und send-reminders genutzt.
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { buildIcs } from './ics.ts';
 import {
   contactAttributes,
   requestNewsletterDoubleOptIn,
@@ -70,6 +71,7 @@ export async function deliverTicket(
       qrImageUrl,
       ticketUrl: `${siteUrl}/ticket/${b.ticket_token}`,
       pdfUrl: ticketFileUrl(supabaseUrl, b.ticket_token, 'pdf'),
+      icsUrl: ticketFileUrl(supabaseUrl, b.ticket_token, 'ics'),
       appleWalletUrl: wallet.apple ? ticketFileUrl(supabaseUrl, b.ticket_token, 'apple') : null,
       googleWalletUrl: wallet.google ? ticketFileUrl(supabaseUrl, b.ticket_token, 'google') : null,
       invoiceUrl: b.stripe_invoice_url,
@@ -82,7 +84,32 @@ export async function deliverTicket(
       subject: mail.subject,
       html: mail.html,
       text: mail.text,
-      attachments: [{ name: `Ticket-${b.booking_code}.pdf`, content: toBase64(pdf) }],
+      attachments: [
+        { name: `Ticket-${b.booking_code}.pdf`, content: toBase64(pdf) },
+        // Kalendereintrag nur bei der Buchungsbestätigung, nicht bei der Erinnerung
+        ...(kind === 'ticket'
+          ? [
+              {
+                name: `Lounge-${b.booking_code}.ics`,
+                content: toBase64(
+                  new TextEncoder().encode(
+                    buildIcs({
+                      uid: `${b.id}@lounge`,
+                      date: b.date,
+                      startTime: common.startTime,
+                      endTime: common.endTime,
+                      persons: b.persons,
+                      talerCount: common.talerCount,
+                      bookingCode: b.booking_code,
+                      location: s.lounge_location,
+                      ticketUrl: `${siteUrl}/ticket/${b.ticket_token}`,
+                    }),
+                  ),
+                ),
+              },
+            ]
+          : []),
+      ],
       tags: [kind === 'reminder' ? 'lounge-erinnerung' : 'lounge-ticket'],
     });
     await log(db, b.id, kind, null);

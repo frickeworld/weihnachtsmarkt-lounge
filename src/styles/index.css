@@ -253,8 +253,44 @@
   animation: sparkle 3.6s ease-in-out infinite;
 }
 
+/* Adventskerzen */
+@keyframes candle-flicker {
+  0%,
+  100% {
+    transform: scale(1, 1);
+    opacity: 1;
+  }
+  40% {
+    transform: scale(0.92, 1.08);
+    opacity: 0.85;
+  }
+  70% {
+    transform: scale(1.05, 0.94);
+  }
+}
+
+.candle-flame {
+  animation: candle-flicker 1.6s ease-in-out infinite;
+}
+
+/* Taler auf der Erfolgsseite: dreht sich einmal ins Bild */
+@keyframes taler-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.4) rotateY(180deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.12) rotateY(-20deg);
+  }
+  100% {
+    transform: scale(1) rotateY(0);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .sparkle,
+  .candle-flame,
   .btn-gold::after {
     animation: none !important;
   }
