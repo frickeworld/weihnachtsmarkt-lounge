@@ -10,12 +10,15 @@ import { formatLongDate, type IsoDate } from '@/lib/dates';
 export function Waitlist({
   bookedDays,
   onFreeNow,
+  openFor,
 }: {
   bookedDays: IsoDate[];
   onFreeNow: (date: IsoDate) => void;
+  /** Direkt geöffnet mit diesem Tag (z. B. aus „Besondere Abende“) */
+  openFor?: IsoDate | null;
 }) {
-  const [open, setOpen] = useState(false);
-  const [date, setDate] = useState<IsoDate | ''>('');
+  const [open, setOpen] = useState(Boolean(openFor));
+  const [date, setDate] = useState<IsoDate | ''>(openFor ?? '');
   const [email, setEmail] = useState('');
   const [consent, setConsent] = useState(false);
   const [website, setWebsite] = useState('');

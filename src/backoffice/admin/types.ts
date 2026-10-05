@@ -125,6 +125,8 @@ export interface SlotSpecial {
   price_cents: number;
   taler_count: number;
   haendler_share_cents: number | null;
+  act: string | null;
+  description: string | null;
 }
 
 export interface AccessRow {

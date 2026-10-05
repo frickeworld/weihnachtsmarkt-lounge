@@ -15,6 +15,7 @@ import { HowItWorks } from '@/sections/HowItWorks';
 import { Market } from '@/sections/Market';
 import { Occasions } from '@/sections/Occasions';
 import { Pricing } from '@/sections/Pricing';
+import { SpecialEvents } from '@/sections/SpecialEvents';
 import { trackPageView } from '@/lib/track';
 
 export function HomePage() {
@@ -46,6 +47,7 @@ export function HomePage() {
         <Gallery />
         <Occasions />
         <Pricing />
+        <SpecialEvents />
         <HowItWorks />
         <Booking />
         <Market />

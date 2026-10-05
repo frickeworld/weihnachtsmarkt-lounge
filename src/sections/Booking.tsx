@@ -3,6 +3,7 @@ import { Reveal } from '@/components/Reveal';
 import { releaseHold } from '@/lib/api';
 import { SectionHeading } from '@/components/SectionHeading';
 import { addDays, formatLongDate, parseIsoDate, todayInBerlin, type IsoDate } from '@/lib/dates';
+import { SELECT_SLOT_EVENT, type SelectSlotDetail } from '@/lib/selectSlot';
 import { useSettings } from '@/lib/settingsContext';
 import { useAvailability } from '@/lib/useAvailability';
 import { usePrefersReducedMotion } from '@/lib/useMediaQuery';
@@ -73,6 +74,8 @@ export function Booking() {
   );
   const [holdReleased, setHoldReleased] = useState(!abortedBookingId);
   const [open, setOpen] = useState(false);
+  const [waitlistFor, setWaitlistFor] = useState<IsoDate | null>(null);
+  const waitlistRef = useRef<HTMLDivElement>(null);
 
   const sectionRef = useRef<HTMLElement>(null);
   const slotsRef = useRef<HTMLDivElement>(null);
@@ -158,6 +161,29 @@ export function Booking() {
     void refreshAndCheck(date, start);
   }
 
+  // Auswahl aus anderen Abschnitten („Besondere Abende“): Monat wechseln, Tag und Zeitfenster setzen.
+  useEffect(() => {
+    const onSelect = (e: Event) => {
+      const { date: d, startTime, waitlist } = (e as CustomEvent<SelectSlotDetail>).detail;
+      setOpen(true);
+      setView(ym(d));
+      setNotice(null);
+      if (waitlist) {
+        setDate(null);
+        setSlotStart(null);
+        setWaitlistFor(d);
+        requestAnimationFrame(() => scrollTo(waitlistRef.current ?? sectionRef.current));
+      } else {
+        setWaitlistFor(null);
+        setDate(d);
+        setSlotStart(startTime ?? null);
+        requestAnimationFrame(() => scrollTo(slotsRef.current ?? sectionRef.current));
+      }
+    };
+    window.addEventListener(SELECT_SLOT_EVENT, onSelect);
+    return () => window.removeEventListener(SELECT_SLOT_EVENT, onSelect);
+  });
+
   const move = (delta: number) => {
     const k = ymKey(view) + delta;
     const year = Math.floor((k - 1) / 12);
@@ -209,14 +235,17 @@ export function Booking() {
               )}
             </div>
             {state === 'ready' && (
-              <Waitlist
-                key={monthStart(view)}
-                bookedDays={bookedDays}
-                onFreeNow={(d) => {
-                  selectDate(d);
-                  setNotice('Gute Nachricht: An diesem Tag ist gerade wieder etwas frei.');
-                }}
-              />
+              <div ref={waitlistRef} className="scroll-mt-24">
+                <Waitlist
+                  key={`${monthStart(view)}-${waitlistFor ?? ''}`}
+                  openFor={waitlistFor && bookedDays.includes(waitlistFor) ? waitlistFor : null}
+                  bookedDays={bookedDays}
+                  onFreeNow={(d) => {
+                    selectDate(d);
+                    setNotice('Gute Nachricht: An diesem Tag ist gerade wieder etwas frei.');
+                  }}
+                />
+              </div>
             )}
             {notice && (
               <p

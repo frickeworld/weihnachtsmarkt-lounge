@@ -80,7 +80,9 @@ export function CalendarPage() {
         .in('status', ['pending', 'paid']),
       c
         .from('slot_specials')
-        .select('date, start_time, title, price_cents, taler_count, haendler_share_cents')
+        .select(
+          'date, start_time, title, price_cents, taler_count, haendler_share_cents, act, description',
+        )
         .gte('date', first)
         .lte('date', last),
     ]);

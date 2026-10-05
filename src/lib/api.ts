@@ -2,7 +2,7 @@ import type { SlotAvailability, SlotStatus } from './availability';
 import type { IsoDate } from './dates';
 import type { PublicSettings } from './settings';
 import { DEMO } from './demo';
-import { DEMO_TICKET_TOKEN, demoAvailability, demoSettings } from './demoApi';
+import { DEMO_TICKET_TOKEN, demoAvailability, demoSettings, demoSpecialEvents } from './demoApi';
 import { env } from './env';
 import { restConfigured, rpc } from './rest';
 
@@ -383,4 +383,47 @@ export async function joinWaitlist(values: {
   } catch {
     return { ok: false, message: GENERIC_ERROR };
   }
+}
+
+export interface SpecialEvent {
+  date: IsoDate;
+  startTime: string;
+  endTime: string;
+  title: string;
+  act: string | null;
+  description: string | null;
+  totalCents: number;
+  talerCount: number;
+  status: 'free' | 'taken';
+}
+
+/** Kommende Sonderveranstaltungen (Partys, Live-Auftritte) für „Besondere Abende“. */
+export async function fetchSpecialEvents(): Promise<SpecialEvent[]> {
+  if (DEMO) return demoSpecialEvents();
+  if (!restConfigured()) return [];
+  const rows =
+    (await rpc<
+      {
+        date: string;
+        start_time: string;
+        end_time: string;
+        title: string;
+        act: string | null;
+        description: string | null;
+        total_cents: number;
+        taler_count: number;
+        status: 'free' | 'taken';
+      }[]
+    >('get_special_events')) ?? [];
+  return rows.map((r) => ({
+    date: r.date,
+    startTime: r.start_time.slice(0, 5),
+    endTime: r.end_time.slice(0, 5),
+    title: r.title,
+    act: r.act,
+    description: r.description,
+    totalCents: r.total_cents,
+    talerCount: r.taler_count,
+    status: r.status,
+  }));
 }

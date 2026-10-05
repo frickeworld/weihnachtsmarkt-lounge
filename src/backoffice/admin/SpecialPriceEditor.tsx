@@ -28,6 +28,8 @@ export function SpecialPriceEditor({
 }) {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState(special?.title ?? '');
+  const [act, setAct] = useState(special?.act ?? '');
+  const [description, setDescription] = useState(special?.description ?? '');
   const [price, setPrice] = useState(special ? centsToEuroInput(special.price_cents) : '');
   const [taler, setTaler] = useState(special ? String(special.taler_count) : '');
   const [share, setShare] = useState(
@@ -62,6 +64,8 @@ export function SpecialPriceEditor({
         price_cents: priceCents,
         taler_count: Number(taler),
         haendler_share_cents: shareCents,
+        act: act.trim() || null,
+        description: description.trim() || null,
       });
     setBusy(false);
     if (e) return setError(errorText(e));
@@ -85,8 +89,9 @@ export function SpecialPriceEditor({
     <div className="mt-2">
       {special && !open && (
         <p className="text-sm">
-          <strong className="text-haendler-red">{special.title}</strong> ·{' '}
-          {formatCents(special.price_cents)} · {special.taler_count} € Freiverzehr · Händler{' '}
+          <strong className="text-haendler-red">{special.title}</strong>
+          {special.act ? ` (${special.act})` : ''} · {formatCents(special.price_cents)} ·{' '}
+          {special.taler_count} € Freiverzehr · Händler{' '}
           {formatCents(
             special.haendler_share_cents ??
               autoHaendlerShare(special.price_cents, feeCents, special.taler_count),
@@ -118,6 +123,24 @@ export function SpecialPriceEditor({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="z. B. Party-Abend"
+            />
+          </label>
+          <label className="block text-sm">
+            <span className="field-label">Zusatz (optional), z. B. „Live: Weidmüller“</span>
+            <input
+              className="field-input"
+              maxLength={80}
+              value={act}
+              onChange={(e) => setAct(e.target.value)}
+            />
+          </label>
+          <label className="block text-sm">
+            <span className="field-label">Infotext für „Besondere Abende“ (optional)</span>
+            <textarea
+              className="field-input min-h-24"
+              maxLength={600}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
             />
           </label>
           <div className="grid grid-cols-3 gap-2">

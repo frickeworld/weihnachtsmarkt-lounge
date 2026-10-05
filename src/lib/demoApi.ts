@@ -1,6 +1,7 @@
 // Beispieldaten für den Vorschau-Modus. Wird nur bei VITE_DEMO=true eingebunden.
 import type { SlotAvailability, SlotStatus } from './availability';
 import { addDays, isoWeekday, parseIsoDate, todayInBerlin, type IsoDate } from './dates';
+import type { SpecialEvent } from './api';
 import { PUBLIC_SETTINGS_FALLBACK, type PublicSettings } from './settings';
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -9,6 +10,28 @@ export async function demoSettings(): Promise<PublicSettings> {
   await wait(150);
   return PUBLIC_SETTINGS_FALLBACK;
 }
+
+/** Beispiel-Sonderveranstaltungen der Vorschau (Tag im Monat, Index des Zeitfensters). */
+const DEMO_SPECIALS = [
+  {
+    day: 12,
+    index: 2,
+    title: 'Party-Abend',
+    act: 'DJ [NAME]',
+    description: '[PLATZHALTER: Text zur Party, z. B. Musik, Dresscode, Besonderheiten]',
+    totalCents: 24900,
+    talerCount: 125,
+  },
+  {
+    day: 22,
+    index: 2,
+    title: 'Live-Abend',
+    act: 'Live: [KÜNSTLER]',
+    description: '[PLATZHALTER: Text zum Auftritt]',
+    totalCents: 22900,
+    talerCount: 110,
+  },
+];
 
 export async function demoAvailability(from: IsoDate, to: IsoDate): Promise<SlotAvailability[]> {
   await wait(250);
@@ -25,16 +48,16 @@ export async function demoAvailability(from: IsoDate, to: IsoDate): Promise<Slot
       else if (day === 30) status = 'closed';
       else if (day % 6 === 4) status = 'taken';
       else if (day % 5 === 2 && i === 1) status = 'taken';
-      // Beispiel für einen Sondertermin in der Vorschau
-      const special = day === 12 && i === 2;
+      // Beispiele für Sondertermine in der Vorschau
+      const special = DEMO_SPECIALS.find((x) => x.day === day && x.index === i);
       out.push({
         date: d,
         startTime,
         endTime,
         status,
-        totalCents: special ? 24900 : totalCents,
-        talerCount: special ? 125 : talerCount,
-        specialTitle: special ? 'Party-Abend' : null,
+        totalCents: special?.totalCents ?? totalCents,
+        talerCount: special?.talerCount ?? talerCount,
+        specialTitle: special?.title ?? null,
         label,
       });
     });
@@ -43,3 +66,24 @@ export async function demoAvailability(from: IsoDate, to: IsoDate): Promise<Slot
 }
 
 export const DEMO_TICKET_TOKEN = 'VorschauTicket000000000000000000';
+
+export async function demoSpecialEvents(): Promise<SpecialEvent[]> {
+  const s = PUBLIC_SETTINGS_FALLBACK;
+  const slots = await demoAvailability(s.seasonStart, s.seasonEnd);
+  return slots
+    .filter((x) => x.specialTitle && (x.status === 'free' || x.status === 'taken'))
+    .map((x) => {
+      const d = DEMO_SPECIALS.find((sp) => sp.title === x.specialTitle)!;
+      return {
+        date: x.date,
+        startTime: x.startTime,
+        endTime: x.endTime,
+        title: d.title,
+        act: d.act,
+        description: d.description,
+        totalCents: d.totalCents,
+        talerCount: d.talerCount,
+        status: x.status as 'free' | 'taken',
+      };
+    });
+}

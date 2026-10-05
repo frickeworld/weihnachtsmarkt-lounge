@@ -220,3 +220,52 @@ test.describe('Erfolgsseite', () => {
     });
   });
 });
+
+test.describe('Besondere Abende', () => {
+  test('ohne Sonderveranstaltungen kein Abschnitt', async ({ page }) => {
+    await mockSupabase(page);
+    await page.goto('/');
+    await expect(page.locator('#preis')).toBeVisible();
+    await expect(page.locator('#besondere-abende')).toHaveCount(0);
+  });
+
+  test('Party buchen und ausgebuchten Live-Abend auf die Warteliste', async ({ page }) => {
+    let monday = addDays(MOCK_SETTINGS.season_start, 7);
+    while (new Date(`${monday}T00:00:00Z`).getUTCDay() !== 1) monday = addDays(monday, 1);
+    const tuesday = addDays(monday, 1);
+    const event = (date: string, status: string, title: string) => ({
+      date,
+      start_time: '19:00:00',
+      end_time: '21:00:00',
+      title,
+      act: title === 'Live-Abend' ? 'Live: Weidmüller' : null,
+      description: 'Ein besonderer Abend.',
+      total_cents: 24900,
+      taler_count: 125,
+      status,
+    });
+    await mockSupabase(page, {
+      specials: {
+        [`${monday} 19:00`]: { title: 'Party-Abend', total_cents: 24900, taler_count: 125 },
+        [`${tuesday} 19:00`]: { title: 'Live-Abend', total_cents: 24900, taler_count: 125 },
+      },
+      overrides: Object.fromEntries(
+        ['14:30', '16:45', '19:00'].map((t) => [`${tuesday} ${t}`, 'taken']),
+      ),
+      specialEvents: [event(monday, 'free', 'Party-Abend'), event(tuesday, 'taken', 'Live-Abend')],
+    });
+    await page.goto('/');
+    const section = page.locator('#besondere-abende');
+    await expect(section.getByRole('heading', { name: 'Besondere Abende' })).toBeVisible();
+    await expect(section).toContainText('Live: Weidmüller');
+    await expect(section).toContainText('inkl. 125 € Freiverzehr');
+
+    await section.getByRole('link', { name: 'Lounge buchen' }).click();
+    await expect(
+      page.getByRole('button', { name: /Zahlungspflichtig buchen – 249,00\s€/ }),
+    ).toBeVisible();
+
+    await section.getByRole('link', { name: 'Auf die Warteliste' }).click();
+    await expect(page.getByLabel('Wunschtag')).toHaveValue(tuesday);
+  });
+});
