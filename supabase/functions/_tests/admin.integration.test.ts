@@ -106,7 +106,7 @@ Deno.test({
         const r = await call({
           action: 'manual_booking',
           date: '2026-12-08',
-          startTime: '17:00',
+          startTime: '14:30',
           paymentMethod: 'bar',
           includeInSettlement: true,
           form,
@@ -122,7 +122,7 @@ Deno.test({
         assertEquals(b!.status, 'paid');
         assertEquals(b!.source, 'manual');
         assertEquals(b!.payment_method, 'bar');
-        assertEquals(b!.amount_total_cents, 17850);
+        assertEquals(b!.amount_total_cents, 9900); // Dienstag 14:30: 99 €
         assertEquals(b!.created_by, userId);
         const { data: log } = await db
           .from('email_log')
@@ -136,7 +136,7 @@ Deno.test({
         const r = await call({
           action: 'manual_booking',
           date: '2026-12-08',
-          startTime: '17:00',
+          startTime: '14:30',
           paymentMethod: 'bar',
           includeInSettlement: true,
           override: true,

@@ -11,8 +11,10 @@ geht die Seite unter der echten Domain online.
       § 18 MStV, Gültigkeit der Residenztaler, Haftung, Streitbeilegung). Danach den Vermerk
       „Entwurf – noch nicht freigegeben“ entfernen (`src/pages/legal/LegalLayout.tsx`) und
       Stand-Datum setzen (`supabase/functions/_shared/legal.ts`).
-- [ ] **Preisanzeige** „175 € zzgl. 3,50 € Vorverkaufsgebühr“ vom Anwalt freigeben lassen
-      (PAngV, Gesamtpreisangabe). Falls nicht: Werbepreis auf 178,50 € umstellen.
+- [ ] **Preisstaffel** (99/149/199 € Endpreise inkl. 3,50 € Gebühr, „ab 99 €“) vom Anwalt
+      prüfen lassen (PAngV: „ab“-Preis, Gesamtpreis je Zeitfenster vor der Buchung).
+- [ ] **Sonderveranstaltungen** (Partys 22./23./29./30., Weidmüller/Stegelmann) im Admin-Kalender
+      mit Titel, Preis und Freiverzehr anlegen, bevor die ersten Buchungen eingehen.
 - [ ] **Umsatzsteuer**: Ausweis von Lounge-Preis, Gebühr und Residenztalern mit dem
       Steuerberater klären (Stripe-Rechnungen, AGB § 3).
 - [ ] **Bildrechte**: Foto Stadt Detmold, Gold-Glitzer-Textur und Markt-Schriftzug von
@@ -40,7 +42,7 @@ geht die Seite unter der echten Domain online.
 
 ## C. Daten und Einstellungen
 
-- [ ] Im Admin unter **Einstellungen**: Saison, Preise, Händler-Anteil, Taler, Buchungsschluss,
+- [ ] Im Admin unter **Einstellungen**: Saison, Preisstaffel je Zeitfenster, Buchungsschluss,
       Kontakt-E-Mail, Treffpunkt. Zeitfenster pro Wochentag prüfen.
 - [ ] Im **Kalender** Schließtage und gesperrte Zeitfenster eintragen.
 - [ ] **Zugänge**: Admins mit 2FA, Händler-Zugänge einladen (E-Mail-Adressen von den Händlern).
@@ -82,7 +84,7 @@ npm run build
       am Lounge-Standort.
 - [ ] Händler-Zugang: Übersicht, Buchungen, Abrechnung (PDF/CSV).
 - [ ] Lighthouse mobil ≥ 85 (Performance, Barrierefreiheit, Best Practices, SEO).
-- [ ] Rich-Results-Test von Google für die Startseite (Produkt mit Preis 178,50 €).
+- [ ] Rich-Results-Test von Google für die Startseite (Produkt mit Preisspanne 99–199 €).
 
 ## F. Nach der Saison
 

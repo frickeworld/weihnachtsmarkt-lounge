@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import {
+  addDays,
   FAKE_STRIPE_URL,
   MOCK_SETTINGS,
   mockSupabase,
@@ -17,7 +18,7 @@ async function fillAndSubmit(page: Page, extra?: (p: Page) => Promise<void>) {
   await page.getByLabel('Personenzahl').selectOption('8');
   if (extra) await extra(page);
   await page.getByLabel(/Ich akzeptiere die/).check();
-  await page.getByRole('button', { name: /Zahlungspflichtig buchen – 178,50 €/ }).click();
+  await page.getByRole('button', { name: /Zahlungspflichtig buchen – \d+,\d\d €/ }).click();
 }
 
 test.describe('Checkout (Phase 3)', () => {
@@ -32,6 +33,67 @@ test.describe('Checkout (Phase 3)', () => {
       form: { firstName: 'Anna', persons: 8 },
     });
     expect(JSON.stringify(req)).not.toMatch(/price|amount|cents/i);
+  });
+
+  test('Preis je Zeitfenster und Sonderveranstaltung in der Zusammenfassung', async ({ page }) => {
+    // Montag in der Saison: Nachmittag 99 €, abends Sonderpreis
+    let monday = MOCK_SETTINGS.season_start;
+    while (new Date(`${monday}T00:00:00Z`).getUTCDay() !== 1) monday = addDays(monday, 1);
+    await mockSupabase(page, {
+      specials: {
+        [`${monday} 19:00`]: { title: 'Party-Abend', total_cents: 24900, taler_count: 125 },
+      },
+    });
+    await page.goto('/#buchen');
+    const label = new Intl.DateTimeFormat('de-DE', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      timeZone: 'UTC',
+    }).format(new Date(`${monday}T00:00:00Z`));
+    const day = page.getByRole('button', { name: new RegExp(`^${label}`) });
+    // Zum Monat des Termins blättern (der Kalender startet je nach Datum in einem anderen Monat)
+    const months = [
+      'Januar',
+      'Februar',
+      'März',
+      'April',
+      'Mai',
+      'Juni',
+      'Juli',
+      'August',
+      'September',
+      'Oktober',
+      'November',
+      'Dezember',
+    ];
+    const heading = page.locator('#buchen h3[aria-live]');
+    const target = Number(monday.slice(0, 4)) * 12 + Number(monday.slice(5, 7)) - 1;
+    for (let i = 0; i < 6; i++) {
+      await expect(page.locator('#buchen table button:not([disabled])').first()).toBeVisible();
+      const [name, year] = (await heading.innerText()).trim().split(' ');
+      const shown = Number(year) * 12 + months.indexOf(name);
+      if (shown === target) break;
+      await page
+        .getByRole('button', { name: shown < target ? 'Nächster Monat' : 'Vorheriger Monat' })
+        .click();
+      await expect(heading).not.toHaveText(`${name} ${year}`);
+    }
+    await day.click();
+    const slots = page.getByRole('group', { name: 'Zeitfenster' }).locator('button');
+    await expect(slots.nth(0)).toContainText('99 €');
+    await expect(slots.nth(0)).toContainText('50 € Freiverzehr');
+    await expect(slots.nth(2)).toContainText('Party-Abend');
+    await slots.nth(2).click();
+    await expect(page.locator('#buchen')).toContainText('Sonderveranstaltung');
+    await expect(
+      page.getByRole('button', { name: /Zahlungspflichtig buchen – 249,00\s€/ }),
+    ).toBeVisible();
+    await slots.nth(0).click();
+    await expect(
+      page.getByRole('button', { name: /Zahlungspflichtig buchen – 99,00\s€/ }),
+    ).toBeVisible();
   });
 
   test('Zeitfenster gerade vergeben (409): Hinweis, Formular weg', async ({ page }) => {

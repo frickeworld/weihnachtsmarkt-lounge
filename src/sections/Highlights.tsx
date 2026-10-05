@@ -1,5 +1,6 @@
 import { Reveal } from '@/components/Reveal';
 import { formatCents } from '@/lib/money';
+import { maxTalerCount, minPriceCents } from '@/lib/settings';
 import { useSettings } from '@/lib/settingsContext';
 
 /** Die Eckdaten in großen Zahlen – direkt unter dem Hero. */
@@ -8,11 +9,15 @@ export function Highlights() {
   const euro = (cents: number) => formatCents(cents).replace(/,00\s?€$/, ' €');
   const items = [
     {
-      value: euro(s.priceCents),
+      value: `ab ${euro(minPriceCents(s))}`,
       label: 'pro Lounge',
-      note: `zzgl. ${formatCents(s.feeCents)} Vorverkaufsgebühr`,
+      note: `inkl. ${formatCents(s.feeCents)} Vorverkaufsgebühr`,
     },
-    { value: `${s.talerCount} €`, label: 'Freiverzehr inklusive', note: 'in Residenztalern' },
+    {
+      value: `bis ${maxTalerCount(s)} €`,
+      label: 'Freiverzehr inklusive',
+      note: 'in Residenztalern',
+    },
     { value: String(s.maxPersons), label: 'Personen', note: 'Platz für deine Runde' },
     { value: '2 Std.', label: 'exklusiv', note: 'nur für euch' },
   ];

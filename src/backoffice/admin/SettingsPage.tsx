@@ -3,8 +3,9 @@ import { formatCents } from '@/lib/money';
 import { requireClient } from '../authClient';
 import { errorText } from '../errors';
 import { ErrorBox, Loading, PageHeader, Panel, SuccessBox, WarnBox, smallBtn } from '../ui';
-import { centsToEuroInput, hhmm, parseEuroToCents } from './format';
-import type { AdminSettings, SlotTemplate } from './types';
+import { centsToEuroInput, parseEuroToCents } from './format';
+import { SlotTemplatesPanel } from './SlotTemplatesPanel';
+import type { AdminSettings } from './types';
 import { unwrap, useLoad } from './useLoad';
 
 const SETTINGS_COLUMNS =
@@ -26,7 +27,7 @@ export function SettingsPage() {
       <div className="grid gap-6 xl:grid-cols-2">
         {s.data && <SettingsForm initial={s.data} onSaved={s.reload} />}
         <div className="space-y-6">
-          <SlotTemplatesPanel />
+          <SlotTemplatesPanel feeCents={s.data?.fee_cents ?? 350} />
           <ScannerPinPanel />
         </div>
       </div>
@@ -170,11 +171,11 @@ function SettingsForm({ initial, onSaved }: { initial: AdminSettings; onSaved: (
         <div className="grid gap-4 sm:grid-cols-2">
           {input('season_start', 'Saisonstart', { type: 'date' })}
           {input('season_end', 'Saisonende', { type: 'date' })}
-          {input('price', 'Lounge-Preis', { suffix: '€' })}
-          {input('fee', 'Vorverkaufsgebühr', { suffix: '€' })}
-          {input('haendler', 'Anteil Händler je Buchung', { suffix: '€' })}
-          {input('taler_count', 'Anzahl Residenztaler', { suffix: 'Stk.' })}
-          {input('taler', 'Wert der Taler', { suffix: '€' })}
+          {input('price', 'Standard: Lounge-Preis ohne Gebühr', { suffix: '€' })}
+          {input('fee', 'Vorverkaufsgebühr (in jedem Preis enthalten)', { suffix: '€' })}
+          {input('haendler', 'Standard: Anteil Händler', { suffix: '€' })}
+          {input('taler_count', 'Standard: Anzahl Residenztaler', { suffix: 'Stk.' })}
+          {input('taler', 'Standard: Wert der Taler', { suffix: '€' })}
           {input('max_persons', 'Max. Personen', { suffix: 'Pers.' })}
           {input('cutoff', 'Online-Buchungsschluss vor Beginn', { suffix: 'Min.' })}
           {input('hold', 'Reservierung beim Checkout', { suffix: 'Min.' })}
@@ -183,7 +184,11 @@ function SettingsForm({ initial, onSaved }: { initial: AdminSettings; onSaved: (
         </div>
         {input('lounge_location', 'Treffpunkt (steht im Ticket)')}
         <p className="text-sm text-ink-soft">
-          Gesamtpreis für Gäste:{' '}
+          Die Standardwerte gelten nur für Zeitfenster ohne eigenen Preis. Die Preisstaffel steht
+          unter „Zeitfenster und Preise“, Sonderpreise im Kalender.
+        </p>
+        <p className="text-sm text-ink-soft">
+          Standard-Gesamtpreis für Gäste:{' '}
           <strong className="text-ink">
             {price !== null && fee !== null ? formatCents(price + fee) : '–'}
           </strong>
@@ -199,134 +204,6 @@ function SettingsForm({ initial, onSaved }: { initial: AdminSettings; onSaved: (
           {busy ? 'Speichern …' : 'Einstellungen speichern'}
         </button>
       </form>
-    </Panel>
-  );
-}
-
-const DAY_NAMES = [
-  '',
-  'Montag',
-  'Dienstag',
-  'Mittwoch',
-  'Donnerstag',
-  'Freitag',
-  'Samstag',
-  'Sonntag',
-];
-
-function SlotTemplatesPanel() {
-  const t = useLoad(
-    async () =>
-      unwrap(
-        await requireClient()
-          .from('slot_templates')
-          .select('id, weekday, start_time, end_time, active')
-          .order('weekday')
-          .order('start_time'),
-      ) as SlotTemplate[],
-    [],
-  );
-  const [add, setAdd] = useState({ weekday: '1', start: '', end: '' });
-  const [error, setError] = useState<string | null>(null);
-
-  const run = async (p: PromiseLike<{ error: unknown }>) => {
-    setError(null);
-    const { error: e } = await p;
-    if (e) setError(errorText(e));
-    t.reload();
-  };
-
-  return (
-    <Panel title="Zeitfenster pro Wochentag">
-      <p className="mb-4 text-sm text-ink-soft">
-        Gilt für alle Tage der Saison. Einzelne Tage sperrst du im Kalender. Bereits gebuchte
-        Termine bleiben unverändert.
-      </p>
-      {t.loading && !t.data && <Loading />}
-      {t.data && (
-        <ul className="divide-y divide-line text-sm">
-          {t.data.map((s) => (
-            <li key={s.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
-              <span className={s.active ? '' : 'text-ink-soft line-through'}>
-                <span className="inline-block w-24 font-semibold">{DAY_NAMES[s.weekday]}</span>
-                <span className="tabular-nums">
-                  {hhmm(s.start_time)}–{hhmm(s.end_time)}
-                </span>
-              </span>
-              <span className="flex gap-2">
-                <button
-                  type="button"
-                  className={smallBtn}
-                  onClick={() =>
-                    void run(
-                      requireClient()
-                        .from('slot_templates')
-                        .update({ active: !s.active })
-                        .eq('id', s.id),
-                    )
-                  }
-                >
-                  {s.active ? 'Deaktivieren' : 'Aktivieren'}
-                </button>
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
-      <form
-        className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:items-end"
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (!add.start || !add.end || add.start >= add.end)
-            return setError('Bitte Beginn vor Ende angeben.');
-          void run(
-            requireClient()
-              .from('slot_templates')
-              .insert({ weekday: Number(add.weekday), start_time: add.start, end_time: add.end }),
-          ).then(() => setAdd((a) => ({ ...a, start: '', end: '' })));
-        }}
-      >
-        <label className="col-span-2 sm:col-span-1">
-          <span className="field-label">Wochentag</span>
-          <select
-            className="field-input"
-            value={add.weekday}
-            onChange={(e) => setAdd((a) => ({ ...a, weekday: e.target.value }))}
-          >
-            {DAY_NAMES.slice(1).map((n, i) => (
-              <option key={n} value={i + 1}>
-                {n}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          <span className="field-label">Beginn</span>
-          <input
-            type="time"
-            className="field-input"
-            value={add.start}
-            onChange={(e) => setAdd((a) => ({ ...a, start: e.target.value }))}
-          />
-        </label>
-        <label>
-          <span className="field-label">Ende</span>
-          <input
-            type="time"
-            className="field-input"
-            value={add.end}
-            onChange={(e) => setAdd((a) => ({ ...a, end: e.target.value }))}
-          />
-        </label>
-        <button type="submit" className={`${smallBtn} col-span-2 sm:col-span-1`}>
-          Hinzufügen
-        </button>
-      </form>
-      {error && (
-        <div className="mt-3">
-          <ErrorBox>{error}</ErrorBox>
-        </div>
-      )}
     </Panel>
   );
 }

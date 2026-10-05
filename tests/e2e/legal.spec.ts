@@ -16,10 +16,20 @@ for (const [path, heading, must] of [
   });
 }
 
-test('AGB nennen Preise aus den Einstellungen', async ({ page }) => {
+test('AGB nennen die Preisstaffel aus der Datenbank', async ({ page }) => {
   await mockSupabase(page);
   await page.goto('/agb');
-  await expect(page.getByText(/insgesamt 178,50\s€ je Buchung/)).toBeVisible();
+  await expect(
+    page.getByText(/Endpreise je Lounge und enthalten eine Vorverkaufsgebühr von 3,50\s€/),
+  ).toBeVisible();
+  await expect(
+    page.getByText(
+      /Montag bis Donnerstag, Nachmittag \(14:30–16:30 Uhr\): 99,00\s€ inkl\. 50 € Freiverzehr/,
+    ),
+  ).toBeVisible();
+  await expect(
+    page.getByText(/Freitag und Samstag, Abend .*199,00\s€ inkl\. 100 € Freiverzehr/),
+  ).toBeVisible();
 });
 
 test('Fehlerseite, wenn ein Seitenteil nach einem Update fehlt', async ({ page }) => {
@@ -30,11 +40,16 @@ test('Fehlerseite, wenn ein Seitenteil nach einem Update fehlt', async ({ page }
   await expect(page.getByRole('button', { name: 'Seite neu laden' })).toBeVisible();
 });
 
-test('Startseite: strukturierte Daten mit Gesamtpreis', async ({ page }) => {
+test('Startseite: strukturierte Daten mit Preisspanne', async ({ page }) => {
   await mockSupabase(page);
   await page.goto('/');
   const json = JSON.parse(
     (await page.locator('script[type="application/ld+json"]').textContent())!,
   );
-  expect(json.offers).toMatchObject({ price: '178.50', priceCurrency: 'EUR' });
+  expect(json.offers).toMatchObject({
+    '@type': 'AggregateOffer',
+    lowPrice: '99.00',
+    highPrice: '199.00',
+    priceCurrency: 'EUR',
+  });
 });

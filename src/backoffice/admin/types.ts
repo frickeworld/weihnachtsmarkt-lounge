@@ -110,6 +110,21 @@ export interface SlotTemplate {
   start_time: string;
   end_time: string;
   active: boolean;
+  /** Endpreis inkl. Vorverkaufsgebühr; null = Standardpreis aus den Einstellungen */
+  price_cents: number | null;
+  taler_count: number | null;
+  /** null = automatisch (Freiverzehr + Hälfte des Rests) */
+  haendler_share_cents: number | null;
+  label: string | null;
+}
+
+export interface SlotSpecial {
+  date: string;
+  start_time: string;
+  title: string;
+  price_cents: number;
+  taler_count: number;
+  haendler_share_cents: number | null;
 }
 
 export interface AccessRow {

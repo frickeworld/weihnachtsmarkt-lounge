@@ -84,7 +84,7 @@ const sessionEvent = (
       metadata: { booking_id: bookingId },
       client_reference_id: bookingId,
       payment_intent: 'pi_integration',
-      amount_total: 17850,
+      amount_total: 9900,
       invoice: null,
     },
   },
@@ -116,15 +116,16 @@ Deno.test({
     let sessionId = '';
 
     await t.step('create-checkout legt pending-Buchung mit Server-Preisen an', async () => {
-      const r = await post(FN.checkout, { date: day, startTime: '17:00', price_cents: 1, form });
+      const r = await post(FN.checkout, { date: day, startTime: '14:30', price_cents: 1, form });
       assertEquals(r.status, 200, JSON.stringify(r.body));
       assertMatch(r.body.url, /^https:\/\/checkout\.stripe\.com\//);
       bookingId = r.body.bookingId;
       const b = await booking(bookingId);
       assertEquals(b.status, 'pending');
-      assertEquals(b.price_cents, 17500);
-      assertEquals(b.amount_total_cents, 17850);
-      assertEquals(b.haendler_share_cents, 13750);
+      assertEquals(b.price_cents, 9550); // 99 € Nachmittag (Mo–Do) − 3,50 € Gebühr
+      assertEquals(b.amount_total_cents, 9900);
+      assertEquals(b.haendler_share_cents, 7275); // 50 € + (99 − 3,50 − 50) / 2
+      assertEquals(b.taler_cents, 5000);
       assert(b.stripe_checkout_session_id);
       assert(b.terms_accepted_at);
       sessionId = b.stripe_checkout_session_id as string;
@@ -142,7 +143,7 @@ Deno.test({
     });
 
     await t.step('zweite Buchung desselben Zeitfensters → 409', async () => {
-      const r = await post(FN.checkout, { date: day, startTime: '17:00', form });
+      const r = await post(FN.checkout, { date: day, startTime: '14:30', form });
       assertEquals(r.status, 409);
     });
 

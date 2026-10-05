@@ -1,17 +1,21 @@
 import { describe, expect, it } from 'vitest';
 import { buildProductJsonLd } from './structuredData';
 
-describe('schema.org Product/Offer', () => {
-  it('Gesamtpreis 178,50 EUR aus den Einstellungen', () => {
+describe('schema.org Product/AggregateOffer', () => {
+  it('Preisspanne 99–199 EUR aus der Preisstaffel', () => {
     const j = buildProductJsonLd({
       siteUrl: 'https://lounge.example/',
-      totalCents: 17850,
-      talerCount: 100,
+      lowCents: 9900,
+      highCents: 19900,
+      offerCount: 21,
+      maxTaler: 100,
       maxPersons: 10,
       seasonEnd: '2026-12-23',
     });
     expect(j.offers).toMatchObject({
-      price: '178.50',
+      '@type': 'AggregateOffer',
+      lowPrice: '99.00',
+      highPrice: '199.00',
       priceCurrency: 'EUR',
       url: 'https://lounge.example/#buchen',
     });

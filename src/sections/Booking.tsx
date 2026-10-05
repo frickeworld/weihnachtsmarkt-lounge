@@ -219,6 +219,9 @@ export function Booking() {
                     date={date}
                     startTime={slot.startTime}
                     endTime={slot.endTime}
+                    totalCents={slot.totalCents}
+                    talerCount={slot.talerCount}
+                    specialTitle={slot.specialTitle}
                     onSlotUnavailable={(message) => {
                       setSlotStart(null);
                       setNotice(message);

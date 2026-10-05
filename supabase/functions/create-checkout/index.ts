@@ -174,7 +174,7 @@ Deno.serve(async (req) => {
       price_data: {
         currency: 'eur',
         unit_amount: booking.taler_cents,
-        product_data: { name: `Freiverzehr: ${settings.taler_count} Residenztaler` },
+        product_data: { name: `Freiverzehr: ${booking.taler_cents / 100} Residenztaler` },
       },
     },
     {

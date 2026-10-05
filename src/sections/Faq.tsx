@@ -1,15 +1,22 @@
 import { IconChevron } from '@/components/Icons';
 import { Reveal } from '@/components/Reveal';
 import { SectionHeading } from '@/components/SectionHeading';
+import { talerLevels } from '@/lib/settings';
 import { useSettings } from '@/lib/settingsContext';
 import type { ReactNode } from 'react';
 
 export function Faq() {
-  const { talerCount, maxPersons, contactEmail } = useSettings();
+  const s = useSettings();
+  const { maxPersons, contactEmail } = s;
+  const levels = talerLevels(s);
+  const levelText =
+    levels.length > 1
+      ? `${levels.slice(0, -1).join(', ')} oder ${levels.at(-1)}`
+      : String(levels[0]);
   const items: { q: string; a: ReactNode }[] = [
     {
       q: 'Wie funktionieren die Residenztaler?',
-      a: `Beim Einlass erhältst du ${talerCount} Residenztaler im Wert von je 1 €. Du kannst sie an den Ständen des Weihnachtsmarkts im Schlosspark einlösen – pro gekauftem Artikel einen Taler.`,
+      a: `Beim Einlass erhältst du je nach Zeitfenster ${levelText} Residenztaler im Wert von je 1 €. Du kannst sie an den Ständen des Weihnachtsmarkts im Schlosspark einlösen – pro gekauftem Artikel einen Taler.`,
     },
     {
       q: 'Kann ich meine Buchung stornieren?',

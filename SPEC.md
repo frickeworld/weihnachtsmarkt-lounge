@@ -6,37 +6,60 @@ Stand: 3. Okt. 2026 · Verantwortlich: Louis Fricke · Projektregeln: `CLAUDE.md
 
 ## 1. Überblick
 
-| Thema                    | Festlegung                                                                                                |
-| ------------------------ | --------------------------------------------------------------------------------------------------------- |
-| Produkt                  | Überdachte Lounge, Weihnachtsmarkt im Schlosspark Detmold, bis 10 Personen, 2 h exklusiv                  |
-| Preis                    | 175,00 € + 3,50 € Vorverkaufsgebühr = 178,50 € (Anzeige: groß 178,50 €, „inkl. 3,50 € Vorverkaufsgebühr“) |
-| Zeitfenster              | Mo–Fr 17:00–19:00, 19:00–21:00 · Sa–So 17:30–19:30, 19:30–21:30 (Europe/Berlin)                           |
-| Buchungsschluss online   | 60 min vor Beginn (`settings.booking_cutoff_minutes`)                                                     |
-| Reservierung im Checkout | 30 min (`settings.hold_minutes`)                                                                          |
-| Stornierung              | Keine durch Gäste. Admin kann stornieren, Erstattung manuell in Stripe                                    |
-| Zahlung                  | Stripe Checkout (MF Coaching & Promotion GmbH): Karte, Apple Pay, Google Pay, PayPal                      |
-| Rabattcodes              | Keine                                                                                                     |
-| Rechnung                 | Automatisch über Stripe bei Firmenname oder Rechnungswunsch, optional USt-ID                              |
-| Ticket                   | Ein QR-Code pro Buchung, Mail mit PDF-Anhang direkt nach Zahlung, Erinnerung am Buchungstag 10:00 Uhr     |
-| Übertragbarkeit          | Ja, ohne Namensprüfung                                                                                    |
-| Team-Benachrichtigung    | Keine Mail (Admin + Scanner-Liste „Heute“)                                                                |
-| Newsletter               | Freiwillige Checkbox + Brevo-Double-Opt-in                                                                |
-| Tracking                 | Cookielos: page_view, book_click, Buchungen                                                               |
-| Zugänge                  | studio_admin (2FA Pflicht), haendler (2FA optional), Scanner (PIN)                                        |
-| Backend                  | Ein Supabase-Projekt (Frankfurt) für Test und Live                                                        |
-| Hosting                  | Vorschau Cloudflare Pages · Live Mittwald (Domain offen)                                                  |
-| Datenhaltung             | Anonymisierung der Kontaktdaten zum 31. März nach der Saison                                              |
+| Thema                    | Festlegung                                                                                            |
+| ------------------------ | ----------------------------------------------------------------------------------------------------- |
+| Produkt                  | Überdachte Lounge, Weihnachtsmarkt im Schlosspark Detmold, bis 10 Personen, 2 h exklusiv              |
+| Preis                    | Preisstaffel je Wochentag/Zeitfenster, Endpreise inkl. 3,50 € Gebühr: 99 € / 149 € / 199 € (siehe 1a) |
+| Zeitfenster              | Mo–Do + So 14:30, 16:45, 19:00 · Fr–Sa 15:30, 17:45, 20:00, je 2 h (Europe/Berlin)                    |
+| Buchungsschluss online   | 60 min vor Beginn (`settings.booking_cutoff_minutes`)                                                 |
+| Reservierung im Checkout | 30 min (`settings.hold_minutes`)                                                                      |
+| Stornierung              | Keine durch Gäste. Admin kann stornieren, Erstattung manuell in Stripe                                |
+| Zahlung                  | Stripe Checkout (MF Coaching & Promotion GmbH): Karte, Apple Pay, Google Pay, PayPal                  |
+| Rabattcodes              | Keine                                                                                                 |
+| Rechnung                 | Automatisch über Stripe bei Firmenname oder Rechnungswunsch, optional USt-ID                          |
+| Ticket                   | Ein QR-Code pro Buchung, Mail mit PDF-Anhang direkt nach Zahlung, Erinnerung am Buchungstag 10:00 Uhr |
+| Übertragbarkeit          | Ja, ohne Namensprüfung                                                                                |
+| Team-Benachrichtigung    | Keine Mail (Admin + Scanner-Liste „Heute“)                                                            |
+| Newsletter               | Freiwillige Checkbox + Brevo-Double-Opt-in                                                            |
+| Tracking                 | Cookielos: page_view, book_click, Buchungen                                                           |
+| Zugänge                  | studio_admin (2FA Pflicht), haendler (2FA optional), Scanner (PIN)                                    |
+| Backend                  | Ein Supabase-Projekt (Frankfurt) für Test und Live                                                    |
+| Hosting                  | Vorschau Cloudflare Pages · Live Mittwald (Domain offen)                                              |
+| Datenhaltung             | Anonymisierung der Kontaktdaten zum 31. März nach der Saison                                          |
 
-### Geldverteilung pro Buchung
+### 1a. Preisstaffel (Änderung 05.10.2026, Vorschlag Oliver, freigegeben von Louis)
+
+Endpreise inkl. 3,50 € Vorverkaufsgebühr (die Gebühr geht an Studio F). Gepflegt in `slot_templates`
+(`price_cents`, `taler_count`, optional `haendler_share_cents`, `label`), im Admin unter
+Einstellungen → „Zeitfenster und Preise“.
+
+| Tage         | Zeitfenster              | Preis | Freiverzehr | Händler-Anteil |
+| ------------ | ------------------------ | ----- | ----------- | -------------- |
+| Mo–Do        | 14:30–16:30              | 99 €  | 50 €        | 72,75 €        |
+| Mo–Do und So | 16:45–18:45, 19:00–21:00 | 149 € | 75 €        | 110,25 €       |
+| So           | 14:30–16:30              | 149 € | 75 €        | 110,25 €       |
+| Fr–Sa        | 15:30–17:30              | 149 € | 75 €        | 110,25 €       |
+| Fr–Sa        | 17:45–19:45, 20:00–22:00 | 199 € | 100 €       | 147,75 €       |
+
+- **Händler-Anteil** = Freiverzehr + Hälfte des Rests (Endpreis − Gebühr − Freiverzehr), abgerundet
+  auf ganze Cent. Je Zeitfenster oder Sondertermin überschreibbar.
+- **Sonderveranstaltungen** (Partys 22./23./29./30., Auftritte Weidmüller/Stegelmann): eigener Preis
+  und Freiverzehr je Termin in `slot_specials`, im Admin-Kalender pflegbar; Titel erscheint im
+  Buchungskalender.
+- Reihenfolge der Preisfindung (`slot_pricing()`): Sondertermin → Vorlage → alter Standard aus
+  `settings`. Die Beträge werden beim Anlegen in die Buchung kopiert.
+- Website: „ab 99 €“ plus Preisübersicht; im Kalender steht der genaue Preis je Zeitfenster.
+
+### Geldverteilung pro Buchung (Beispiel 199 €)
 
 | Posten                      | Betrag       | Geht an                            |
 | --------------------------- | ------------ | ---------------------------------- |
-| Gast zahlt gesamt           | 178,50 €     | –                                  |
+| Gast zahlt gesamt           | 199,00 €     | –                                  |
 | Vorverkaufsgebühr           | 3,50 €       | Studio F                           |
-| Residenztaler               | 100,00 €     | Händler                            |
-| Hälfte Lounge-Anteil (75 €) | 37,50 €      | Händler                            |
-| Andere Hälfte Lounge-Anteil | 37,50 €      | Studio F                           |
-| **Händler gesamt**          | **137,50 €** | auch bei No-Show, nicht bei Storno |
+| Residenztaler (Freiverzehr) | 100,00 €     | Händler                            |
+| Hälfte Rest (95,50 €)       | 47,75 €      | Händler                            |
+| Andere Hälfte Rest          | 47,75 €      | Studio F                           |
+| **Händler gesamt**          | **147,75 €** | auch bei No-Show, nicht bei Storno |
 
 ---
 
@@ -113,7 +136,11 @@ Constraint: `haendler_share_cents <= price_cents`, `taler_cents <= price_cents`.
 
 ### slot_templates
 
-`id`, `weekday` (1 = Mo … 7 = So), `start_time`, `end_time`, `active` bool. Seed: Mo–Fr 17:00–19:00 und 19:00–21:00, Sa–So 17:30–19:30 und 19:30–21:30.
+`id`, `weekday` (1 = Mo … 7 = So), `start_time`, `end_time`, `active` bool. Seit 05.10.2026 zusätzlich `price_cents` (Endpreis inkl. Gebühr), `taler_count`, `haendler_share_cents` (leer = automatisch), `label`. Seed siehe 1a; alte Vorlagen ohne Preis sind deaktiviert.
+
+### slot_specials
+
+`date`, `start_time` (PK), `title`, `price_cents`, `taler_count`, `haendler_share_cents`, `created_at`. Nur Admin (aal2).
 
 ### closed_dates
 
@@ -349,9 +376,9 @@ Alle Admin-Aktionen serverseitig mit `is_admin_aal2()` geprüft.
 
 Texte wie im Projektplan, mit diesen Änderungen:
 
-- **Preis-Abschnitt:** groß „178,50 €“, darunter „pro Lounge und Zeitfenster · inkl. 3,50 € Vorverkaufsgebühr“.
+- **Preis-Abschnitt:** groß „ab 99 €“, „inkl. 3,50 € Vorverkaufsgebühr“, Preisübersicht nach Tagen und Zeitfenstern (seit 05.10.2026).
 - **Erlebnis-Karte 2:** „Holzhütte mit Fellen, Lichterketten und leiser Musik.“ (ohne Kaminfeuer).
-- **Mobile Leiste:** „Lounge buchen · 178,50 €“.
+- **Mobile Leiste:** „Lounge buchen · ab 99 €“.
 - Alle Preise, Personenzahl, Taler und Kontakt-E-Mail dynamisch aus `get_public_settings` (mit statischem Fallback nur für den ersten Render).
 - Formular zusätzlich: Feld „USt-ID (optional)“, sichtbar bei Firma/Rechnungswunsch.
 - Checkout-Hinweis zum fehlenden Widerrufsrecht direkt über dem Buchen-Button.

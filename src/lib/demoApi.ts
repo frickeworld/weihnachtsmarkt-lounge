@@ -16,25 +16,27 @@ export async function demoAvailability(from: IsoDate, to: IsoDate): Promise<Slot
   const today = todayInBerlin();
   const out: SlotAvailability[] = [];
   for (let d = from; parseIsoDate(d) <= parseIsoDate(to); d = addDays(d, 1)) {
-    const weekend = isoWeekday(d) >= 6;
-    const times = weekend
-      ? [
-          ['17:30', '19:30'],
-          ['19:30', '21:30'],
-        ]
-      : [
-          ['17:00', '19:00'],
-          ['19:00', '21:00'],
-        ];
+    const tiers = s.priceList.filter((t) => t.weekday === isoWeekday(d));
     const day = parseIsoDate(d).getUTCDate();
-    times.forEach(([startTime, endTime], i) => {
+    tiers.forEach(({ startTime, endTime, totalCents, talerCount, label }, i) => {
       let status: SlotStatus = 'free';
       if (d < s.seasonStart || d > s.seasonEnd) status = 'out_of_season';
       else if (d < today) status = 'past';
       else if (day === 30) status = 'closed';
       else if (day % 6 === 4) status = 'taken';
       else if (day % 5 === 2 && i === 1) status = 'taken';
-      out.push({ date: d, startTime: startTime!, endTime: endTime!, status });
+      // Beispiel für einen Sondertermin in der Vorschau
+      const special = day === 12 && i === 2;
+      out.push({
+        date: d,
+        startTime,
+        endTime,
+        status,
+        totalCents: special ? 24900 : totalCents,
+        talerCount: special ? 125 : talerCount,
+        specialTitle: special ? 'Party-Abend' : null,
+        label,
+      });
     });
   }
   return out;

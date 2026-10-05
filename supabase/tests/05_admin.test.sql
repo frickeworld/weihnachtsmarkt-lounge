@@ -16,11 +16,11 @@ grant select on pin_before to authenticated;
 -- Drei bezahlte Buchungen (eine erschienen, eine nicht, eine wird storniert) + eine kostenlose
 insert into public.bookings (id, date, start_time, end_time, status, first_name, last_name, email, phone, persons, occasion, paid_at, source)
 values
-  ('bbbbbbbb-0000-0000-0000-000000000001', '2026-12-01', '17:00', '19:00', 'paid', 'Anna', 'A', 'a@test.de', '0123456', 4, 'freunde', '2026-11-20 10:00+01', 'online'),
-  ('bbbbbbbb-0000-0000-0000-000000000002', '2026-12-01', '19:00', '21:00', 'paid', 'Ben', 'B', 'b@test.de', '0123456', 4, null, '2026-11-21 10:00+01', 'online'),
-  ('bbbbbbbb-0000-0000-0000-000000000003', '2026-12-02', '17:00', '19:00', 'paid', 'Cem', 'C', 'c@test.de', '0123456', 4, 'firmenfeier', '2026-11-22 10:00+01', 'online');
+  ('bbbbbbbb-0000-0000-0000-000000000001', '2026-12-01', '14:30', '16:30', 'paid', 'Anna', 'A', 'a@test.de', '0123456', 4, 'freunde', '2026-11-20 10:00+01', 'online'),
+  ('bbbbbbbb-0000-0000-0000-000000000002', '2026-12-01', '16:45', '18:45', 'paid', 'Ben', 'B', 'b@test.de', '0123456', 4, null, '2026-11-21 10:00+01', 'online'),
+  ('bbbbbbbb-0000-0000-0000-000000000003', '2026-12-02', '14:30', '16:30', 'paid', 'Cem', 'C', 'c@test.de', '0123456', 4, 'firmenfeier', '2026-11-22 10:00+01', 'online');
 insert into public.bookings (id, date, start_time, end_time, status, first_name, last_name, email, phone, persons, source, payment_method, include_in_settlement, amount_total_cents)
-values ('bbbbbbbb-0000-0000-0000-000000000004', '2026-12-03', '17:00', '19:00', 'paid', 'Dora', 'D', 'd@test.de', '0123456', 2, 'manual', 'kostenlos', false, 0);
+values ('bbbbbbbb-0000-0000-0000-000000000004', '2026-12-03', '14:30', '16:30', 'paid', 'Dora', 'D', 'd@test.de', '0123456', 2, 'manual', 'kostenlos', false, 0);
 
 insert into public.page_events (event_type, device, created_at) values
   ('page_view', 'mobile', '2026-12-01 12:00+01'), ('page_view', 'desktop', '2026-12-01 13:00+01'),
@@ -50,10 +50,11 @@ select throws_ok($$select public.admin_cancel_booking('bbbbbbbb-0000-0000-0000-0
 -- Kennzahlen (Woche 1.–7.12.)
 create temp table k as select public.admin_dashboard('2026-12-01', '2026-12-07') as j;
 select is((select (j ->> 'paid_bookings')::int from k), 3, '3 bezahlte Buchungen (Storno zählt nicht)');
-select is((select (j ->> 'revenue_cents')::int from k), 2 * 17850, 'Umsatz brutto 2 × 178,50 € (kostenlose = 0)');
-select is((select (j ->> 'haendler_cents')::int from k), 27500, 'Händler: 2 × 137,50 € = 275,00 € (kostenlose nicht in Abrechnung)');
-select is((select (j ->> 'studio_cents')::int from k), 2 * 17850 - 27500, 'Studio-F-Anteil = Umsatz − Händler');
-select is((select (j ->> 'available_slots')::int from k), 14, '7 Tage × 2 Zeitfenster verfügbar');
+-- Di 14:30 = 99 € (Händler 50 € + ½ × 45,50 € = 72,75 €), Di 16:45 = 149 € (75 € + ½ × 70,50 € = 110,25 €)
+select is((select (j ->> 'revenue_cents')::int from k), 9900 + 14900, 'Umsatz brutto 99 € + 149 € (kostenlose = 0)');
+select is((select (j ->> 'haendler_cents')::int from k), 7275 + 11025, 'Händler: 72,75 € + 110,25 € = 183,00 € (kostenlose nicht in Abrechnung)');
+select is((select (j ->> 'studio_cents')::int from k), 9900 + 14900 - 18300, 'Studio-F-Anteil = Umsatz − Händler');
+select is((select (j ->> 'available_slots')::int from k), 21, '7 Tage × 3 Zeitfenster verfügbar');
 select is((select (j ->> 'page_views')::int from k), 2, '2 Seitenaufrufe');
 select is((select (j ->> 'book_clicks')::int from k), 1, '1 Klick');
 select is((select (j ->> 'checked_in')::int from k), 1, '1 Check-in');

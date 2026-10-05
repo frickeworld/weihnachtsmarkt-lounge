@@ -30,7 +30,10 @@ interface SettingsRow {
 export async function fetchPublicSettings(): Promise<PublicSettings> {
   if (DEMO) return demoSettings();
   ensureConfigured();
-  const data = (await rpc<SettingsRow>('get_public_settings', {}, 'single'))!;
+  const [data, prices] = await Promise.all([
+    rpc<SettingsRow>('get_public_settings', {}, 'single').then((d) => d!),
+    rpc<PriceRow[]>('get_price_list').catch(() => null),
+  ]);
   // Unvollständige Antworten nie übernehmen – dann bleiben die Startwerte stehen.
   const ints = [
     data.price_cents,
@@ -51,7 +54,26 @@ export async function fetchPublicSettings(): Promise<PublicSettings> {
     seasonEnd: data.season_end,
     contactEmail: data.contact_email,
     bookingCutoffMinutes: data.booking_cutoff_minutes,
+    priceList: (prices ?? [])
+      .filter((p) => Number.isInteger(p.total_cents) && Number.isInteger(p.taler_count))
+      .map((p) => ({
+        weekday: p.weekday,
+        startTime: p.start_time.slice(0, 5),
+        endTime: p.end_time.slice(0, 5),
+        totalCents: p.total_cents,
+        talerCount: p.taler_count,
+        label: p.label,
+      })),
   };
+}
+
+interface PriceRow {
+  weekday: number;
+  start_time: string;
+  end_time: string;
+  total_cents: number;
+  taler_count: number;
+  label: string | null;
 }
 
 interface AvailabilityRow {
@@ -59,18 +81,27 @@ interface AvailabilityRow {
   start_time: string;
   end_time: string;
   status: SlotStatus;
+  total_cents: number;
+  taler_count: number;
+  special_title: string | null;
+  label: string | null;
 }
 
 export async function fetchAvailability(from: IsoDate, to: IsoDate): Promise<SlotAvailability[]> {
   if (DEMO) return demoAvailability(from, to);
   ensureConfigured();
   const data =
-    (await rpc<AvailabilityRow[]>('get_availability', { from_date: from, to_date: to })) ?? [];
+    (await rpc<AvailabilityRow[]>('get_availability_priced', { from_date: from, to_date: to })) ??
+    [];
   return data.map((r) => ({
     date: r.slot_date,
     startTime: r.start_time.slice(0, 5),
     endTime: r.end_time.slice(0, 5),
     status: r.status,
+    totalCents: r.total_cents,
+    talerCount: r.taler_count,
+    specialTitle: r.special_title,
+    label: r.label,
   }));
 }
 
@@ -184,7 +215,7 @@ function demoEnd(start: string): string {
 
 export async function fetchSuccessInfo(sessionId: string): Promise<SuccessInfo | null> {
   if (DEMO) {
-    const b = demoBooking ?? { date: '2026-12-05', startTime: '17:30', firstName: 'Anna' };
+    const b = demoBooking ?? { date: '2026-12-05', startTime: '17:45', firstName: 'Anna' };
     return {
       firstName: b.firstName,
       date: b.date,
@@ -232,7 +263,7 @@ export interface TicketInfo {
 export async function fetchTicket(token: string): Promise<TicketInfo | null> {
   if (DEMO) {
     if (token !== DEMO_TICKET_TOKEN) return null;
-    const b = demoBooking ?? { date: '2026-12-05', startTime: '17:30', firstName: 'Anna' };
+    const b = demoBooking ?? { date: '2026-12-05', startTime: '17:45', firstName: 'Anna' };
     return {
       firstName: b.firstName,
       bookingCode: 'HL-VORS-CHAU',

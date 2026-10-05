@@ -117,7 +117,7 @@ Deno.serve(async (req) => {
           endTime: common.endTime,
           dateLabel: common.dateLabel,
           persons: b.persons,
-          talerCount: s.taler_count,
+          talerCount: common.talerCount,
           location: s.lounge_location,
           contactEmail: s.contact_email,
           siteUrl,
@@ -149,7 +149,7 @@ Deno.serve(async (req) => {
         startTime: common.startTime,
         endTime: common.endTime,
         persons: b.persons,
-        talerCount: s.taler_count,
+        talerCount: common.talerCount,
         location: s.lounge_location,
         siteUrl,
       });

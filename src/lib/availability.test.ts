@@ -15,6 +15,12 @@ describe('dayStatus', () => {
   it('nur noch 1 Zeitfenster', () => {
     expect(dayStatus([slot('taken'), slot('free', '19:00')])).toBe('last');
     expect(dayStatus([slot('past'), slot('free', '19:00')])).toBe('last');
+    expect(dayStatus([slot('taken', '14:30'), slot('free', '16:45'), slot('free', '19:00')])).toBe(
+      'free',
+    );
+    expect(dayStatus([slot('taken', '14:30'), slot('taken', '16:45'), slot('free', '19:00')])).toBe(
+      'last',
+    );
   });
   it('ausgebucht', () => {
     expect(dayStatus([slot('taken'), slot('blocked', '19:00')])).toBe('booked');

@@ -22,11 +22,23 @@ interface Props {
   date: IsoDate;
   startTime: string;
   endTime: string;
+  /** Endpreis dieses Zeitfensters inkl. Vorverkaufsgebühr (Anzeige; abgerechnet wird serverseitig) */
+  totalCents?: number;
+  talerCount?: number;
+  specialTitle?: string | null;
   /** Das Zeitfenster ist inzwischen vergeben oder nicht mehr buchbar. */
   onSlotUnavailable: (message: string) => void;
 }
 
-export function BookingForm({ date, startTime, endTime, onSlotUnavailable }: Props) {
+export function BookingForm({
+  date,
+  startTime,
+  endTime,
+  totalCents: slotTotal,
+  talerCount: slotTaler,
+  specialTitle,
+  onSlotUnavailable,
+}: Props) {
   const settings = useSettings();
   const schema = useMemo(() => createBookingSchema(settings.maxPersons), [settings.maxPersons]);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -49,7 +61,10 @@ export function BookingForm({ date, startTime, endTime, onSlotUnavailable }: Pro
     name: ['companyName', 'invoiceRequested', 'persons'],
   });
   const showBilling = needsBillingAddress({ companyName, invoiceRequested });
-  const total = formatCents(totalCents(settings));
+  // Preis des gewählten Zeitfensters (Preisstaffel); Rückfall: Standardpreis
+  const totalValue = slotTotal ?? totalCents(settings);
+  const total = formatCents(totalValue);
+  const taler = slotTaler ?? settings.talerCount;
 
   const onSubmit = async (values: BookingFormValues) => {
     setSubmitError(null);
@@ -275,9 +290,15 @@ export function BookingForm({ date, startTime, endTime, onSlotUnavailable }: Pro
         </dl>
         <div className="my-4 h-px bg-gold/50" aria-hidden="true" />
         <dl className="space-y-1.5">
+          {specialTitle && (
+            <div className="flex justify-between gap-4">
+              <dt>Sonderveranstaltung</dt>
+              <dd className="text-right font-semibold">{specialTitle}</dd>
+            </div>
+          )}
           <div className="flex justify-between gap-4">
-            <dt>Lounge</dt>
-            <dd>{formatCents(settings.priceCents)}</dd>
+            <dt>Lounge inkl. {taler} € Freiverzehr</dt>
+            <dd>{formatCents(totalValue - settings.feeCents)}</dd>
           </div>
           <div className="flex justify-between gap-4">
             <dt>Vorverkaufsgebühr</dt>

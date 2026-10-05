@@ -1,5 +1,11 @@
 import { expect, test, type Page } from '@playwright/test';
-import { addDays, MOCK_SETTINGS, mockSupabase, type MockOptions } from './support/mockSupabase';
+import {
+  addDays,
+  ALL_START_TIMES,
+  MOCK_SETTINGS,
+  mockSupabase,
+  type MockOptions,
+} from './support/mockSupabase';
 
 const firstFreeDay = (page: Page) => page.locator('#buchen table button:not([disabled])').first();
 const slots = (page: Page) => page.getByRole('group', { name: 'Zeitfenster' }).locator('button');
@@ -9,13 +15,16 @@ test.describe('One-Pager', () => {
     await mockSupabase(page);
   });
 
-  test('wirbt mit 175 € zzgl. Gebühr, 100 € Freiverzehr und ohne Kaminfeuer-Versprechen', async ({
+  test('wirbt mit „ab 99 €“, Preisstaffel und Freiverzehr, ohne Kaminfeuer-Versprechen', async ({
     page,
   }) => {
     await page.goto('/');
-    await expect(page.locator('#preis')).toContainText('175 €');
-    await expect(page.locator('#preis')).toContainText('zzgl. 3,50 € Vorverkaufsgebühr');
-    await expect(page.locator('#preis')).not.toContainText('178,50');
+    const preis = page.locator('#preis');
+    await expect(preis).toContainText('Deine Lounge ab 99 €');
+    await expect(preis).toContainText('inkl. 3,50 € Vorverkaufsgebühr');
+    for (const p of ['99 €', '149 €', '199 €']) await expect(preis).toContainText(p);
+    await expect(preis).toContainText('inkl. 100 € Freiverzehr');
+    await expect(preis).not.toContainText('175');
     await expect(page.locator('#start')).toContainText('Freiverzehr');
     await expect(page.locator('body')).not.toContainText('Kaminfeuer');
   });
@@ -51,7 +60,7 @@ test.describe('One-Pager', () => {
     await firstFreeDay(page).click();
     await slots(page).first().click();
 
-    const submit = page.getByRole('button', { name: /Zahlungspflichtig buchen – 178,50 €/ });
+    const submit = page.getByRole('button', { name: /Zahlungspflichtig buchen – \d+,\d\d €/ });
     await submit.click();
     await expect(page.getByText('Bitte gib deinen Vornamen an.')).toBeVisible();
     await expect(page.getByText('Bitte bestätige die AGB und die Verbindlichkeit.')).toBeVisible();
@@ -97,14 +106,10 @@ test.describe('Echte Verfügbarkeit (Phase 2)', () => {
     const start = MOCK_SETTINGS.season_start;
     const opts: MockOptions = {
       overrides: {
-        // Tag 1: beide belegt → ausgebucht
-        ...Object.fromEntries(
-          ['17:00', '17:30', '19:00', '19:30'].map((t) => [`${start} ${t}`, 'taken']),
-        ),
+        // Tag 1: alle belegt → ausgebucht
+        ...Object.fromEntries(ALL_START_TIMES.map((t) => [`${start} ${t}`, 'taken'])),
         // Tag 2: geschlossen
-        ...Object.fromEntries(
-          ['17:00', '17:30', '19:00', '19:30'].map((t) => [`${addDays(start, 1)} ${t}`, 'closed']),
-        ),
+        ...Object.fromEntries(ALL_START_TIMES.map((t) => [`${addDays(start, 1)} ${t}`, 'closed'])),
       },
     };
     await mockSupabase(page, opts);
@@ -123,10 +128,12 @@ test.describe('Echte Verfügbarkeit (Phase 2)', () => {
     await expect(dayBtn(addDays(start, 1))).toHaveAccessibleName(/geschlossen/);
   });
 
-  test('Tag mit einem belegten Zeitfenster: nur das freie ist wählbar', async ({ page }) => {
+  test('Tag mit zwei belegten Zeitfenstern: nur das freie ist wählbar', async ({ page }) => {
     const d = addDays(MOCK_SETTINGS.season_start, 3);
     await mockSupabase(page, {
-      overrides: Object.fromEntries(['17:00', '17:30'].map((t) => [`${d} ${t}`, 'taken'])),
+      overrides: Object.fromEntries(
+        ['14:30', '15:30', '16:45', '17:45'].map((t) => [`${d} ${t}`, 'taken']),
+      ),
     });
     await page.goto('/#buchen');
     const btn = page
@@ -134,8 +141,9 @@ test.describe('Echte Verfügbarkeit (Phase 2)', () => {
       .first();
     await expect(btn).toHaveAccessibleName(/nur noch 1 Zeitfenster/);
     await btn.click();
-    await expect(slots(page).first()).toBeDisabled();
-    await expect(slots(page).nth(1)).toBeEnabled();
+    await expect(slots(page).nth(0)).toBeDisabled();
+    await expect(slots(page).nth(1)).toBeDisabled();
+    await expect(slots(page).nth(2)).toBeEnabled();
   });
 
   test('Zeitfenster wird während der Auswahl vergeben → Hinweis', async ({ page }) => {
@@ -197,7 +205,7 @@ test.describe('Mobile Buchungsleiste', () => {
     test.skip(!isMobile, 'nur mobil');
     await mockSupabase(page);
     await page.goto('/');
-    const bar = page.getByRole('link', { name: 'Lounge buchen · 175,00 €' });
+    const bar = page.getByRole('link', { name: 'Lounge buchen · ab 99 €' });
     await expect(bar).toHaveCount(0);
     await page.locator('#anlaesse').scrollIntoViewIfNeeded();
     await expect(bar).toBeVisible();

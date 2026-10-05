@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, m } from 'framer-motion';
 import { formatCents } from '@/lib/money';
+import { minPriceCents } from '@/lib/settings';
 import { useSettings } from '@/lib/settingsContext';
 import { trackBookClick } from '@/lib/track';
 
@@ -46,7 +47,7 @@ export function MobileBookingBar() {
             onClick={trackBookClick}
             className="btn-gold pointer-events-auto w-full shadow-[0_12px_32px_-8px_rgba(36,34,30,0.55)]"
           >
-            Lounge buchen · {formatCents(settings.priceCents)}
+            Lounge buchen · ab {formatCents(minPriceCents(settings)).replace(/,00\s?€$/, ' €')}
           </a>
         </m.div>
       )}

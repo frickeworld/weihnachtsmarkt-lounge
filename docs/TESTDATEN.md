@@ -6,10 +6,10 @@ Damit kannst du die Abnahme-Checklisten durchspielen, ohne echte Buchungen zu br
 ## Phase 2 – Verfügbarkeit
 
 ```sql
--- Belegtes Zeitfenster: bezahlte Buchung am 27.11.2026 um 17:00
+-- Belegtes Zeitfenster: bezahlte Buchung am 27.11.2026 (Freitag) um 17:45
 -- (Beträge, Buchungscode und Ticket-Token setzt die Datenbank automatisch)
 insert into public.bookings (date, start_time, end_time, status, first_name, last_name, email, phone, persons, occasion)
-values ('2026-11-27', '17:00', '19:00', 'paid', 'Test', 'Gast', 'test@example.de', '0123456', 6, 'freunde');
+values ('2026-11-27', '17:45', '19:45', 'paid', 'Test', 'Gast', 'test@example.de', '0123456', 6, 'freunde');
 
 -- Geschlossener Tag
 insert into public.closed_dates (date, reason) values ('2026-11-30', 'Test');
@@ -62,18 +62,17 @@ select u.email, r.role from public.user_roles r join auth.users u on u.id = r.us
 ## Phase 7 – Rechenprobe Abrechnung
 
 ```sql
--- Drei Buchungen am Saisonstart: erschienen, nicht erschienen, storniert → Händler 275,00 €
+-- Drei Buchungen am Dienstag, 01.12.2026: erschienen (16:45, 149 €), nicht erschienen (19:00, 149 €),
+-- storniert (14:30, 99 €) → Händler 220,50 € (2 × 110,25 €), Studio F 2 × 149 € − 220,50 € = 77,50 €
 insert into public.bookings (date, start_time, end_time, status, first_name, last_name, email, phone, persons, paid_at, checked_in_at, cancelled_at, cancel_reason)
-select season_start, t.st::time, t.et::time, t.status, t.fn, 'Test', 'rechenprobe@example.de', '0123456', 4,
+select '2026-12-01', t.st::time, t.et::time, t.status, t.fn, 'Test', 'rechenprobe@example.de', '0123456', 4,
        case when t.status = 'paid' then now() end,
        case when t.fn = 'Erschienen' then now() end,
        case when t.status = 'cancelled' then now() end,
        case when t.status = 'cancelled' then 'Rechenprobe' end
-  from public.settings,
-       (values ('17:00', '19:00', 'paid', 'Erschienen'),
+  from (values ('16:45', '18:45', 'paid', 'Erschienen'),
                ('19:00', '21:00', 'paid', 'Nichtda'),
-               ('17:30', '19:30', 'cancelled', 'Storno')) t(st, et, status, fn)
- where id = 1;
+               ('14:30', '16:30', 'cancelled', 'Storno')) t(st, et, status, fn);
 
 -- Händler-Testzugang: im Admin unter „Zugänge“ mit Rolle „Händler“ einladen.
 

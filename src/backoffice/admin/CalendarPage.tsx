@@ -5,11 +5,21 @@ import { requireClient } from '../authClient';
 import { errorText } from '../errors';
 import { ErrorBox, Loading, PageHeader, Panel, smallBtn } from '../ui';
 import { hhmm } from './format';
-import type { SlotTemplate } from './types';
+import { formatCents } from '@/lib/money';
+import { autoHaendlerShare } from './pricing';
+import { SpecialPriceEditor } from './SpecialPriceEditor';
+import type { SlotSpecial, SlotTemplate } from './types';
 import { unwrap, useLoad } from './useLoad';
 
 interface MonthData {
-  season: { season_start: string; season_end: string };
+  season: {
+    season_start: string;
+    season_end: string;
+    price_cents: number;
+    fee_cents: number;
+    taler_count: number;
+  };
+  specials: SlotSpecial[];
   templates: SlotTemplate[];
   closed: { date: string; reason: string | null }[];
   blocked: { date: string; start_time: string; reason: string | null }[];
@@ -43,11 +53,17 @@ export function CalendarPage() {
 
   const data = useLoad(async (): Promise<MonthData> => {
     const c = requireClient();
-    const [season, templates, closed, blocked, bookings] = await Promise.all([
-      c.from('settings').select('season_start, season_end').eq('id', 1).single(),
+    const [season, templates, closed, blocked, bookings, specials] = await Promise.all([
+      c
+        .from('settings')
+        .select('season_start, season_end, price_cents, fee_cents, taler_count')
+        .eq('id', 1)
+        .single(),
       c
         .from('slot_templates')
-        .select('id, weekday, start_time, end_time, active')
+        .select(
+          'id, weekday, start_time, end_time, active, price_cents, taler_count, haendler_share_cents, label',
+        )
         .eq('active', true)
         .order('start_time'),
       c.from('closed_dates').select('date, reason').gte('date', first).lte('date', last),
@@ -62,6 +78,11 @@ export function CalendarPage() {
         .gte('date', first)
         .lte('date', last)
         .in('status', ['pending', 'paid']),
+      c
+        .from('slot_specials')
+        .select('date, start_time, title, price_cents, taler_count, haendler_share_cents')
+        .gte('date', first)
+        .lte('date', last),
     ]);
     return {
       season: unwrap(season) as MonthData['season'],
@@ -69,6 +90,7 @@ export function CalendarPage() {
       closed: unwrap(closed) as MonthData['closed'],
       blocked: unwrap(blocked) as MonthData['blocked'],
       bookings: unwrap(bookings) as MonthData['bookings'],
+      specials: unwrap(specials) as SlotSpecial[],
     };
   }, [first, last]);
 
@@ -103,7 +125,8 @@ export function CalendarPage() {
     const blocked = slots.filter((s) =>
       d?.blocked.some((b) => b.date === date && b.start_time === s.start_time),
     );
-    return { slots, inSeason, closed, booked, blocked };
+    const specials = d?.specials.filter((x) => x.date === date) ?? [];
+    return { slots, inSeason, closed, booked, blocked, specials };
   };
 
   const sel = selected ? dayInfo(selected) : null;
@@ -154,7 +177,7 @@ export function CalendarPage() {
                       ? ''
                       : info.closed
                         ? 'geschlossen'
-                        : `${info.booked.length}/${info.slots.length} gebucht${info.blocked.length ? ` · ${info.blocked.length} gesperrt` : ''}`;
+                        : `${info.booked.length}/${info.slots.length} gebucht${info.blocked.length ? ` · ${info.blocked.length} gesperrt` : ''}${info.specials.length ? ' · Sonderpreis' : ''}`;
                     return (
                       <td key={date} className="p-0 align-top">
                         <button
@@ -197,7 +220,8 @@ export function CalendarPage() {
             {!sel || !selected ? (
               <Panel>
                 <p className="text-ink-soft">
-                  Wähle einen Tag, um Zeitfenster zu sperren oder den Tag zu schließen.
+                  Wähle einen Tag, um Zeitfenster zu sperren, Sonderpreise festzulegen oder den Tag
+                  zu schließen.
                 </p>
                 <p className="mt-3 text-sm text-ink-soft">
                   Saison: {d.season.season_start.split('-').reverse().join('.')} –{' '}
@@ -223,6 +247,9 @@ export function CalendarPage() {
                     const block = d.blocked.find(
                       (b) => b.date === selected && b.start_time === s.start_time,
                     );
+                    const special = sel.specials.find((x) => x.start_time === s.start_time);
+                    const stdTotal = s.price_cents ?? d.season.price_cents + d.season.fee_cents;
+                    const stdTaler = s.taler_count ?? d.season.taler_count;
                     return (
                       <li key={s.start_time} className="rounded-xl border border-line p-3">
                         <div className="flex items-center justify-between gap-2">
@@ -239,6 +266,15 @@ export function CalendarPage() {
                                 : 'Frei'}
                           </span>
                         </div>
+                        {!special && (
+                          <p className="text-sm text-ink-soft">
+                            {formatCents(stdTotal)} · {stdTaler} € Freiverzehr · Händler{' '}
+                            {formatCents(
+                              s.haendler_share_cents ??
+                                autoHaendlerShare(stdTotal, d.season.fee_cents, stdTaler),
+                            )}
+                          </p>
+                        )}
                         {booking && (
                           <Link
                             to={`/admin/buchungen?code=${booking.booking_code}`}
@@ -276,6 +312,15 @@ export function CalendarPage() {
                             {block ? 'Sperre aufheben' : 'Zeitfenster sperren'}
                           </button>
                         )}
+                        <SpecialPriceEditor
+                          key={`${selected}-${s.start_time}-${special?.price_cents ?? ''}`}
+                          date={selected}
+                          startTime={s.start_time}
+                          special={special}
+                          feeCents={d.season.fee_cents}
+                          booked={!!booking}
+                          onChanged={data.reload}
+                        />
                       </li>
                     );
                   })}

@@ -1,10 +1,12 @@
 import { IconCoin, IconHut, IconPeople, IconService } from '@/components/Icons';
 import { Reveal } from '@/components/Reveal';
 import { SectionHeading } from '@/components/SectionHeading';
+import { maxTalerCount } from '@/lib/settings';
 import { useSettings } from '@/lib/settingsContext';
 
 export function Experience() {
-  const { maxPersons, talerCount } = useSettings();
+  const s = useSettings();
+  const { maxPersons } = s;
   const cards = [
     {
       icon: IconPeople,
@@ -18,7 +20,7 @@ export function Experience() {
     },
     {
       icon: IconCoin,
-      title: `${talerCount} € Freiverzehr`,
+      title: `Bis zu ${maxTalerCount(s)} € Freiverzehr`,
       text: 'In Residenztalern, einlösbar an den Ständen des Weihnachtsmarkts.',
     },
     {

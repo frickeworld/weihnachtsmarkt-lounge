@@ -15,13 +15,13 @@ Mobile-first One-Page-Website, über die eine überdachte Lounge auf dem Weihnac
 
 ## Geschäftsregeln – NIE brechen
 
-- Preis 175,00 € + 3,50 € Vorverkaufsgebühr = **178,50 €**. Beträge in Cent, immer aus `settings`, nie hart codiert.
-- **Preisanzeige (Entscheidung Louis, Design-Runde 2):** Beworben wird **„175 €“** mit dem Zusatz „zzgl. 3,50 € Vorverkaufsgebühr“ (klein, direkt daneben). Der Gesamtpreis 178,50 € erscheint in der Buchungs-Zusammenfassung und im Checkout. ⚠ PAngV-Risiko (Gesamtpreisangabe) – vom Anwalt prüfen lassen.
+- **Preisstaffel (Entscheidung Louis/Oliver, 05.10.2026):** Endpreise inkl. 3,50 € Vorverkaufsgebühr (geht an Studio F). Mo–Do 14:30 **99 €** (50 € Freiverzehr); Mo–Do 16:45/19:00 und So ganztags **149 €** (75 €); Fr–Sa 15:30 **149 €** (75 €); Fr–Sa 17:45/20:00 **199 €** (100 €). Sonderveranstaltungen (Partys, Live-Auftritte) mit eigenem Preis je Termin (`slot_specials`). Beträge in Cent, immer aus der Datenbank (`slot_pricing()`), nie hart codiert.
+- **Preisanzeige:** Beworben wird **„ab 99 €“** (Endpreis, „inkl. 3,50 € Vorverkaufsgebühr“) plus Preisübersicht. Im Buchungskalender steht der genaue Preis je Zeitfenster, in Zusammenfassung und Checkout der Gesamtpreis.
 - Alle Werbe-Buttons heißen **„Lounge buchen“**. Nur der Abschluss-Button im Formular heißt „Zahlungspflichtig buchen“ (§ 312j BGB).
 - Der Anlass ist bei der Buchung **optional**.
-- Die **100 € Freiverzehr** werden groß herausgestellt (Hero, Eckdaten-Band).
-- Enthalten: Lounge exklusiv 2 Stunden, bis 10 Personen, 100 Residenztaler (je 1 €, pro gekauftem Artikel 1 Taler), Tischservice der Tanzschule Fricke.
-- Zeitfenster Mo–Fr 17:00–19:00 / 19:00–21:00, Sa–So 17:30–19:30 / 19:30–21:30. Zeitzone immer **Europe/Berlin**.
+- Der **Freiverzehr (bis zu 100 €)** wird groß herausgestellt (Hero, Eckdaten-Band).
+- Enthalten: Lounge exklusiv 2 Stunden, bis 10 Personen, Residenztaler in Höhe des Freiverzehrs (50/75/100, je 1 €, pro gekauftem Artikel 1 Taler), Tischservice der Tanzschule Fricke.
+- Zeitfenster Mo–Do und So 14:30–16:30 / 16:45–18:45 / 19:00–21:00, Fr–Sa 15:30–17:30 / 17:45–19:45 / 20:00–22:00 (`slot_templates`). Zeitzone immer **Europe/Berlin**.
 - Saison, Schließtage, gesperrte Zeitfenster: im Admin einstellbar.
 - Jedes Zeitfenster genau einmal verkaufbar (partieller Unique-Index auf `(date, start_time)` für `pending`/`paid`).
 - **Online-Buchungsschluss:** `settings.booking_cutoff_minutes` (Standard 60) vor Beginn. Reservierung beim Checkout: `settings.hold_minutes` (30).
@@ -29,7 +29,7 @@ Mobile-first One-Page-Website, über die eine überdachte Lounge auf dem Weihnac
 - Ein QR-Code pro Buchung. Inhalt nur der `ticket_token`.
 - Zahlungsarten: Karte, Apple Pay, Google Pay, PayPal. **Keine** verzögerten Methoden (SEPA, Klarna, Überweisung über Stripe).
 - **Keine Rabattcodes.**
-- Abrechnung: Pro Buchung mit `status='paid'` und `include_in_settlement=true` erhalten die Händler `haendler_share_cents` (137,50 €), auch bei No-Show. Stornierte zählen nicht. Studio-F-Anteil = `amount_total_cents − haendler_share_cents`. Beträge werden beim Anlegen in die Buchung kopiert, Preisänderungen wirken nur auf neue Buchungen.
+- Abrechnung: Pro Buchung mit `status='paid'` und `include_in_settlement=true` erhalten die Händler `haendler_share_cents` = Freiverzehr + Hälfte des Rests (Endpreis − Gebühr − Freiverzehr): 72,75 € / 110,25 € / 147,75 €, je Preisstufe oder Sondertermin überschreibbar. Auch bei No-Show. Stornierte zählen nicht. Studio-F-Anteil = `amount_total_cents − haendler_share_cents`. Beträge werden beim Anlegen in die Buchung kopiert, Preisänderungen wirken nur auf neue Buchungen.
 - Rechnung automatisch über Stripe, wenn Firmenname angegeben ODER „Ich benötige eine Rechnung“ angehakt. Optional USt-ID.
 - Newsletter nur per freiwilliger Checkbox (nicht vorausgewählt) + Brevo-Double-Opt-in. Alle Bucher kommen in die Liste „Lounge-Buchungen“ (keine Werbung).
 - Tracking ohne Cookies, ohne localStorage-IDs, ohne IP-Speicherung: `page_view`, `book_click`, Buchungen.

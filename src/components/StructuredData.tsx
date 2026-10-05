@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { env } from '@/lib/env';
-import { totalCents } from '@/lib/settings';
+import { maxTalerCount, minPriceCents } from '@/lib/settings';
 import { useSettings } from '@/lib/settingsContext';
 import { buildProductJsonLd } from '@/lib/structuredData';
 
@@ -9,8 +9,10 @@ export function StructuredData() {
   const json = JSON.stringify(
     buildProductJsonLd({
       siteUrl: env.publicSiteUrl,
-      totalCents: totalCents(s),
-      talerCount: s.talerCount,
+      lowCents: minPriceCents(s),
+      highCents: Math.max(minPriceCents(s), ...s.priceList.map((t) => t.totalCents)),
+      offerCount: s.priceList.length || 1,
+      maxTaler: maxTalerCount(s),
       maxPersons: s.maxPersons,
       seasonEnd: s.seasonEnd,
     }),

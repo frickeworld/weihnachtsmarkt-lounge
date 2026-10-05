@@ -1,5 +1,5 @@
 import { formatCents } from '@/lib/money';
-import { totalCents } from '@/lib/settings';
+import { priceGroups } from '@/lib/settings';
 import { useSettings } from '@/lib/settingsContext';
 import { LEGAL_SHORT as L } from '../../../supabase/functions/_shared/legal.ts';
 import { H2, LegalLayout } from './LegalLayout';
@@ -24,9 +24,9 @@ export function AgbPage() {
         <li>die exklusive Nutzung der überdachten Lounge für 2 Stunden,</li>
         <li>Platz für bis zu {s.maxPersons} Personen,</li>
         <li>
-          {s.talerCount} Residenztaler im Wert von je 1 € (insgesamt {s.talerCount} € Freiverzehr)
-          zur Einlösung an den Ständen des Weihnachtsmarkts im Schlosspark – pro gekauftem Artikel
-          ein Taler,
+          Residenztaler im Wert von je 1 € als Freiverzehr – die Anzahl hängt vom gebuchten
+          Zeitfenster ab (siehe § 3) – zur Einlösung an den Ständen des Weihnachtsmarkts im
+          Schlosspark, pro gekauftem Artikel ein Taler,
         </li>
         <li>Tischservice durch die Tanzschule Fricke.</li>
       </ul>
@@ -38,9 +38,24 @@ export function AgbPage() {
 
       <H2>{n(3)} Preise</H2>
       <p>
-        Der Preis beträgt {formatCents(s.priceCents)} zuzüglich einer Vorverkaufsgebühr von{' '}
-        {formatCents(s.feeCents)}, insgesamt {formatCents(totalCents(s))} je Buchung. [ANGABE ZUR
+        Preis und Freiverzehr hängen vom Wochentag und Zeitfenster ab. Alle Preise sind Endpreise je
+        Lounge und enthalten eine Vorverkaufsgebühr von {formatCents(s.feeCents)}. [ANGABE ZUR
         UMSATZSTEUER PRÜFEN: „inkl. gesetzlicher MwSt.“]
+      </p>
+      <ul className="list-disc space-y-1 pl-6">
+        {priceGroups(s.priceList).flatMap((g) =>
+          g.rows.map((r) => (
+            <li key={g.days + r.label + r.totalCents}>
+              {g.days}, {r.label} ({r.times.join(' oder ')} Uhr): {formatCents(r.totalCents)} inkl.{' '}
+              {r.talerCount} € Freiverzehr
+            </li>
+          )),
+        )}
+      </ul>
+      <p>
+        Für Sonderveranstaltungen (z. B. Partys oder Live-Auftritte) können abweichende Preise und
+        ein abweichender Freiverzehr gelten; sie werden vor der Buchung beim jeweiligen Termin
+        angezeigt. Maßgeblich ist der bei der Buchung angezeigte Gesamtpreis.
       </p>
 
       <H2>{n(4)} Vertragsschluss</H2>

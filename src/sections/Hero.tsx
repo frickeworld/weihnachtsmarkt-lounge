@@ -5,6 +5,7 @@ import hero800 from '@/assets/hero-800.webp';
 import { GlitterBand } from '@/components/GlitterBand';
 import { Snowfall } from '@/components/Snowfall';
 import { WeihnachtsmarktLogo } from '@/components/WeihnachtsmarktLogo';
+import { maxTalerCount } from '@/lib/settings';
 import { useSettings } from '@/lib/settingsContext';
 import { trackBookClick } from '@/lib/track';
 
@@ -58,8 +59,11 @@ export function Hero() {
             </p>
             {/* Das stärkste Argument groß: Freiverzehr */}
             <div className="glitter mt-6 inline-flex items-center gap-4 rounded-2xl px-5 py-3 shadow-[0_18px_40px_-20px_rgba(0,0,0,0.8)]">
+              <span className="text-sm leading-tight font-bold tracking-wide uppercase">
+                bis zu
+              </span>
               <span className="font-display text-5xl leading-none font-medium sm:text-6xl">
-                {s.talerCount}&nbsp;€
+                {maxTalerCount(s)}&nbsp;€
               </span>
               <span className="text-sm leading-tight font-bold tracking-wide uppercase">
                 Freiverzehr

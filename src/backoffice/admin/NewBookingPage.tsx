@@ -51,13 +51,20 @@ export function NewBookingPage() {
 
   const slots = useLoad(
     async () =>
-      unwrap(await requireClient().rpc('get_availability', { from_date: date, to_date: date })) as {
+      unwrap(
+        await requireClient().rpc('get_availability_priced', { from_date: date, to_date: date }),
+      ) as {
         start_time: string;
         end_time: string;
         status: string;
+        total_cents: number;
+        taler_count: number;
+        special_title: string | null;
       }[],
     [date, result],
   );
+
+  const selectedSlot = slots.data?.find((s) => hhmm(s.start_time) === startTime);
 
   const {
     register,
@@ -181,10 +188,18 @@ export function NewBookingPage() {
                           {st}–{hhmm(s.end_time)}
                         </span>
                       </span>
-                      <span
-                        className={`text-sm ${s.status === 'free' ? 'text-emerald-800' : 'text-ink-soft'}`}
-                      >
-                        {SLOT_STATUS[s.status] ?? s.status}
+                      <span className="text-right text-sm">
+                        <span className="block font-semibold tabular-nums">
+                          {formatCents(s.total_cents)} · {s.taler_count} € Freiverzehr
+                        </span>
+                        {s.special_title && (
+                          <span className="block text-haendler-red">{s.special_title}</span>
+                        )}
+                        <span
+                          className={`block ${s.status === 'free' ? 'text-emerald-800' : 'text-ink-soft'}`}
+                        >
+                          {SLOT_STATUS[s.status] ?? s.status}
+                        </span>
                       </span>
                     </label>
                   );
@@ -217,7 +232,9 @@ export function NewBookingPage() {
             <p className="mt-3 text-sm text-ink-soft">
               {payment === 'kostenlos'
                 ? 'Betrag 0 €, zählt nicht zur Händler-Abrechnung.'
-                : `Betrag ${formatCents(totalCents(settings))} (aktueller Preis).`}
+                : `Betrag ${formatCents(selectedSlot?.total_cents ?? totalCents(settings))}${
+                    selectedSlot ? ' (Preis dieses Zeitfensters).' : ' (Standardpreis).'
+                  }`}
             </p>
             {payment !== 'kostenlos' && (
               <label className="mt-3 flex min-h-11 cursor-pointer items-center gap-3">

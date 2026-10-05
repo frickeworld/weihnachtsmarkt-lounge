@@ -8,6 +8,12 @@ export interface SlotAvailability {
   startTime: string; // HH:MM
   endTime: string; // HH:MM
   status: SlotStatus;
+  /** Endpreis inkl. Vorverkaufsgebühr (Preisstaffel / Sondertermin) */
+  totalCents?: number;
+  talerCount?: number;
+  /** z. B. „Party-Abend“ bei Sonderveranstaltungen */
+  specialTitle?: string | null;
+  label?: string | null;
 }
 
 /** Tagesstatus für den Kalender. */
@@ -19,7 +25,8 @@ export function dayStatus(slots: SlotAvailability[]): DayStatus {
   if (slots.every((s) => s.status === 'closed')) return 'closed';
   const free = slots.filter((s) => s.status === 'free').length;
   if (free === 0) return 'booked';
-  if (free < slots.length) return 'last';
+  // „nur noch 1“ wörtlich nehmen: Bei drei Zeitfenstern ist ein Tag mit zwei freien noch „frei“.
+  if (free === 1 && slots.length > 1) return 'last';
   return 'free';
 }
 

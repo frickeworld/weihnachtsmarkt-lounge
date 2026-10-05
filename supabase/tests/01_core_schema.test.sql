@@ -17,7 +17,7 @@ insert into public.user_roles (user_id, role) values
 update public.settings
    set season_start = current_date - 1, season_end = current_date + 30;
 
--- Einen Montag in der Zukunft innerhalb der Saison finden (Zeitfenster 17:00/19:00).
+-- Einen Montag in der Zukunft innerhalb der Saison finden (Zeitfenster 14:30/16:45/19:00).
 create temp table t_day as
   select d::date as d
     from generate_series(current_date + 3, current_date + 10, interval '1 day') d
@@ -27,23 +27,23 @@ grant select on t_day to anon, authenticated;
 
 -- ---------- Seeds ----------
 select is((select count(*)::int from public.settings), 1, 'genau eine settings-Zeile');
-select is((select count(*)::int from public.slot_templates where active), 14, '14 Zeitfenster-Vorlagen (7 Tage × 2)');
+select is((select count(*)::int from public.slot_templates where active), 21, '21 Zeitfenster-Vorlagen (7 Tage × 3)');
 select results_eq(
-  $$select start_time::text from public.slot_templates where weekday = 6 order by start_time$$,
-  $$values ('17:30:00'), ('19:30:00')$$,
-  'Samstag: 17:30 und 19:30'
+  $$select start_time::text from public.slot_templates where weekday = 6 and active order by start_time$$,
+  $$values ('15:30:00'), ('17:45:00'), ('20:00:00')$$,
+  'Samstag: 15:30, 17:45 und 20:00'
 );
 
--- ---------- Beträge werden aus settings kopiert ----------
+-- ---------- Beträge werden aus dem Preis des Zeitfensters kopiert ----------
 insert into public.bookings (id, date, start_time, end_time, status, first_name, last_name, email, phone, persons, occasion, hold_expires_at)
-select '11111111-1111-1111-1111-111111111111', d, '17:00', '19:00', 'paid', 'Anna', 'Muster', 'anna@test.de', '0123456', 8, 'firmenfeier', null
+select '11111111-1111-1111-1111-111111111111', d, '16:45', '18:45', 'paid', 'Anna', 'Muster', 'anna@test.de', '0123456', 8, 'firmenfeier', null
   from t_day;
 
 select results_eq(
   $$select price_cents, fee_cents, taler_cents, haendler_share_cents, amount_total_cents
       from public.bookings where id = '11111111-1111-1111-1111-111111111111'$$,
-  $$values (17500, 350, 10000, 13750, 17850)$$,
-  'Beträge werden beim Anlegen aus settings übernommen (178,50 €, Händler 137,50 €)'
+  $$values (14550, 350, 7500, 11025, 14900)$$,
+  'Montag 16:45: 149 € inkl. 3,50 € Gebühr, 75 € Freiverzehr, Händler 75 € + ½ × 70,50 € = 110,25 €'
 );
 select matches(
   (select booking_code from public.bookings where id = '11111111-1111-1111-1111-111111111111'),
@@ -62,17 +62,17 @@ select throws_ok(
 );
 
 -- Spätere Preisänderung betrifft alte Buchung nicht.
-update public.settings set price_cents = 19900;
+update public.slot_templates set price_cents = 19900 where weekday = 1 and start_time = '16:45';
 select is(
-  (select price_cents from public.bookings where id = '11111111-1111-1111-1111-111111111111'),
-  17500, 'Preisänderung wirkt nicht auf bestehende Buchung'
+  (select amount_total_cents from public.bookings where id = '11111111-1111-1111-1111-111111111111'),
+  14900, 'Preisänderung wirkt nicht auf bestehende Buchung'
 );
-update public.settings set price_cents = 17500;
+update public.slot_templates set price_cents = 14900 where weekday = 1 and start_time = '16:45';
 
 -- ---------- Doppelbuchung ----------
 select throws_ok(
   $$insert into public.bookings (date, start_time, end_time, status, first_name, last_name, email, phone, persons, occasion, hold_expires_at)
-    select d, '17:00', '19:00', 'pending', 'Ben', 'B', 'b@test.de', '0123456', 2, 'freunde', now() + interval '30 min' from t_day$$,
+    select d, '16:45', '18:45', 'pending', 'Ben', 'B', 'b@test.de', '0123456', 2, 'freunde', now() + interval '30 min' from t_day$$,
   '23505', null,
   'zweite Buchung im selben Zeitfenster scheitert am Unique-Index'
 );
@@ -86,7 +86,7 @@ select lives_ok(
 );
 select lives_ok(
   $$insert into public.bookings (date, start_time, end_time, status, first_name, last_name, email, phone, persons, occasion, hold_expires_at)
-    select d, '17:00', '19:00', 'pending', 'Dora', 'D', 'd@test.de', '0123456', 4, 'familienfeier', now() + interval '30 min' from t_day$$,
+    select d, '16:45', '18:45', 'pending', 'Dora', 'D', 'd@test.de', '0123456', 4, 'familienfeier', now() + interval '30 min' from t_day$$,
   'nach Storno ist das Zeitfenster wieder buchbar'
 );
 
@@ -94,7 +94,7 @@ select lives_ok(
 -- Die abgelaufene Reservierung (19:00) wird beim Abruf freigegeben.
 select results_eq(
   $$select start_time::text, status from public.get_availability((select d from t_day), (select d from t_day))$$,
-  $$values ('17:00:00', 'taken'), ('19:00:00', 'free')$$,
+  $$values ('14:30:00', 'free'), ('16:45:00', 'taken'), ('19:00:00', 'free')$$,
   'pending zählt als belegt, abgelaufene Reservierung ist wieder frei'
 );
 select is(
