@@ -128,6 +128,37 @@ test.describe('Echte Verfügbarkeit (Phase 2)', () => {
     await expect(dayBtn(addDays(start, 1))).toHaveAccessibleName(/geschlossen/);
   });
 
+  test('Warteliste für einen ausgebuchten Tag', async ({ page }) => {
+    const start = MOCK_SETTINGS.season_start;
+    const opts: MockOptions = {
+      overrides: Object.fromEntries(ALL_START_TIMES.map((t) => [`${start} ${t}`, 'taken'])),
+      waitlistRequests: [],
+    };
+    await mockSupabase(page, opts);
+    await page.goto('/#buchen');
+    await page.getByRole('button', { name: /Dein Wunschtag ist ausgebucht/ }).click();
+    await page.getByLabel('Wunschtag').selectOption(start);
+    await page.locator('#buchen').getByLabel('E-Mail', { exact: true }).fill('warte@example.de');
+    await page.getByRole('button', { name: 'Auf die Warteliste setzen' }).click();
+    await expect(page.getByText('Bitte bestätige die Benachrichtigung.')).toBeVisible();
+    await page.getByLabel(/einmalig/).check();
+    await page.getByRole('button', { name: 'Auf die Warteliste setzen' }).click();
+    await expect(page.getByText(/Du stehst auf der Warteliste/)).toBeVisible();
+    expect(opts.waitlistRequests).toEqual([
+      { date: start, email: 'warte@example.de', consent: true, website: '' },
+    ]);
+  });
+
+  test('Link aus der Warteliste-Mail öffnet den Tag', async ({ page }) => {
+    const d = addDays(MOCK_SETTINGS.season_start, 2);
+    await mockSupabase(page);
+    await page.goto(`/?datum=${d}#buchen`);
+    await expect(page.getByRole('heading', { name: 'Zeitfenster wählen' })).toBeVisible();
+    await expect(
+      page.getByRole('group', { name: 'Zeitfenster' }).locator('button').first(),
+    ).toBeEnabled();
+  });
+
   test('Tag mit zwei belegten Zeitfenstern: nur das freie ist wählbar', async ({ page }) => {
     const d = addDays(MOCK_SETTINGS.season_start, 3);
     await mockSupabase(page, {

@@ -356,3 +356,31 @@ export async function sendContact(values: Record<string, unknown>): Promise<Cont
     return { ok: false, message: GENERIC_ERROR };
   }
 }
+
+export type WaitlistResult =
+  { ok: true } | { ok: false; freeNow?: boolean; message: string; fields?: Record<string, string> };
+
+/** Warteliste für einen ausgebuchten Tag (Edge Function `waitlist`). */
+export async function joinWaitlist(values: {
+  date: string;
+  email: string;
+  consent: boolean;
+  website: string;
+}): Promise<WaitlistResult> {
+  if (DEMO) {
+    await new Promise((r) => setTimeout(r, 500));
+    return { ok: true };
+  }
+  try {
+    const { status, data } = await callFunction('waitlist', values);
+    if (status === 200 && data.ok === true) return { ok: true };
+    return {
+      ok: false,
+      freeNow: data.freeNow === true,
+      message: typeof data.message === 'string' ? data.message : GENERIC_ERROR,
+      fields: data.fields as Record<string, string> | undefined,
+    };
+  } catch {
+    return { ok: false, message: GENERIC_ERROR };
+  }
+}

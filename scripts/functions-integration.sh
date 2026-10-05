@@ -55,14 +55,14 @@ cleanup() {
 trap cleanup EXIT
 
 port=8101
-for f in create-checkout stripe-webhook release-hold send-ticket send-reminders admin ticket-files scanner contact; do
+for f in create-checkout stripe-webhook release-hold send-ticket send-reminders admin ticket-files scanner contact waitlist send-waitlist; do
   DENO_SERVE_ADDRESS="tcp:127.0.0.1:$port" deno run -A --config "supabase/functions/$f/deno.json" \
     "supabase/functions/$f/index.ts" >"/tmp/fn-$f.log" 2>&1 &
   pids+=($!)
   port=$((port + 1))
 done
 
-for p in 8101 8102 8103 8104 8105 8106 8107 8108 8109 12111; do
+for p in 8101 8102 8103 8104 8105 8106 8107 8108 8109 8110 8111 12111; do
   for _ in $(seq 1 60); do
     (echo >"/dev/tcp/127.0.0.1/$p") 2>/dev/null && break
     sleep 1

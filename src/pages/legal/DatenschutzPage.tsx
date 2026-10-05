@@ -84,12 +84,23 @@ export function DatenschutzPage() {
         dich jederzeit über den Link in jeder Ausgabe abmelden.
       </p>
 
-      <H2>6. Kontaktformular</H2>
+      <H2>6. Kontaktformular, Firmenanfrage und Warteliste</H2>
       <p>
         Nachrichten aus dem Kontaktformular senden wir per E-Mail (über Brevo) an unser Postfach und
         speichern sie nicht in der Datenbank. Wir nutzen deine Angaben nur zur Beantwortung (Art. 6
         Abs. 1 lit. b bzw. f DSGVO). Zum Schutz vor Missbrauch zählen wir Anfragen je Gerät über
         einen Hash der IP-Adresse, der nach kurzer Zeit gelöscht wird.
+      </p>
+      <p>
+        Anfragen für Firmenfeiern und größere Gruppen behandeln wir genauso: Sie gehen per E-Mail an
+        unser Postfach und werden nicht in der Datenbank gespeichert.
+      </p>
+      <p>
+        Für die <strong>Warteliste</strong> speichern wir nur deine E-Mail-Adresse und den
+        gewünschten Tag – auf Grundlage deiner Einwilligung (Art. 6 Abs. 1 lit. a DSGVO). Wird an
+        dem Tag ein Zeitfenster frei, schicken wir dir genau eine E-Mail (über Brevo) und löschen
+        den Eintrag sofort. Spätestens am Tag nach dem Wunschtag wird er automatisch gelöscht. Du
+        kannst die Einwilligung jederzeit per E-Mail an uns widerrufen.
       </p>
 
       <H2>7. Anmeldebereich für Partner</H2>

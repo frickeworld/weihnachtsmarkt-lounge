@@ -8,6 +8,7 @@ import { useAvailability } from '@/lib/useAvailability';
 import { usePrefersReducedMotion } from '@/lib/useMediaQuery';
 import { Calendar } from './booking/Calendar';
 import { SlotPicker } from './booking/SlotPicker';
+import { Waitlist } from './booking/Waitlist';
 
 // Formular (zod, react-hook-form) erst laden, wenn ein Zeitfenster gewählt ist.
 const BookingForm = lazy(() =>
@@ -53,10 +54,15 @@ export function Booking() {
   const first = settings.seasonStart > today ? settings.seasonStart : today;
   const minMonth = ym(first);
   const maxMonth = ym(settings.seasonEnd);
-  const [requestedView, setView] = useState<YM | null>(null);
+  // Link aus der Warteliste-Mail: /?datum=YYYY-MM-DD#buchen öffnet direkt diesen Tag.
+  const [linkedDate] = useState<IsoDate | null>(() => {
+    const d = new URLSearchParams(window.location.search).get('datum');
+    return d && /^\d{4}-\d{2}-\d{2}$/.test(d) && d >= today ? d : null;
+  });
+  const [requestedView, setView] = useState<YM | null>(() => (linkedDate ? ym(linkedDate) : null));
   // Ansicht immer im Saisonzeitraum halten (auch wenn die echten Einstellungen erst später kommen).
   const view = clampView(requestedView ?? minMonth, minMonth, maxMonth);
-  const [date, setDate] = useState<IsoDate | null>(null);
+  const [date, setDate] = useState<IsoDate | null>(linkedDate);
   const [slotStart, setSlotStart] = useState<string | null>(null);
   // Rückkehr von Stripe mit „Zurück“: /?abbruch=<booking_id>#buchen
   const [abortedBookingId] = useState(() =>
@@ -106,6 +112,16 @@ export function Booking() {
   );
 
   const daySlots = date ? (byDate.get(date) ?? []) : [];
+  // Ausgebuchte Tage im angezeigten Monat (für die Warteliste)
+  const bookedDays = [...byDate.entries()]
+    .filter(
+      ([d, slots]) =>
+        d >= today &&
+        slots.some((x) => x.status === 'taken') &&
+        !slots.some((x) => x.status === 'free'),
+    )
+    .map(([d]) => d)
+    .sort();
   const slot = daySlots.find((s) => s.startTime === slotStart && s.status === 'free') ?? null;
 
   const scrollTo = (el: HTMLElement | null) =>
@@ -192,6 +208,16 @@ export function Booking() {
                 </div>
               )}
             </div>
+            {state === 'ready' && (
+              <Waitlist
+                key={monthStart(view)}
+                bookedDays={bookedDays}
+                onFreeNow={(d) => {
+                  selectDate(d);
+                  setNotice('Gute Nachricht: An diesem Tag ist gerade wieder etwas frei.');
+                }}
+              />
+            )}
             {notice && (
               <p
                 role="alert"

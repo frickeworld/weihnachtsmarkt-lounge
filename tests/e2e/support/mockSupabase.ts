@@ -86,6 +86,8 @@ export interface MockOptions {
   successToken?: string | null;
   /** Eingerichtete Wallets (ticket-files?format=info). */
   wallet?: { apple: boolean; google: boolean };
+  /** Alle Anfragen an die Warteliste. */
+  waitlistRequests?: unknown[];
   /** Alle Anfragen an das Kontaktformular. */
   contactRequests?: unknown[];
   /** Antwort von get_ticket (null = nicht gefunden). */
@@ -111,6 +113,10 @@ export async function mockSupabase(page: Page, opts: MockOptions = {}) {
   });
   await page.route('**/functions/v1/contact', async (route) => {
     opts.contactRequests?.push(route.request().postDataJSON());
+    await route.fulfill({ json: { ok: true } });
+  });
+  await page.route('**/functions/v1/waitlist', async (route) => {
+    opts.waitlistRequests?.push(route.request().postDataJSON());
     await route.fulfill({ json: { ok: true } });
   });
   await page.route('**/functions/v1/release-hold', async (route) => {
