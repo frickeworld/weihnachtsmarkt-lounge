@@ -246,3 +246,24 @@ test.describe('Mobile Buchungsleiste', () => {
     await expect(bar).toHaveCount(0);
   });
 });
+
+test.describe('Tages-Überraschungen', () => {
+  test('Nikolaus am 2. Advent: Gruß mit zwei Kerzen, sonst nichts', async ({ page }) => {
+    await mockSupabase(page);
+    // Saison im Dezember, damit Nikolaus und Advent darin liegen
+    await page.route('**/rest/v1/rpc/get_public_settings*', (route) => {
+      const s = { ...MOCK_SETTINGS, season_start: '2026-11-26', season_end: '2026-12-23' };
+      const single = (route.request().headers()['accept'] ?? '').includes('vnd.pgrst.object');
+      return route.fulfill({ json: single ? s : [s] });
+    });
+    await page.goto('/?tag=2026-12-06');
+    const greeting = page.getByTestId('tagesgruss');
+    await expect(greeting).toContainText('Frohen Nikolaus und schönen 2. Advent');
+    await expect(
+      greeting.getByRole('img', { name: '2 von 4 Adventskerzen brennen' }),
+    ).toBeVisible();
+    await page.goto('/?tag=2026-12-31');
+    await expect(page.locator('#start h1')).toBeVisible();
+    await expect(page.getByTestId('tagesgruss')).toHaveCount(0);
+  });
+});
