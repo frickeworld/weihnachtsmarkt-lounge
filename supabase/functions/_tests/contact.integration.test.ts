@@ -1,5 +1,5 @@
 // Integrationstest Kontaktformular: Mail an STUDIO/F mit Reply-To, Honigtopf, Prüfung, Begrenzung.
-import { assertEquals, assertMatch } from 'jsr:@std/assert@1';
+import { assert, assertEquals, assertMatch } from 'jsr:@std/assert@1';
 
 const FN = Deno.env.get('FN_CONTACT') ?? 'http://127.0.0.1:8109';
 const device = `203.0.113.${Math.floor(Math.random() * 200) + 1}`;
@@ -60,6 +60,38 @@ Deno.test({
         const r = await send({ ...valid, website: 'http://spam.example' });
         assertEquals(r.body.ok, true);
         assertEquals(mails.length, before);
+      });
+
+      await t.step('Firmenanfrage → eigene Mail mit Zeitfenstern und Personen', async () => {
+        const before = mails.length;
+        const bad = await send({ kind: 'gruppe', company: '', name: 'X', email: 'x@example.de' });
+        assertEquals(bad.status, 400);
+        assert(bad.body.fields.company);
+        const r = await send({
+          kind: 'gruppe',
+          company: 'Muster GmbH',
+          name: 'Frau Muster',
+          email: 'firma@example.de',
+          phone: '05231 123456',
+          slots: 3,
+          persons: 28,
+          dates: 'Fr 4.12. ab 15:30',
+          message: '',
+          website: '',
+        });
+        assertEquals(r.status, 200, JSON.stringify(r.body));
+        const m = mails[before] as {
+          to: { email: string }[];
+          replyTo: { email: string };
+          subject: string;
+          textContent: string;
+          tags: string[];
+        };
+        assertEquals(m.to[0]!.email, 'info@studio-f.club');
+        assertEquals(m.replyTo.email, 'firma@example.de');
+        assertEquals(m.subject, 'Firmenanfrage: Muster GmbH – 3 Zeitfenster, 28 Personen');
+        assertMatch(m.textContent, /Wunschtermine: Fr 4\.12\. ab 15:30/);
+        assertEquals(m.tags, ['lounge-firmenanfrage']);
       });
 
       await t.step('mehr als 5 Nachrichten pro Stunde → 429', async () => {

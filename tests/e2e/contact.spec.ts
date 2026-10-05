@@ -47,3 +47,30 @@ test('Footer: großes „Powered by STUDIO/F“ und Kontakt-Link; FAQ verweist a
   await page.getByText('Ich habe kein Ticket bekommen. Was nun?').click();
   await expect(page.getByRole('link', { name: 'Kontaktformular' })).toBeVisible();
 });
+
+test('Firmenanfrage: mehrere Zeitfenster, Versand an STUDIO/F', async ({ page }) => {
+  const contactRequests: unknown[] = [];
+  await mockSupabase(page, { contactRequests });
+  await page.goto('/#firmen');
+  const form = page.getByRole('form', { name: 'Anfrage für Firmen und Gruppen' });
+  await form.getByRole('button', { name: 'Anfrage senden' }).click();
+  await expect(form.getByText('Bitte gib den Namen der Firma oder Gruppe an.')).toBeVisible();
+  expect(contactRequests).toHaveLength(0);
+
+  await form.getByLabel('Firma oder Gruppe').fill('Muster GmbH');
+  await form.getByLabel('Ansprechperson').fill('Frau Muster');
+  await form.getByLabel('E-Mail').fill('firma@example.de');
+  await form.getByLabel('Wie viele Zeitfenster?').fill('3');
+  await form.getByLabel('Personen insgesamt').fill('28');
+  await form.getByLabel('Wunschtermine').fill('Fr 4.12. ab 15:30');
+  await form.getByRole('button', { name: 'Anfrage senden' }).click();
+  await expect(
+    page.getByRole('heading', { name: 'Danke! STUDIO/F meldet sich mit einem Vorschlag.' }),
+  ).toBeVisible();
+  expect(contactRequests[0]).toMatchObject({
+    kind: 'gruppe',
+    company: 'Muster GmbH',
+    slots: 3,
+    persons: 28,
+  });
+});

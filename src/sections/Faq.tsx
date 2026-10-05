@@ -30,8 +30,12 @@ export function Faq() {
       q: `Wir sind mehr als ${maxPersons} Personen. Geht das?`,
       a: (
         <>
-          Die Lounge bietet Platz für bis zu {maxPersons} Personen. Für größere Gruppen schreib uns
-          an{' '}
+          Die Lounge bietet Platz für bis zu {maxPersons} Personen. Für größere Gruppen reservieren
+          wir gern mehrere Zeitfenster hintereinander oder an verschiedenen Tagen – nutze dafür die{' '}
+          <a href="#firmen" className="font-semibold text-gold-deep underline underline-offset-4">
+            Anfrage für Firmen und Gruppen
+          </a>{' '}
+          oder schreib an{' '}
           <a
             href={`mailto:${contactEmail}`}
             className="font-semibold text-gold-deep underline underline-offset-4"
