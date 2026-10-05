@@ -15,6 +15,9 @@ test.describe('Händler-Bereich', () => {
     await expect(page.getByText('Euer Anteil', { exact: true })).toBeVisible();
     await expect(page.getByText(/Umsatz|Studio F/)).toHaveCount(0);
     await expect(page.getByRole('heading', { name: 'Heute in der Lounge' })).toBeVisible();
+    // Heatmap: gefragteste Zeit, Werte per Fokus, ohne Umsatz
+    await expect(page.getByText(/Am gefragtesten:\s*Freitag 17:45 Uhr/)).toBeVisible();
+    await expect(page.getByLabel('Montag 19:00 Uhr: 3 von 4 gebucht (75 %)')).toBeVisible();
   });
 
   test('Buchungen: Status, nicht erschienen, keine Aktions-Buttons', async ({ page }) => {

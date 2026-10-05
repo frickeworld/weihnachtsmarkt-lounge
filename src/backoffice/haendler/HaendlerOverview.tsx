@@ -6,6 +6,7 @@ import { unwrap, useLoad } from '../admin/useLoad';
 import { requireClient } from '../authClient';
 import { errorText } from '../errors';
 import { Kpi } from '../Kpi';
+import { OccupancyHeatmapPanel } from '../OccupancyHeatmap';
 import { PeriodPicker } from '../PeriodPicker';
 import { usePeriod } from '../usePeriod';
 import { ErrorBox, Loading, PageHeader, Panel } from '../ui';
@@ -74,7 +75,7 @@ export function HaendlerOverview() {
             <Kpi
               label="Euer Anteil"
               value={formatCents(d.haendler_cents)}
-              sub="137,50 € je bezahlter Buchung"
+              sub="Freiverzehr + Hälfte des Rests je bezahlter Buchung"
             />
             <Kpi label="Residenztaler übergeben" value={d.taler_handed_out} />
             <Kpi label="Seitenaufrufe" value={d.page_views} />
@@ -100,6 +101,7 @@ export function HaendlerOverview() {
               />
             </div>
           )}
+          <OccupancyHeatmapPanel from={period.from} to={period.to} />
         </>
       )}
     </>

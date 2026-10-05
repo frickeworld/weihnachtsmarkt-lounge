@@ -22,6 +22,11 @@
   --color-haendler-red: #cd131c; /* Händler-Rot, gemessen aus dem Logo-Schriftzug */
   --color-fir: #1f3a2e;
   --color-chart: #a8761c; /* Diagramm-Balken (Kontrast ≥ 3:1, geprüft mit dem Paletten-Validator) */
+  /* Auslastungs-Heatmap: eine Gold-Skala hell → dunkel (Paletten-Validator „ordinal“ bestanden) */
+  --color-heat-1: #c9a65e;
+  --color-heat-2: #a8823a;
+  --color-heat-3: #86611c;
+  --color-heat-4: #5a4112;
 
   --font-display: 'Jost', 'Jost Fallback', 'Century Gothic', 'Avenir Next', sans-serif;
   --font-sans: 'Manrope', 'Manrope Fallback', system-ui, -apple-system, 'Segoe UI', sans-serif;

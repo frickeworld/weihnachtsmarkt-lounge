@@ -6,6 +6,7 @@ import { requireClient } from '../authClient';
 import { errorText } from '../errors';
 import { ErrorBox, Loading, PageHeader, Panel } from '../ui';
 import { BOOKING_COLUMNS } from './api';
+import { OccupancyHeatmapPanel } from '../OccupancyHeatmap';
 import { DailyBars } from './DailyBars';
 import { hhmm, percent } from './format';
 import type { Booking, DashboardData } from './types';
@@ -210,6 +211,7 @@ export function OverviewPage() {
               />
             </div>
           )}
+          {range && <OccupancyHeatmapPanel from={range.from} to={range.to} />}
         </>
       )}
     </>

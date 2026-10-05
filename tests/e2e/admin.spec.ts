@@ -68,6 +68,9 @@ test.describe('Admin', () => {
     await expect(page.getByText('Erika Muster · 8 Pers.')).toBeVisible();
     await expect(page.getByText('2.142,00 €')).toBeVisible(); // 12 × 178,50 €
     await expect(page.getByText('8,3 %')).toBeVisible(); // 10 ÷ 120
+    await expect(
+      page.getByLabel('Freitag 20:00 Uhr: 4 von 4 gebucht (100 %) · 796,00 €'),
+    ).toBeVisible();
     await page.getByText('Als Tabelle anzeigen').first().click();
     await expect(page.getByRole('table').first()).toBeVisible();
     // Keine waagerechte Scrollleiste

@@ -1,6 +1,6 @@
 -- pgTAP Phase 7: Händler-Zugriff, keine Kontaktdaten, Rechenprobe Abrechnung
 begin;
-select plan(20);
+select plan(23);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-0000000000a7', 'admin7@test.de'),
@@ -31,6 +31,7 @@ set local role authenticated;
 set local request.jwt.claims = '{"sub":"00000000-0000-0000-0000-0000000000d7","role":"authenticated","aal":"aal1"}';
 select throws_ok($$select public.settlement('2025-12-01', '2025-12-07')$$, '42501', null, 'ohne Rolle: keine Abrechnung');
 select throws_ok($$select * from public.haendler_bookings('2025-12-01', '2025-12-07')$$, '42501', null, 'ohne Rolle: keine Buchungen');
+select throws_ok($$select * from public.occupancy_heatmap('2025-12-01', '2025-12-07')$$, '42501', null, 'ohne Rolle: keine Auslastung');
 
 -- ---------- Händler mit eingerichteter 2FA, aber ohne Code ----------
 set local request.jwt.claims = '{"sub":"00000000-0000-0000-0000-0000000000c7","role":"authenticated","aal":"aal1"}';
@@ -62,10 +63,14 @@ select throws_ok($$select public.admin_dashboard('2025-12-01', '2025-12-07')$$, 
 create temp table d as select public.haendler_dashboard('2025-12-01', '2025-12-07') as j;
 select is((select (j ->> 'haendler_cents')::int from d), 29550, 'Kennzahl „Euer Anteil“ = 295,50 €');
 select ok((select not (j ? 'studio_cents') and not (j ? 'revenue_cents') from d), 'Kennzahlen ohne Umsatz/Studio-F-Anteil');
+select results_eq($$select weekday, start_time, booked, revenue_cents from public.occupancy_heatmap('2025-12-01', '2025-12-07') where booked > 0$$,
+  $$values (5::smallint, '17:45'::time, 1, null::bigint), (5::smallint, '20:00'::time, 1, null::bigint), (7::smallint, '14:30'::time, 1, null::bigint)$$,
+  'Auslastung je Wochentag/Zeitfenster, für Händler ohne Umsatz');
 
 -- ---------- Admin ----------
 set local request.jwt.claims = '{"sub":"00000000-0000-0000-0000-0000000000a7","role":"authenticated","aal":"aal2"}';
 select is((public.settlement('2025-12-01', '2025-12-07') ->> 'studio_cents')::int, 2 * 19900 - 29550, 'Admin sieht Studio-F-Anteil (2 × 51,25 €)');
+select is((select sum(revenue_cents)::int from public.occupancy_heatmap('2025-12-01', '2025-12-07')), 2 * 19900, 'Admin sieht Umsatz je Zeitfenster');
 
 reset role;
 select * from finish();

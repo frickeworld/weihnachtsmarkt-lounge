@@ -218,6 +218,55 @@ export async function mockBackoffice(page: Page, opts: BackofficeOptions = {}) {
       },
     });
   });
+  await page.route('**/rest/v1/rpc/occupancy_heatmap*', (route) => {
+    const admin = (opts.role ?? 'studio_admin') === 'studio_admin';
+    return route.fulfill({
+      json: [
+        {
+          weekday: 1,
+          start_time: '14:30:00',
+          offered: 4,
+          booked: 1,
+          revenue_cents: admin ? 9900 : null,
+        },
+        {
+          weekday: 1,
+          start_time: '16:45:00',
+          offered: 4,
+          booked: 2,
+          revenue_cents: admin ? 29800 : null,
+        },
+        {
+          weekday: 1,
+          start_time: '19:00:00',
+          offered: 4,
+          booked: 3,
+          revenue_cents: admin ? 44700 : null,
+        },
+        {
+          weekday: 5,
+          start_time: '15:30:00',
+          offered: 4,
+          booked: 0,
+          revenue_cents: admin ? 0 : null,
+        },
+        {
+          weekday: 5,
+          start_time: '17:45:00',
+          offered: 4,
+          booked: 4,
+          revenue_cents: admin ? 79600 : null,
+        },
+        {
+          weekday: 5,
+          start_time: '20:00:00',
+          offered: 4,
+          booked: 4,
+          revenue_cents: admin ? 79600 : null,
+        },
+      ],
+    });
+  });
   await page.route('**/rest/v1/rpc/haendler_dashboard*', (route) =>
     route.fulfill({
       json: {
