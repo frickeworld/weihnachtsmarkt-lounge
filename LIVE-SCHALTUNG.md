@@ -4,6 +4,8 @@ Reihenfolge von oben nach unten abarbeiten. Details zu jedem Schritt stehen in
 `docs/SETUP.md` (Abschnittsnummern in Klammern). Erst wenn **alle** Punkte abgehakt sind,
 geht die Seite unter der echten Domain online.
 
+- Schritt-für-Schritt-Test mit echter Buchung: `docs/LIVE-TEST.md`
+
 ## A. Inhalte und Recht (Louis / Anwalt / Steuerberater)
 
 - [ ] **Impressum, Datenschutz, AGB** vom Anwalt prüfen lassen; alle `[PLATZHALTER]` füllen
