@@ -26,6 +26,11 @@ test.describe('Online-Ticket', () => {
     await expect(qr).toBeVisible();
     expect(await qr.getAttribute('src')).toMatch(/^data:image\/png;base64,/);
     await expect(page.locator('meta[name="robots"][content*="noindex"]').first()).toBeAttached();
+    // Einladung an die Runde: Termin und Website, aber nie der Ticket-Link
+    const wa = await page.getByRole('link', { name: 'Per WhatsApp einladen' }).getAttribute('href');
+    const text = decodeURIComponent(wa!.replace('https://wa.me/?text=', ''));
+    expect(text).toContain('Samstag, 5. Dezember 2026, 17:30–19:30 Uhr');
+    expect(text).not.toContain('/ticket/');
   });
 
   test('eingecheckt zeigt Uhrzeit', async ({ page }) => {

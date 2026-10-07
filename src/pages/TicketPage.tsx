@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { HaendlerLogo } from '@/components/HaendlerLogo';
+import { InviteFriends } from '@/components/InviteFriends';
 import { TicketDownloads } from '@/components/TicketDownloads';
 import { fetchTicket, type TicketInfo } from '@/lib/api';
 import { Countdown } from '@/components/Countdown';
@@ -148,15 +149,18 @@ function TicketView({ ticket, qr, token }: { ticket: TicketInfo; qr: string; tok
       </p>
 
       {!cancelled && (
-        <TicketDownloads
-          token={token}
-          slot={{
-            date: ticket.date,
-            startTime: ticket.startTime,
-            endTime: ticket.endTime,
-            bookingCode: ticket.bookingCode,
-          }}
-        />
+        <>
+          <TicketDownloads
+            token={token}
+            slot={{
+              date: ticket.date,
+              startTime: ticket.startTime,
+              endTime: ticket.endTime,
+              bookingCode: ticket.bookingCode,
+            }}
+          />
+          <InviteFriends date={ticket.date} startTime={ticket.startTime} endTime={ticket.endTime} />
+        </>
       )}
     </>
   );

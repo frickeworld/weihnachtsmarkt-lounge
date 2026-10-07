@@ -5,6 +5,7 @@ import { Header } from '@/components/Header';
 import { GlitterBand } from '@/components/GlitterBand';
 import { Countdown } from '@/components/Countdown';
 import { TalerRain } from '@/components/TalerRain';
+import { InviteFriends } from '@/components/InviteFriends';
 import { TicketDownloads } from '@/components/TicketDownloads';
 import taler192 from '@/assets/taler-192.webp';
 import { fetchSuccessInfo, fetchSuccessTicketToken, type SuccessInfo } from '@/lib/api';
@@ -145,6 +146,11 @@ export function BookingSuccessPage() {
                       endTime: view.info.endTime,
                       bookingCode: view.info.bookingCode,
                     }}
+                  />
+                  <InviteFriends
+                    date={view.info.date}
+                    startTime={view.info.startTime}
+                    endTime={view.info.endTime}
                   />
                 </div>
               )}
