@@ -8,6 +8,7 @@ import { BookingsPage } from './BookingsPage';
 import { CalendarPage } from './CalendarPage';
 import { DataCarePage } from './DataCarePage';
 import { DayListPage } from './DayListPage';
+import { WeekPlanPage } from './WeekPlanPage';
 import { ExportPage } from './ExportPage';
 import { NewBookingPage } from './NewBookingPage';
 import { OverviewPage } from './OverviewPage';
@@ -32,6 +33,7 @@ export default function AdminRoutes() {
             <Route path="*" element={<Navigate to="/admin" replace />} />
           </Route>
           <Route path="tagesliste/:date" element={<DayListPage />} />
+          <Route path="belegungsplan/:from" element={<WeekPlanPage />} />
         </Routes>
       </RequireAccess>
     </AuthProvider>

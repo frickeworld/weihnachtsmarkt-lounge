@@ -80,6 +80,21 @@ test.describe('Admin', () => {
     expect(overflow).toBe(false);
   });
 
+  test('Belegungsplan für eine Woche mit Wünschen', async ({ page }) => {
+    await mockBackoffice(page, { hasFactor: true });
+    const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Berlin' }).format(
+      new Date(),
+    );
+    await enter(page, `/admin/belegungsplan/${today}`);
+    await expect(
+      page.getByRole('heading', { name: 'Lounge der Händler – Belegungsplan' }),
+    ).toBeVisible();
+    await expect(page.getByText('Erika Muster')).toBeVisible();
+    await expect(page.getByText('Glühwein für alle')).toBeVisible();
+    await expect(page.getByText('8 Pers.')).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Woche danach →' })).toBeVisible();
+  });
+
   test('Buchung öffnen und einchecken', async ({ page }) => {
     await mockBackoffice(page, { hasFactor: true });
     await enter(page, '/admin/buchungen');

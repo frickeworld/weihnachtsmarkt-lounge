@@ -124,9 +124,14 @@ export function ExportPage() {
               onChange={(e) => e.target.value && setDay(e.target.value)}
             />
           </label>
-          <Link to={`/admin/tagesliste/${day}`} className={`${smallBtn} mt-4`}>
-            Tagesliste öffnen
-          </Link>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link to={`/admin/tagesliste/${day}`} className={smallBtn}>
+              Tagesliste öffnen
+            </Link>
+            <Link to={`/admin/belegungsplan/${day}`} className={smallBtn}>
+              Belegungsplan (7 Tage ab diesem Tag)
+            </Link>
+          </div>
         </Panel>
       </div>
     </>
