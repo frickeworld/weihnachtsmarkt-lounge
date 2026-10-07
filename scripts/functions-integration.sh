@@ -22,6 +22,10 @@ export BREVO_SENDER_EMAIL=tickets@studio-f.club
 export BREVO_LIST_BOOKINGS=7
 export BREVO_LIST_NEWSLETTER=8
 export BREVO_DOI_TEMPLATE_ID=9
+# Instagram Graph API simuliert der Test (Port 8197)
+export INSTAGRAM_USER_ID=17841400000000000
+export INSTAGRAM_ACCESS_TOKEN=ig_test_token
+export INSTAGRAM_API_BASE=http://127.0.0.1:8197
 
 # Wallet: Test-Zertifikate (selbst signiert) statt der echten Apple-Zertifikate, Google-API simuliert der Test
 WALLET_DIR=$(mktemp -d)
@@ -55,14 +59,14 @@ cleanup() {
 trap cleanup EXIT
 
 port=8101
-for f in create-checkout stripe-webhook release-hold send-ticket send-reminders admin ticket-files scanner contact waitlist send-waitlist; do
+for f in create-checkout stripe-webhook release-hold send-ticket send-reminders admin ticket-files scanner contact waitlist send-waitlist instagram-sync; do
   DENO_SERVE_ADDRESS="tcp:127.0.0.1:$port" deno run -A --config "supabase/functions/$f/deno.json" \
     "supabase/functions/$f/index.ts" >"/tmp/fn-$f.log" 2>&1 &
   pids+=($!)
   port=$((port + 1))
 done
 
-for p in 8101 8102 8103 8104 8105 8106 8107 8108 8109 8110 8111 12111; do
+for p in 8101 8102 8103 8104 8105 8106 8107 8108 8109 8110 8111 8112 12111; do
   for _ in $(seq 1 60); do
     (echo >"/dev/tcp/127.0.0.1/$p") 2>/dev/null && break
     sleep 1

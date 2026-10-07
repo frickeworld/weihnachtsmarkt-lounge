@@ -453,3 +453,6 @@ verify_jwt = false
 
 [functions.send-waitlist]
 verify_jwt = false
+
+[functions.instagram-sync]
+verify_jwt = false

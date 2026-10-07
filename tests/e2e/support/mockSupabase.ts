@@ -89,6 +89,8 @@ export interface MockOptions {
   specialEvents?: Record<string, unknown>[];
   /** Antwort von get_scarcity (Standard: viel frei, kein Hinweis). */
   scarcity?: { free_total: number; offered_total: number; free_weekend_eve: number };
+  /** Follower von @diehaendlerdetmold (Standard: keine Zahl hinterlegt). */
+  instagramFollowers?: number;
   /** Alle Anfragen an die Warteliste. */
   waitlistRequests?: unknown[];
   /** Alle Anfragen an das Kontaktformular. */
@@ -151,6 +153,11 @@ export async function mockSupabase(page: Page, opts: MockOptions = {}) {
       return route.fulfill({ status: 406, json: { code: 'PGRST116', message: 'no rows' } });
     return route.fulfill({ json: single ? item : item ? [item] : [] });
   });
+  await page.route('**/rest/v1/rpc/get_instagram_stats*', (route) =>
+    opts.instagramFollowers === undefined
+      ? route.fulfill({ status: 406, json: { code: 'PGRST116', message: 'no rows' } })
+      : route.fulfill({ json: { followers: opts.instagramFollowers, updated_at: null } }),
+  );
   await page.route('**/rest/v1/rpc/get_scarcity*', (route) =>
     route.fulfill({
       json: opts.scarcity ?? { free_total: 90, offered_total: 100, free_weekend_eve: 20 },

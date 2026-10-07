@@ -1,6 +1,9 @@
 import { GlitterBand } from '@/components/GlitterBand';
 import { Reveal } from '@/components/Reveal';
+import { useEffect, useState } from 'react';
+import { CountUp } from '@/components/CountUp';
 import { INSTAGRAM_HANDLE, INSTAGRAM_URL, MARKET_URL } from '@/content/partners';
+import { fetchInstagramFollowers } from '@/lib/api';
 
 const pillars = [
   {
@@ -19,6 +22,14 @@ const pillars = [
 
 /** Der Weihnachtsmarkt rund um die Lounge (Inhalte angelehnt an weihnachtsmarkt-detmold.de). */
 export function Market() {
+  const [followers, setFollowers] = useState<number | null>(null);
+  useEffect(() => {
+    let active = true;
+    void fetchInstagramFollowers().then((n) => active && setFollowers(n));
+    return () => {
+      active = false;
+    };
+  }, []);
   return (
     <section id="weihnachtsmarkt" className="scroll-mt-20 px-4 py-20 sm:px-6 sm:py-24">
       <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[1fr_1.2fr] lg:items-center">
@@ -60,6 +71,16 @@ export function Market() {
               <p className="font-display mt-2 text-3xl font-medium sm:text-4xl">
                 Folge den Händlern auf Instagram
               </p>
+              {followers !== null && (
+                <p className="mt-3 flex items-baseline justify-center gap-2 md:justify-start">
+                  <span className="font-display text-5xl leading-none font-medium sm:text-6xl">
+                    <CountUp value={followers} />
+                  </span>
+                  <span className="text-sm font-bold tracking-wide uppercase">
+                    folgen schon – sei dabei
+                  </span>
+                </p>
+              )}
             </div>
             <a
               href={INSTAGRAM_URL}

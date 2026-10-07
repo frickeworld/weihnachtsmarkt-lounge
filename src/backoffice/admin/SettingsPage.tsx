@@ -4,6 +4,7 @@ import { requireClient } from '../authClient';
 import { errorText } from '../errors';
 import { ErrorBox, Loading, PageHeader, Panel, SuccessBox, WarnBox, smallBtn } from '../ui';
 import { centsToEuroInput, parseEuroToCents } from './format';
+import { InstagramPanel } from './InstagramPanel';
 import { SlotTemplatesPanel } from './SlotTemplatesPanel';
 import type { AdminSettings } from './types';
 import { unwrap, useLoad } from './useLoad';
@@ -29,6 +30,7 @@ export function SettingsPage() {
         <div className="space-y-6">
           <SlotTemplatesPanel feeCents={s.data?.fee_cents ?? 350} />
           <ScannerPinPanel />
+          <InstagramPanel />
         </div>
       </div>
     </>

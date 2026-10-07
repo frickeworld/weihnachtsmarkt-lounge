@@ -455,3 +455,11 @@ export async function fetchScarcity(): Promise<Scarcity | null> {
     ? { freeTotal: r.free_total, offeredTotal: r.offered_total, freeWeekendEve: r.free_weekend_eve }
     : null;
 }
+
+/** Follower von @diehaendlerdetmold (null = noch keine Zahl hinterlegt). */
+export async function fetchInstagramFollowers(): Promise<number | null> {
+  if (DEMO) return 2480;
+  if (!restConfigured()) return null;
+  const r = await rpc<{ followers: number }>('get_instagram_stats', {}, 'maybe').catch(() => null);
+  return r && Number.isInteger(r.followers) ? r.followers : null;
+}

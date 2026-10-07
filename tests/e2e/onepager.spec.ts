@@ -292,3 +292,19 @@ test.describe('Ehrliche Knappheit', () => {
     ).toBeVisible();
   });
 });
+
+test.describe('Instagram', () => {
+  test('Follower-Zähler nur mit hinterlegter Zahl', async ({ page }) => {
+    await mockSupabase(page);
+    await page.goto('/#weihnachtsmarkt');
+    await expect(page.getByText('Folge den Händlern auf Instagram')).toBeVisible();
+    await expect(page.getByText('folgen schon – sei dabei')).toHaveCount(0);
+
+    await mockSupabase(page, { instagramFollowers: 2480 });
+    await page.reload();
+    const band = page.getByText('folgen schon – sei dabei').locator('..');
+    await band.scrollIntoViewIfNeeded();
+    await expect(band.getByLabel('2.480')).toBeVisible();
+    await expect(band).toContainText('2.480', { timeout: 5000 });
+  });
+});
