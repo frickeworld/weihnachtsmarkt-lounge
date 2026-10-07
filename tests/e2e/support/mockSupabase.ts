@@ -87,6 +87,8 @@ export interface MockOptions {
   wallet?: { apple: boolean; google: boolean };
   /** Antwort von get_special_events („Besondere Abende“). */
   specialEvents?: Record<string, unknown>[];
+  /** Antwort von get_scarcity (Standard: viel frei, kein Hinweis). */
+  scarcity?: { free_total: number; offered_total: number; free_weekend_eve: number };
   /** Alle Anfragen an die Warteliste. */
   waitlistRequests?: unknown[];
   /** Alle Anfragen an das Kontaktformular. */
@@ -149,6 +151,11 @@ export async function mockSupabase(page: Page, opts: MockOptions = {}) {
       return route.fulfill({ status: 406, json: { code: 'PGRST116', message: 'no rows' } });
     return route.fulfill({ json: single ? item : item ? [item] : [] });
   });
+  await page.route('**/rest/v1/rpc/get_scarcity*', (route) =>
+    route.fulfill({
+      json: opts.scarcity ?? { free_total: 90, offered_total: 100, free_weekend_eve: 20 },
+    }),
+  );
   await page.route('**/rest/v1/rpc/get_special_events*', (route) =>
     route.fulfill({ json: opts.specialEvents ?? [] }),
   );

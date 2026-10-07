@@ -1,5 +1,6 @@
 import type { SlotAvailability, SlotStatus } from './availability';
-import type { IsoDate } from './dates';
+import { isoWeekday, type IsoDate } from './dates';
+import type { Scarcity } from './scarcity';
 import type { PublicSettings } from './settings';
 import { DEMO } from './demo';
 import { DEMO_TICKET_TOKEN, demoAvailability, demoSettings, demoSpecialEvents } from './demoApi';
@@ -426,4 +427,31 @@ export async function fetchSpecialEvents(): Promise<SpecialEvent[]> {
     talerCount: r.taler_count,
     status: r.status,
   }));
+}
+
+/** Echte Zahlen freier Zeitfenster für den Knappheits-Hinweis (null = unbekannt). */
+export async function fetchScarcity(): Promise<Scarcity | null> {
+  if (DEMO) {
+    const s = await demoSettings();
+    const slots = (await demoAvailability(s.seasonStart, s.seasonEnd)).filter(
+      (x) => x.status === 'free' || x.status === 'taken',
+    );
+    const free = slots.filter((x) => x.status === 'free');
+    return {
+      freeTotal: free.length,
+      offeredTotal: slots.length,
+      freeWeekendEve: free.filter(
+        (x) => [5, 6].includes(isoWeekday(x.date)) && ['17:45', '20:00'].includes(x.startTime),
+      ).length,
+    };
+  }
+  if (!restConfigured()) return null;
+  const r = await rpc<{ free_total: number; offered_total: number; free_weekend_eve: number }>(
+    'get_scarcity',
+    {},
+    'maybe',
+  ).catch(() => null);
+  return r
+    ? { freeTotal: r.free_total, offeredTotal: r.offered_total, freeWeekendEve: r.free_weekend_eve }
+    : null;
 }

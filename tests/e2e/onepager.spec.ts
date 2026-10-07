@@ -275,3 +275,20 @@ test.describe('Tages-Überraschungen', () => {
     await expect(page.getByTestId('tagesgruss')).toHaveCount(0);
   });
 });
+
+test.describe('Ehrliche Knappheit', () => {
+  test('Hinweis nur bei echter Knappheit', async ({ page }) => {
+    await mockSupabase(page);
+    await page.goto('/');
+    await expect(page.locator('#start h1')).toBeVisible();
+    await expect(page.getByText(/Nur noch/)).toHaveCount(0);
+
+    await mockSupabase(page, {
+      scarcity: { free_total: 40, offered_total: 100, free_weekend_eve: 3 },
+    });
+    await page.reload();
+    await expect(
+      page.locator('#start').getByText('Nur noch 3 Abende am Wochenende frei'),
+    ).toBeVisible();
+  });
+});

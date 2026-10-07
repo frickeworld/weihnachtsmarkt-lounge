@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Reveal } from '@/components/Reveal';
 import { releaseHold } from '@/lib/api';
+import { ScarcityNote } from '@/components/ScarcityNote';
 import { SectionHeading } from '@/components/SectionHeading';
 import { addDays, formatLongDate, parseIsoDate, todayInBerlin, type IsoDate } from '@/lib/dates';
 import { SELECT_SLOT_EVENT, type SelectSlotDetail } from '@/lib/selectSlot';
@@ -194,6 +195,9 @@ export function Booking() {
     <section ref={sectionRef} id="buchen" className="scroll-mt-20 px-4 py-20 sm:px-6 sm:py-24">
       <div className="mx-auto max-w-3xl">
         <SectionHeading eyebrow="Buchung" title="Wähle deinen Abend" />
+        <div className="-mt-6 mb-8 text-center sm:-mt-8">
+          <ScarcityNote className="text-gold-deep" />
+        </div>
         <Reveal className="space-y-6">
           <Step n={1} title="Tag wählen">
             <div className="relative" aria-busy={state === 'loading'}>

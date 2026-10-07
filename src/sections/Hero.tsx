@@ -4,6 +4,7 @@ import hero800Avif from '@/assets/hero-800.avif';
 import hero800 from '@/assets/hero-800.webp';
 import { GlitterBand } from '@/components/GlitterBand';
 import { AdventCandles } from '@/components/AdventCandles';
+import { ScarcityNote } from '@/components/ScarcityNote';
 import { Snowfall } from '@/components/Snowfall';
 import { WeihnachtsmarktLogo } from '@/components/WeihnachtsmarktLogo';
 import { maxTalerCount } from '@/lib/settings';
@@ -113,6 +114,7 @@ export function Hero() {
                 Was dich erwartet
               </a>
             </div>
+            <ScarcityNote className="mt-5 text-gold-light" />
           </div>
         </div>
         <p className="absolute right-3 bottom-2 z-20 text-[11px] text-on-dark/60">
