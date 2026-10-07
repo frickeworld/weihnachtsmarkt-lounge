@@ -14,6 +14,8 @@ export interface TicketMailData {
   ticketUrl: string;
   /** PDF zum Herunterladen (zusätzlich zum Anhang) */
   pdfUrl?: string | null;
+  /** Geschenk-Karte mit Ticket (PDF) */
+  giftUrl?: string | null;
   /** Kalendereintrag (.ics) */
   icsUrl?: string | null;
   /** „In Google Kalender eintragen“ */
@@ -157,7 +159,11 @@ export function renderTicketEmail(d: TicketMailData): {
       ${walletButtons(d)}
       ${
         d.pdfUrl
-          ? `<tr><td align="center" style="padding:8px 32px 0;"><a href="${escapeHtml(d.pdfUrl)}" style="color:${C.goldDeep};font-size:14px;font-weight:bold;">Ticket als PDF herunterladen</a></td></tr>`
+          ? `<tr><td align="center" style="padding:8px 32px 0;"><a href="${escapeHtml(d.pdfUrl)}" style="color:${C.goldDeep};font-size:14px;font-weight:bold;">Ticket als PDF herunterladen</a>${
+              d.giftUrl
+                ? ` &middot; <a href="${escapeHtml(d.giftUrl)}" style="color:${C.goldDeep};font-size:14px;font-weight:bold;">Als Geschenk-Karte</a>`
+                : ''
+            }</td></tr>`
           : ''
       }
       ${
@@ -202,6 +208,7 @@ export function renderTicketEmail(d: TicketMailData): {
     'Das Ticket hängt zusätzlich als PDF an. Zeig den QR-Code am Einlass.',
     ...(d.appleWalletUrl ? [`Zu Apple Wallet hinzufügen: ${d.appleWalletUrl}`] : []),
     ...(d.googleWalletUrl ? [`In Google Wallet speichern: ${d.googleWalletUrl}`] : []),
+    ...(d.giftUrl ? [`Als Geschenk-Karte ausdrucken: ${d.giftUrl}`] : []),
     ...(d.icsUrl ? [`In den Kalender eintragen: ${d.icsUrl}`] : []),
     ...(d.googleCalendarUrl ? [`In Google Kalender eintragen: ${d.googleCalendarUrl}`] : []),
     '',

@@ -87,6 +87,22 @@ export function TicketDownloads({ token, slot }: { token: string; slot?: Calenda
         </svg>
         Ticket als PDF herunterladen
       </a>
+      <a href={ticketFileUrl(token, 'gift')} className="btn-outline w-full" download>
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 24 24"
+          className="h-5 w-5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <rect x="3" y="8" width="18" height="13" rx="1.5" />
+          <path d="M3 12h18M12 8v13M12 8S10.5 3 7.5 4.2C5 5.2 7 8 12 8Zm0 0s1.5-5 4.5-3.8C19 5.2 17 8 12 8Z" />
+        </svg>
+        Als Geschenk-Karte ausdrucken
+      </a>
       <a href={ticketFileUrl(token, 'ics')} className="btn-outline w-full" download>
         <svg
           aria-hidden="true"

@@ -179,3 +179,122 @@ export async function renderTicketPdf(d: TicketPdfData): Promise<Uint8Array> {
 
   return await pdf.save();
 }
+
+export interface GiftPdfData extends TicketPdfData {
+  /** Weihnachtsmarkt-Taler (PNG mit Transparenz), optional */
+  talerPng?: Uint8Array | null;
+}
+
+/**
+ * Geschenk-Karte: Seite 1 zum Verschenken (Termin, Freiverzehr, Felder „Für“ und „Von“ zum
+ * Ausfüllen), Seite 2 das Ticket mit QR-Code. Das Ticket ist übertragbar.
+ */
+export async function renderGiftPdf(d: GiftPdfData): Promise<Uint8Array> {
+  const pdf = await PDFDocument.create();
+  pdf.setTitle(`Geschenk – Weihnachtsmarkt-Lounge ${d.bookingCode}`);
+  pdf.setAuthor('Weihnachtsmarkt-Lounge der Händler');
+  pdf.setLanguage('de-DE');
+
+  const W = 420;
+  const H = 595;
+  const page = pdf.addPage([W, H]);
+  const serifBold = await pdf.embedFont(StandardFonts.TimesRomanBold);
+  const serifItalic = await pdf.embedFont(StandardFonts.TimesRomanItalic);
+  const sans = await pdf.embedFont(StandardFonts.Helvetica);
+  const sansBold = await pdf.embedFont(StandardFonts.HelveticaBold);
+  const center = (text: string, y: number, font = sans, size = 10, color = INK) => {
+    const t = safe(text);
+    page.drawText(t, { x: (W - font.widthOfTextAtSize(t, size)) / 2, y, size, font, color });
+  };
+
+  page.drawRectangle({ x: 0, y: 0, width: W, height: H, color: PAPER });
+  // Doppelter Goldrahmen
+  page.drawRectangle({
+    x: 16,
+    y: 16,
+    width: W - 32,
+    height: H - 32,
+    borderColor: GOLD,
+    borderWidth: 3,
+  });
+  page.drawRectangle({
+    x: 24,
+    y: 24,
+    width: W - 48,
+    height: H - 48,
+    borderColor: GOLD,
+    borderWidth: 0.8,
+  });
+  // Sterne in den Ecken
+  for (const [x, y] of [
+    [40, H - 40],
+    [W - 40, H - 40],
+    [40, 40],
+    [W - 40, 40],
+  ] as const) {
+    page.drawCircle({ x, y, size: 3.2, color: GOLD });
+  }
+
+  let y = H - 70;
+  if (d.headerJpg) {
+    const head = await pdf.embedJpg(d.headerJpg);
+    const hw = W - 64;
+    const hh = 64;
+    page.drawImage(head, { x: 32, y: y - hh + 14, width: hw, height: hh });
+    y -= hh + 14;
+  }
+  y -= 20;
+  center('EIN GESCHENK FÜR DICH', y, sansBold, 9, GOLD_DEEP);
+  y -= 40;
+  center('Ein Abend in der Lounge', y, serifBold, 26, INK);
+  y -= 24;
+  center('auf dem Weihnachtsmarkt im Schlosspark Detmold', y, serifItalic, 12.5, INK_SOFT);
+
+  if (d.talerPng) {
+    const taler = await pdf.embedPng(d.talerPng);
+    const s = 92;
+    y -= s + 22;
+    page.drawImage(taler, { x: (W - s) / 2, y, width: s, height: s });
+  } else y -= 40;
+
+  y -= 30;
+  center(d.dateLabel, y, sansBold, 16, INK);
+  y -= 19;
+  center(
+    `${d.startTime}–${d.endTime} Uhr · bis zu ${d.persons} Personen`,
+    y,
+    sansBold,
+    11.5,
+    GOLD_DEEP,
+  );
+  y -= 30;
+  const boxW = 290;
+  page.drawRectangle({ x: (W - boxW) / 2, y: y - 9, width: boxW, height: 28, color: GOLD });
+  center(`inklusive ${d.talerCount} € Freiverzehr und Tischservice`, y, sansBold, 10, INK);
+
+  // Felder zum Ausfüllen
+  y -= 50;
+  for (const label of ['Für', 'Von']) {
+    page.drawText(label, { x: 70, y, size: 12, font: serifItalic, color: INK_SOFT });
+    page.drawLine({
+      start: { x: 100, y: y - 2 },
+      end: { x: W - 70, y: y - 2 },
+      thickness: 0.8,
+      color: LINE,
+    });
+    y -= 34;
+  }
+
+  y -= 4;
+  center('Das Ticket mit QR-Code liegt auf der nächsten Seite.', y, sans, 8.5, INK_SOFT);
+  y -= 12;
+  center('Einfach mitbringen und am Einlass zeigen.', y, sans, 8.5, INK_SOFT);
+  center('Powered by STUDIO/F', 34, sans, 6.5, INK_SOFT);
+
+  // Seite 2: das Ticket
+  const ticket = await PDFDocument.load(await renderTicketPdf(d));
+  const [ticketPage] = await pdf.copyPages(ticket, [0]);
+  pdf.addPage(ticketPage);
+
+  return await pdf.save();
+}

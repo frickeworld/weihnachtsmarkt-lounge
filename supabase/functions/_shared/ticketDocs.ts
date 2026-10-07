@@ -2,7 +2,7 @@
 import QRCode from 'qrcode';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { formatLongDate, hhmm } from './format.ts';
-import { renderTicketPdf } from './ticketPdf.ts';
+import { renderGiftPdf, renderTicketPdf } from './ticketPdf.ts';
 
 export interface TicketBooking {
   id: string;
@@ -97,7 +97,7 @@ export async function buildTicketPdf(
 export function ticketFileUrl(
   supabaseUrl: string,
   token: string,
-  format: 'pdf' | 'ics' | 'apple' | 'google',
+  format: 'pdf' | 'gift' | 'ics' | 'apple' | 'google',
 ) {
   return `${supabaseUrl.replace(/\/$/, '')}/functions/v1/ticket-files?token=${token}&format=${format}`;
 }
@@ -107,4 +107,20 @@ export function toBase64(bytes: Uint8Array): string {
   for (let i = 0; i < bytes.length; i += 0x8000)
     bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
   return btoa(bin);
+}
+
+/** Geschenk-Karte (Seite 1) + Ticket (Seite 2). */
+export async function buildGiftPdf(
+  b: TicketBooking,
+  s: TicketSettings,
+  siteUrl: string,
+): Promise<Uint8Array> {
+  const site = siteUrl.replace(/\/$/, '');
+  const [qr, headerJpg, logoPng, talerPng] = await Promise.all([
+    ticketQrPng(b.ticket_token),
+    fetchAsset(`${site}/email/kopf.jpg`),
+    fetchAsset(`${site}/email/haendler-logo-weiss.png`),
+    fetchAsset(`${site}/email/taler.png`),
+  ]);
+  return renderGiftPdf({ ...ticketCommon(b, s), qrPng: qr, headerJpg, logoPng, talerPng });
 }

@@ -53,6 +53,10 @@ test.describe('Online-Ticket', () => {
       `http://supabase.test/functions/v1/ticket-files?token=${TOKEN}&format=pdf`,
     );
     await expect(page.getByRole('link', { name: /Wallet/ })).toHaveCount(0);
+    await expect(page.getByRole('link', { name: 'Als Geschenk-Karte ausdrucken' })).toHaveAttribute(
+      'href',
+      /format=gift$/,
+    );
     await expect(
       page.getByRole('link', { name: 'In den Kalender eintragen (iPhone, Outlook)' }),
     ).toHaveAttribute('href', /format=ics$/);

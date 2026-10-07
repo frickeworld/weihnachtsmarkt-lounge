@@ -2,6 +2,7 @@
 import { assert, assertEquals, assertMatch, assertStringIncludes } from 'jsr:@std/assert@1';
 import { unzipSync } from 'fflate';
 import { createClient } from '@supabase/supabase-js';
+import { PDFDocument } from 'pdf-lib';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -88,6 +89,18 @@ Deno.test({
         );
         const bytes = new Uint8Array(await res.arrayBuffer());
         assertEquals(new TextDecoder().decode(bytes.slice(0, 5)), '%PDF-');
+      });
+
+      await t.step('Geschenk-Karte: PDF mit zwei Seiten', async () => {
+        const res = await fetch(url('gift'));
+        assertEquals(res.status, 200);
+        assertEquals(res.headers.get('content-type'), 'application/pdf');
+        assertStringIncludes(
+          res.headers.get('content-disposition') ?? '',
+          `Geschenk-Lounge-${b.booking_code}.pdf`,
+        );
+        const doc = await PDFDocument.load(new Uint8Array(await res.arrayBuffer()));
+        assertEquals(doc.getPageCount(), 2);
       });
 
       await t.step('Apple Wallet: gültig signierter Pass mit QR-Code', async () => {

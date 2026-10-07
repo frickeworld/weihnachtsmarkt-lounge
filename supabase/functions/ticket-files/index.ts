@@ -1,6 +1,7 @@
 // ticket-files: öffentliche Downloads zum Ticket – nur mit dem geheimen ticket_token (Inhalt des QR-Codes).
 //   GET ?format=info                 → { apple, google } (welche Wallets eingerichtet sind)
 //   GET ?token=…&format=pdf          → PDF-Ticket
+//   GET ?token=…&format=gift         → Geschenk-Karte mit Ticket (PDF)
 //   GET ?token=…&format=ics          → Kalendereintrag (.ics)
 //   GET ?token=…&format=apple        → Apple-Wallet-Pass (.pkpass)
 //   GET ?token=…&format=google       → Weiterleitung zu „In Google Wallet speichern“
@@ -10,6 +11,7 @@ import { googleSaveUrl } from '../_shared/googleWallet.ts';
 import { buildIcs } from '../_shared/ics.ts';
 import { corsHeaders, requireEnv } from '../_shared/http.ts';
 import {
+  buildGiftPdf,
   buildTicketPdf,
   fetchAsset,
   loadTicketSettings,
@@ -84,6 +86,17 @@ Deno.serve(async (req) => {
           ...noStore,
           'Content-Type': 'application/pdf',
           'Content-Disposition': `attachment; filename="Ticket-${b.booking_code}.pdf"`,
+        },
+      });
+    }
+
+    if (format === 'gift') {
+      const pdf = await buildGiftPdf(b, s, siteUrl);
+      return new Response(pdf as Uint8Array<ArrayBuffer>, {
+        headers: {
+          ...noStore,
+          'Content-Type': 'application/pdf',
+          'Content-Disposition': `attachment; filename="Geschenk-Lounge-${b.booking_code}.pdf"`,
         },
       });
     }

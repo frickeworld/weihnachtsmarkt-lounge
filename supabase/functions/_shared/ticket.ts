@@ -71,6 +71,7 @@ export async function deliverTicket(
       qrImageUrl,
       ticketUrl: `${siteUrl}/ticket/${b.ticket_token}`,
       pdfUrl: ticketFileUrl(supabaseUrl, b.ticket_token, 'pdf'),
+      giftUrl: ticketFileUrl(supabaseUrl, b.ticket_token, 'gift'),
       icsUrl: ticketFileUrl(supabaseUrl, b.ticket_token, 'ics'),
       googleCalendarUrl: googleCalendarUrl({
         date: b.date,
