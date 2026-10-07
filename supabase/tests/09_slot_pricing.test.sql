@@ -10,7 +10,7 @@ select extract(isodow from d)::int wd, to_char(p_start, 'HH24:MI') st, p.*
        lateral public.slot_pricing(v.d, v.p_start) p;
 
 select results_eq($$select total_cents, taler_count, haendler_share_cents from pr where wd = 1 and st = '14:30'$$,
-  $$values (9900, 50, 7275)$$, 'Mo–Do Nachmittag: 99 € inkl. 50 € Freiverzehr, Händler 72,75 €');
+  $$values (9900, 50, 7275)$$, 'Mo–Do Nachmittag (deaktiviert): Preis bleibt für bestehende/manuelle Buchungen 99 €, Händler 72,75 €');
 select results_eq($$select total_cents, taler_count, haendler_share_cents from pr where wd = 1 and st = '19:00'$$,
   $$values (14900, 75, 11025)$$, 'Mo–Do Abend: 149 € inkl. 75 €, Händler 110,25 €');
 select results_eq($$select total_cents, taler_count from pr where wd = 5 and st = '15:30'$$,
@@ -41,7 +41,7 @@ select results_eq($$select amount_total_cents, fee_cents, price_cents, taler_cen
 set local role anon;
 select results_eq($$select total_cents, taler_count, special_title from public.get_availability_priced('2026-12-05', '2026-12-05') where start_time = '20:00'$$,
   $$values (24900, 125, 'Party-Abend'::text)$$, 'Verfügbarkeit zeigt Preis und Sondertermin');
-select is((select min(total_cents) from public.get_price_list()), 9900, 'Preisliste: ab 99 €');
+select is((select min(total_cents) from public.get_price_list()), 14900, 'Preisliste: ab 149 € (Mo–Do ohne Nachmittag)');
 select is((select max(taler_count) from public.get_price_list()), 100, 'Preisliste: bis zu 100 € Freiverzehr');
 select throws_ok($$select * from public.slot_pricing('2026-12-05', '20:00')$$, '42501', null, 'interne Preisfunktion nicht öffentlich');
 select throws_ok($$select * from public.slot_specials$$, '42501', null, 'Sondertermine nur für Admins');

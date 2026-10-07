@@ -8,7 +8,7 @@ const FN_WAITLIST = Deno.env.get('FN_WAITLIST') ?? 'http://127.0.0.1:8110';
 const FN_SEND = Deno.env.get('FN_SEND_WAITLIST') ?? 'http://127.0.0.1:8111';
 const db = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
 
-// Ein Dienstag in 20–26 Tagen (drei Zeitfenster: 14:30, 16:45, 19:00)
+// Ein Dienstag in 20–26 Tagen (zwei Zeitfenster: 16:45, 19:00)
 const day = (() => {
   const d = new Date();
   d.setUTCDate(d.getUTCDate() + 20);
@@ -59,7 +59,6 @@ Deno.test({
       const ids: string[] = [];
       await t.step('Tag ausbuchen, eintragen (doppelt egal), Einwilligung Pflicht', async () => {
         for (const [st, et] of [
-          ['14:30', '16:30'],
           ['16:45', '18:45'],
           ['19:00', '21:00'],
         ]) {
@@ -116,7 +115,7 @@ Deno.test({
       });
 
       await t.step('Zeitfenster frei → eine Mail mit Link, Eintrag gelöscht', async () => {
-        await db.from('bookings').delete().eq('id', ids[1]!);
+        await db.from('bookings').delete().eq('id', ids[0]!);
         assertEquals((await send()).sent, 1);
         const m = mails[0] as { to: { email: string }[]; subject: string; textContent: string };
         assertEquals(m.to[0]!.email, 'gast@example.de');

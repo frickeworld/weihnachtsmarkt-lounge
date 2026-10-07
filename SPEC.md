@@ -9,8 +9,8 @@ Stand: 3. Okt. 2026 · Verantwortlich: Louis Fricke · Projektregeln: `CLAUDE.md
 | Thema                    | Festlegung                                                                                            |
 | ------------------------ | ----------------------------------------------------------------------------------------------------- |
 | Produkt                  | Überdachte Lounge, Weihnachtsmarkt im Schlosspark Detmold, bis 10 Personen, 2 h exklusiv              |
-| Preis                    | Preisstaffel je Wochentag/Zeitfenster, Endpreise inkl. 3,50 € Gebühr: 99 € / 149 € / 199 € (siehe 1a) |
-| Zeitfenster              | Mo–Do + So 14:30, 16:45, 19:00 · Fr–Sa 15:30, 17:45, 20:00, je 2 h (Europe/Berlin)                    |
+| Preis                    | Preisstaffel je Wochentag/Zeitfenster, Endpreise inkl. 3,50 € Gebühr: 149 € / 199 € (siehe 1a)        |
+| Zeitfenster              | Mo–Do 16:45, 19:00 · So 14:30, 16:45, 19:00 · Fr–Sa 15:30, 17:45, 20:00, je 2 h (Europe/Berlin)       |
 | Buchungsschluss online   | 60 min vor Beginn (`settings.booking_cutoff_minutes`)                                                 |
 | Reservierung im Checkout | 30 min (`settings.hold_minutes`)                                                                      |
 | Stornierung              | Keine durch Gäste. Admin kann stornieren, Erstattung manuell in Stripe                                |
@@ -35,7 +35,6 @@ Einstellungen → „Zeitfenster und Preise“.
 
 | Tage         | Zeitfenster              | Preis | Freiverzehr | Händler-Anteil |
 | ------------ | ------------------------ | ----- | ----------- | -------------- |
-| Mo–Do        | 14:30–16:30              | 99 €  | 50 €        | 72,75 €        |
 | Mo–Do und So | 16:45–18:45, 19:00–21:00 | 149 € | 75 €        | 110,25 €       |
 | So           | 14:30–16:30              | 149 € | 75 €        | 110,25 €       |
 | Fr–Sa        | 15:30–17:30              | 149 € | 75 €        | 110,25 €       |
@@ -48,7 +47,8 @@ Einstellungen → „Zeitfenster und Preise“.
   Buchungskalender.
 - Reihenfolge der Preisfindung (`slot_pricing()`): Sondertermin → Vorlage → alter Standard aus
   `settings`. Die Beträge werden beim Anlegen in die Buchung kopiert.
-- Website: „ab 99 €“ plus Preisübersicht; im Kalender steht der genaue Preis je Zeitfenster.
+- **Änderung 07.10.2026 (Louis):** Mo–Do kein Nachmittag mehr (14:30/99 € gestrichen, Vorlage deaktiviert). Der günstigste Preis ist damit 149 €.
+- Website: „ab“ günstigstem Preis (derzeit 149 €) plus Preisübersicht; im Kalender steht der genaue Preis je Zeitfenster.
 
 ### Geldverteilung pro Buchung (Beispiel 199 €)
 
@@ -376,9 +376,9 @@ Alle Admin-Aktionen serverseitig mit `is_admin_aal2()` geprüft.
 
 Texte wie im Projektplan, mit diesen Änderungen:
 
-- **Preis-Abschnitt:** groß „ab 99 €“, „inkl. 3,50 € Vorverkaufsgebühr“, Preisübersicht nach Tagen und Zeitfenstern (seit 05.10.2026).
+- **Preis-Abschnitt:** groß „ab 149 €“ (günstigster Preis, dynamisch), „inkl. 3,50 € Vorverkaufsgebühr“, Preisübersicht nach Tagen und Zeitfenstern (seit 05.10.2026).
 - **Erlebnis-Karte 2:** „Holzhütte mit Fellen, Lichterketten und leiser Musik.“ (ohne Kaminfeuer).
-- **Mobile Leiste:** „Lounge buchen · ab 99 €“.
+- **Mobile Leiste:** „Lounge buchen · ab 149 €“.
 - Alle Preise, Personenzahl, Taler und Kontakt-E-Mail dynamisch aus `get_public_settings` (mit statischem Fallback nur für den ersten Render).
 - Formular zusätzlich: Feld „USt-ID (optional)“, sichtbar bei Firma/Rechnungswunsch.
 - Checkout-Hinweis zum fehlenden Widerrufsrecht direkt über dem Buchen-Button.

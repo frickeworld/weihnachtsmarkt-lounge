@@ -36,7 +36,7 @@ test.describe('Checkout (Phase 3)', () => {
   });
 
   test('Preis je Zeitfenster und Sonderveranstaltung in der Zusammenfassung', async ({ page }) => {
-    // Montag in der Saison: Nachmittag 99 €, abends Sonderpreis
+    // Montag in der Saison: nur abends (16:45 149 €, 19:00 als Sonderpreis)
     let monday = MOCK_SETTINGS.season_start;
     while (new Date(`${monday}T00:00:00Z`).getUTCDay() !== 1) monday = addDays(monday, 1);
     await mockSupabase(page, {
@@ -82,17 +82,19 @@ test.describe('Checkout (Phase 3)', () => {
     }
     await day.click();
     const slots = page.getByRole('group', { name: 'Zeitfenster' }).locator('button');
-    await expect(slots.nth(0)).toContainText('99 €');
-    await expect(slots.nth(0)).toContainText('50 € Freiverzehr');
-    await expect(slots.nth(2)).toContainText('Party-Abend');
-    await slots.nth(2).click();
+    await expect(slots).toHaveCount(2);
+    await expect(slots.nth(0)).toContainText('16:45–18:45 Uhr');
+    await expect(slots.nth(0)).toContainText('149 €');
+    await expect(slots.nth(0)).toContainText('75 € Freiverzehr');
+    await expect(slots.nth(1)).toContainText('Party-Abend');
+    await slots.nth(1).click();
     await expect(page.locator('#buchen')).toContainText('Sonderveranstaltung');
     await expect(
       page.getByRole('button', { name: /Zahlungspflichtig buchen – 249,00\s€/ }),
     ).toBeVisible();
     await slots.nth(0).click();
     await expect(
-      page.getByRole('button', { name: /Zahlungspflichtig buchen – 99,00\s€/ }),
+      page.getByRole('button', { name: /Zahlungspflichtig buchen – 149,00\s€/ }),
     ).toBeVisible();
   });
 
@@ -249,9 +251,7 @@ test.describe('Besondere Abende', () => {
         [`${monday} 19:00`]: { title: 'Party-Abend', total_cents: 24900, taler_count: 125 },
         [`${tuesday} 19:00`]: { title: 'Live-Abend', total_cents: 24900, taler_count: 125 },
       },
-      overrides: Object.fromEntries(
-        ['14:30', '16:45', '19:00'].map((t) => [`${tuesday} ${t}`, 'taken']),
-      ),
+      overrides: Object.fromEntries(['16:45', '19:00'].map((t) => [`${tuesday} ${t}`, 'taken'])),
       specialEvents: [event(monday, 'free', 'Party-Abend'), event(tuesday, 'taken', 'Live-Abend')],
     });
     await page.goto('/');

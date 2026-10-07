@@ -24,7 +24,7 @@ test('AGB nennen die Preisstaffel aus der Datenbank', async ({ page }) => {
   ).toBeVisible();
   await expect(
     page.getByText(
-      /Montag bis Donnerstag, Nachmittag \(14:30–16:30 Uhr\): 99,00\s€ inkl\. 50 € Freiverzehr/,
+      /Montag bis Donnerstag, Abend \(16:45–18:45 oder 19:00–21:00 Uhr\): 149,00\s€ inkl\. 75 € Freiverzehr/,
     ),
   ).toBeVisible();
   await expect(
@@ -48,7 +48,7 @@ test('Startseite: strukturierte Daten mit Preisspanne', async ({ page }) => {
   );
   expect(json.offers).toMatchObject({
     '@type': 'AggregateOffer',
-    lowPrice: '99.00',
+    lowPrice: '149.00',
     highPrice: '199.00',
     priceCurrency: 'EUR',
   });

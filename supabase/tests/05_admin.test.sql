@@ -50,11 +50,11 @@ select throws_ok($$select public.admin_cancel_booking('bbbbbbbb-0000-0000-0000-0
 -- Kennzahlen (Woche 1.–7.12.)
 create temp table k as select public.admin_dashboard('2026-12-01', '2026-12-07') as j;
 select is((select (j ->> 'paid_bookings')::int from k), 3, '3 bezahlte Buchungen (Storno zählt nicht)');
--- Di 14:30 = 99 € (Händler 50 € + ½ × 45,50 € = 72,75 €), Di 16:45 = 149 € (75 € + ½ × 70,50 € = 110,25 €)
+-- Di 14:30 = 99 € (Zeitfenster seit 07.10.2026 deaktiviert, die Buchung behält ihren Preis; Händler 50 € + ½ × 45,50 € = 72,75 €), Di 16:45 = 149 € (75 € + ½ × 70,50 € = 110,25 €)
 select is((select (j ->> 'revenue_cents')::int from k), 9900 + 14900, 'Umsatz brutto 99 € + 149 € (kostenlose = 0)');
 select is((select (j ->> 'haendler_cents')::int from k), 7275 + 11025, 'Händler: 72,75 € + 110,25 € = 183,00 € (kostenlose nicht in Abrechnung)');
 select is((select (j ->> 'studio_cents')::int from k), 9900 + 14900 - 18300, 'Studio-F-Anteil = Umsatz − Händler');
-select is((select (j ->> 'available_slots')::int from k), 21, '7 Tage × 3 Zeitfenster verfügbar');
+select is((select (j ->> 'available_slots')::int from k), 17, 'Mo–Do 2, Fr–So 3 Zeitfenster verfügbar');
 select is((select (j ->> 'page_views')::int from k), 2, '2 Seitenaufrufe');
 select is((select (j ->> 'book_clicks')::int from k), 1, '1 Klick');
 select is((select (j ->> 'checked_in')::int from k), 1, '1 Check-in');

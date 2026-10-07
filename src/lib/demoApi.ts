@@ -15,7 +15,7 @@ export async function demoSettings(): Promise<PublicSettings> {
 const DEMO_SPECIALS = [
   {
     day: 12,
-    index: 2,
+    index: -1,
     title: 'Party-Abend',
     act: 'DJ [NAME]',
     description: '[PLATZHALTER: Text zur Party, z. B. Musik, Dresscode, Besonderheiten]',
@@ -24,7 +24,7 @@ const DEMO_SPECIALS = [
   },
   {
     day: 22,
-    index: 2,
+    index: -1,
     title: 'Live-Abend',
     act: 'Live: [KÜNSTLER]',
     description: '[PLATZHALTER: Text zum Auftritt]',
@@ -49,7 +49,10 @@ export async function demoAvailability(from: IsoDate, to: IsoDate): Promise<Slot
       else if (day % 6 === 4) status = 'taken';
       else if (day % 5 === 2 && i === 1) status = 'taken';
       // Beispiele für Sondertermine in der Vorschau
-      const special = DEMO_SPECIALS.find((x) => x.day === day && x.index === i);
+      // index -1 = letztes Zeitfenster des Tages (Mo–Do gibt es nur zwei)
+      const special = DEMO_SPECIALS.find(
+        (x) => x.day === day && (x.index === -1 ? i === tiers.length - 1 : x.index === i),
+      );
       out.push({
         date: d,
         startTime,

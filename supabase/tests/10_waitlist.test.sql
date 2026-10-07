@@ -2,10 +2,10 @@
 begin;
 select plan(6);
 
--- Dienstag 01.12.2026: alle drei Zeitfenster reserviert → ausgebucht
+-- Dienstag 01.12.2026: beide Zeitfenster (16:45, 19:00) reserviert → ausgebucht
 insert into public.bookings (id, date, start_time, end_time, status, first_name, last_name, email, phone, persons, hold_expires_at)
 select ('eeeeeeee-0000-0000-0000-00000000000' || n)::uuid, '2026-12-01', st::time, et::time, 'pending', 'W', 'Test', 'w@test.de', '0123456', 4, now() + interval '30 min'
-  from (values (1, '14:30', '16:30'), (2, '16:45', '18:45'), (3, '19:00', '21:00')) v(n, st, et);
+  from (values (2, '16:45', '18:45'), (3, '19:00', '21:00')) v(n, st, et);
 
 insert into public.waitlist (date, email) values ('2026-12-01', 'gast@example.de');
 

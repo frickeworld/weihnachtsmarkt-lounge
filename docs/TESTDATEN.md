@@ -63,16 +63,16 @@ select u.email, r.role from public.user_roles r join auth.users u on u.id = r.us
 
 ```sql
 -- Drei Buchungen am Dienstag, 01.12.2026: erschienen (16:45, 149 €), nicht erschienen (19:00, 149 €),
--- storniert (14:30, 99 €) → Händler 220,50 € (2 × 110,25 €), Studio F 2 × 149 € − 220,50 € = 77,50 €
+-- storniert (Do 03.12., 16:45, 149 €) → Händler 220,50 € (2 × 110,25 €), Studio F 2 × 149 € − 220,50 € = 77,50 €
 insert into public.bookings (date, start_time, end_time, status, first_name, last_name, email, phone, persons, paid_at, checked_in_at, cancelled_at, cancel_reason)
-select '2026-12-01', t.st::time, t.et::time, t.status, t.fn, 'Test', 'rechenprobe@example.de', '0123456', 4,
+select t.d::date, t.st::time, t.et::time, t.status, t.fn, 'Test', 'rechenprobe@example.de', '0123456', 4,
        case when t.status = 'paid' then now() end,
        case when t.fn = 'Erschienen' then now() end,
        case when t.status = 'cancelled' then now() end,
        case when t.status = 'cancelled' then 'Rechenprobe' end
-  from (values ('16:45', '18:45', 'paid', 'Erschienen'),
-               ('19:00', '21:00', 'paid', 'Nichtda'),
-               ('14:30', '16:30', 'cancelled', 'Storno')) t(st, et, status, fn);
+  from (values ('2026-12-01', '16:45', '18:45', 'paid', 'Erschienen'),
+               ('2026-12-01', '19:00', '21:00', 'paid', 'Nichtda'),
+               ('2026-12-03', '16:45', '18:45', 'cancelled', 'Storno')) t(d, st, et, status, fn);
 
 -- Händler-Testzugang: im Admin unter „Zugänge“ mit Rolle „Händler“ einladen.
 

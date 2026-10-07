@@ -43,7 +43,6 @@ const tier = (
 /** Preisstaffel wie in der Migration slot_pricing (Endpreise inkl. 3,50 € Gebühr). */
 export const MOCK_PRICE_LIST = [
   ...[1, 2, 3, 4].flatMap((d) => [
-    tier(d, '14:30', '16:30', 99, 50, 'Nachmittag'),
     tier(d, '16:45', '18:45', 149, 75, 'Abend'),
     tier(d, '19:00', '21:00', 149, 75, 'Abend'),
   ]),

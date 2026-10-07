@@ -11,7 +11,7 @@ geht die Seite unter der echten Domain online.
       § 18 MStV, Gültigkeit der Residenztaler, Haftung, Streitbeilegung). Danach den Vermerk
       „Entwurf – noch nicht freigegeben“ entfernen (`src/pages/legal/LegalLayout.tsx`) und
       Stand-Datum setzen (`supabase/functions/_shared/legal.ts`).
-- [ ] **Preisstaffel** (99/149/199 € Endpreise inkl. 3,50 € Gebühr, „ab 99 €“) vom Anwalt
+- [ ] **Preisstaffel** (149/199 € Endpreise inkl. 3,50 € Gebühr, „ab 149 €“) vom Anwalt
       prüfen lassen (PAngV: „ab“-Preis, Gesamtpreis je Zeitfenster vor der Buchung).
 - [ ] **Sonderveranstaltungen** (Partys 22./23./29./30., Weidmüller/Stegelmann) im Admin-Kalender
       mit Titel, Preis und Freiverzehr anlegen, bevor die ersten Buchungen eingehen.
@@ -84,7 +84,7 @@ npm run build
       am Lounge-Standort.
 - [ ] Händler-Zugang: Übersicht, Buchungen, Abrechnung (PDF/CSV).
 - [ ] Lighthouse mobil ≥ 85 (Performance, Barrierefreiheit, Best Practices, SEO).
-- [ ] Rich-Results-Test von Google für die Startseite (Produkt mit Preisspanne 99–199 €).
+- [ ] Rich-Results-Test von Google für die Startseite (Produkt mit Preisspanne 149–199 €).
 
 ## F. Nach der Saison
 

@@ -11,10 +11,10 @@ import {
 describe('Preisstaffel', () => {
   const s = PUBLIC_SETTINGS_FALLBACK;
 
-  it('ab 99 €, bis zu 100 € Freiverzehr, Stufen 50/75/100', () => {
-    expect(minPriceCents(s)).toBe(9900);
+  it('ab 149 €, bis zu 100 € Freiverzehr, Stufen 75/100', () => {
+    expect(minPriceCents(s)).toBe(14900);
     expect(maxTalerCount(s)).toBe(100);
-    expect(talerLevels(s)).toEqual([50, 75, 100]);
+    expect(talerLevels(s)).toEqual([75, 100]);
   });
 
   it('Wochentage lesbar zusammengefasst', () => {
@@ -31,8 +31,8 @@ describe('Preisstaffel', () => {
       'Freitag und Samstag',
       'Sonntag',
     ]);
+    // Mo–Do nur abends (Nachmittag seit 07.10.2026 gestrichen)
     expect(g[0]!.rows).toEqual([
-      { label: 'Nachmittag', times: ['14:30–16:30'], totalCents: 9900, talerCount: 50 },
       { label: 'Abend', times: ['16:45–18:45', '19:00–21:00'], totalCents: 14900, talerCount: 75 },
     ]);
     expect(g[1]!.rows.map((r) => [r.totalCents, r.talerCount])).toEqual([

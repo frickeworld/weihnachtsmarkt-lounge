@@ -1,7 +1,7 @@
 -- pgTAP-Tests für Phase 2: Rechte, Doppelbuchung, Verfügbarkeit, Tracking.
 -- Ausführen: npx supabase test db
 begin;
-select plan(33);
+select plan(34);
 
 -- ---------- Hilfsdaten ----------
 -- Testnutzer anlegen (auth.users) und Rollen vergeben.
@@ -17,7 +17,7 @@ insert into public.user_roles (user_id, role) values
 update public.settings
    set season_start = current_date - 1, season_end = current_date + 30;
 
--- Einen Montag in der Zukunft innerhalb der Saison finden (Zeitfenster 14:30/16:45/19:00).
+-- Einen Montag in der Zukunft innerhalb der Saison finden (Zeitfenster 16:45/19:00, kein Nachmittag seit 07.10.2026).
 create temp table t_day as
   select d::date as d
     from generate_series(current_date + 3, current_date + 10, interval '1 day') d
@@ -27,7 +27,8 @@ grant select on t_day to anon, authenticated;
 
 -- ---------- Seeds ----------
 select is((select count(*)::int from public.settings), 1, 'genau eine settings-Zeile');
-select is((select count(*)::int from public.slot_templates where active), 21, '21 Zeitfenster-Vorlagen (7 Tage × 3)');
+select is((select count(*)::int from public.slot_templates where active), 17, '17 Zeitfenster-Vorlagen (Mo–Do 2, Fr–So 3)');
+select is((select count(*)::int from public.slot_templates where active and weekday between 1 and 4 and start_time = '14:30'), 0, 'Mo–Do kein Nachmittagstermin mehr');
 select results_eq(
   $$select start_time::text from public.slot_templates where weekday = 6 and active order by start_time$$,
   $$values ('15:30:00'), ('17:45:00'), ('20:00:00')$$,
@@ -94,7 +95,7 @@ select lives_ok(
 -- Die abgelaufene Reservierung (19:00) wird beim Abruf freigegeben.
 select results_eq(
   $$select start_time::text, status from public.get_availability((select d from t_day), (select d from t_day))$$,
-  $$values ('14:30:00', 'free'), ('16:45:00', 'taken'), ('19:00:00', 'free')$$,
+  $$values ('16:45:00', 'taken'), ('19:00:00', 'free')$$,
   'pending zählt als belegt, abgelaufene Reservierung ist wieder frei'
 );
 select is(

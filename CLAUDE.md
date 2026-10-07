@@ -15,13 +15,13 @@ Mobile-first One-Page-Website, über die eine überdachte Lounge auf dem Weihnac
 
 ## Geschäftsregeln – NIE brechen
 
-- **Preisstaffel (Entscheidung Louis/Oliver, 05.10.2026):** Endpreise inkl. 3,50 € Vorverkaufsgebühr (geht an Studio F). Mo–Do 14:30 **99 €** (50 € Freiverzehr); Mo–Do 16:45/19:00 und So ganztags **149 €** (75 €); Fr–Sa 15:30 **149 €** (75 €); Fr–Sa 17:45/20:00 **199 €** (100 €). Sonderveranstaltungen (Partys, Live-Auftritte) mit eigenem Preis je Termin (`slot_specials`). Beträge in Cent, immer aus der Datenbank (`slot_pricing()`), nie hart codiert.
-- **Preisanzeige:** Beworben wird **„ab 99 €“** (Endpreis, „inkl. 3,50 € Vorverkaufsgebühr“) plus Preisübersicht. Im Buchungskalender steht der genaue Preis je Zeitfenster, in Zusammenfassung und Checkout der Gesamtpreis.
+- **Preisstaffel (Entscheidung Louis/Oliver, 05.10.2026):** Endpreise inkl. 3,50 € Vorverkaufsgebühr (geht an Studio F). Mo–Do 16:45/19:00 und So ganztags **149 €** (75 € Freiverzehr); Fr–Sa 15:30 **149 €** (75 €); Fr–Sa 17:45/20:00 **199 €** (100 €). Sonderveranstaltungen (Partys, Live-Auftritte) mit eigenem Preis je Termin (`slot_specials`). Beträge in Cent, immer aus der Datenbank (`slot_pricing()`), nie hart codiert. Der Mo–Do-Nachmittag (14:30, 99 €) ist seit 07.10.2026 gestrichen (Vorlage deaktiviert, Entscheidung Louis).
+- **Preisanzeige:** Beworben wird der günstigste Preis, derzeit **„ab 149 €“** (Endpreis, „inkl. 3,50 € Vorverkaufsgebühr“) plus Preisübersicht. Im Buchungskalender steht der genaue Preis je Zeitfenster, in Zusammenfassung und Checkout der Gesamtpreis.
 - Alle Werbe-Buttons heißen **„Lounge buchen“**. Nur der Abschluss-Button im Formular heißt „Zahlungspflichtig buchen“ (§ 312j BGB).
 - Der Anlass ist bei der Buchung **optional**.
 - Der **Freiverzehr (bis zu 100 €)** wird groß herausgestellt (Hero, Eckdaten-Band).
 - Enthalten: Lounge exklusiv 2 Stunden, bis 10 Personen, Residenztaler in Höhe des Freiverzehrs (50/75/100, je 1 €, pro gekauftem Artikel 1 Taler), Tischservice der Tanzschule Fricke.
-- Zeitfenster Mo–Do und So 14:30–16:30 / 16:45–18:45 / 19:00–21:00, Fr–Sa 15:30–17:30 / 17:45–19:45 / 20:00–22:00 (`slot_templates`). Zeitzone immer **Europe/Berlin**.
+- Zeitfenster Mo–Do 16:45–18:45 / 19:00–21:00, So 14:30–16:30 / 16:45–18:45 / 19:00–21:00, Fr–Sa 15:30–17:30 / 17:45–19:45 / 20:00–22:00 (`slot_templates`). Zeitzone immer **Europe/Berlin**.
 - Saison, Schließtage, gesperrte Zeitfenster: im Admin einstellbar.
 - Jedes Zeitfenster genau einmal verkaufbar (partieller Unique-Index auf `(date, start_time)` für `pending`/`paid`).
 - **Online-Buchungsschluss:** `settings.booking_cutoff_minutes` (Standard 60) vor Beginn. Reservierung beim Checkout: `settings.hold_minutes` (30).

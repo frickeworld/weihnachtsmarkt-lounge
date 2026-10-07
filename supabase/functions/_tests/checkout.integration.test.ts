@@ -84,7 +84,7 @@ const sessionEvent = (
       metadata: { booking_id: bookingId },
       client_reference_id: bookingId,
       payment_intent: 'pi_integration',
-      amount_total: 9900,
+      amount_total: 14900,
       invoice: null,
     },
   },
@@ -116,16 +116,16 @@ Deno.test({
     let sessionId = '';
 
     await t.step('create-checkout legt pending-Buchung mit Server-Preisen an', async () => {
-      const r = await post(FN.checkout, { date: day, startTime: '14:30', price_cents: 1, form });
+      const r = await post(FN.checkout, { date: day, startTime: '16:45', price_cents: 1, form });
       assertEquals(r.status, 200, JSON.stringify(r.body));
       assertMatch(r.body.url, /^https:\/\/checkout\.stripe\.com\//);
       bookingId = r.body.bookingId;
       const b = await booking(bookingId);
       assertEquals(b.status, 'pending');
-      assertEquals(b.price_cents, 9550); // 99 € Nachmittag (Mo–Do) − 3,50 € Gebühr
-      assertEquals(b.amount_total_cents, 9900);
-      assertEquals(b.haendler_share_cents, 7275); // 50 € + (99 − 3,50 − 50) / 2
-      assertEquals(b.taler_cents, 5000);
+      assertEquals(b.price_cents, 14550); // 149 € Abend (Mo–Do) − 3,50 € Gebühr
+      assertEquals(b.amount_total_cents, 14900);
+      assertEquals(b.haendler_share_cents, 11025); // 75 € + (149 − 3,50 − 75) / 2
+      assertEquals(b.taler_cents, 7500);
       assert(b.stripe_checkout_session_id);
       assert(b.terms_accepted_at);
       sessionId = b.stripe_checkout_session_id as string;
@@ -143,8 +143,13 @@ Deno.test({
     });
 
     await t.step('zweite Buchung desselben Zeitfensters → 409', async () => {
-      const r = await post(FN.checkout, { date: day, startTime: '14:30', form });
+      const r = await post(FN.checkout, { date: day, startTime: '16:45', form });
       assertEquals(r.status, 409);
+    });
+
+    await t.step('Mo–Do Nachmittag 14:30 gibt es nicht mehr → 422', async () => {
+      const r = await post(FN.checkout, { date: day, startTime: '14:30', form });
+      assertEquals(r.status, 422);
     });
 
     await t.step('ungültige Eingaben → 400 mit Feldern', async () => {
