@@ -161,7 +161,7 @@ export function SlotTemplatesPanel({ feeCents }: { feeCents: number }) {
                   <input
                     id={`${id}-label`}
                     className="field-input !min-h-11 !py-2"
-                    placeholder="Abend"
+                    placeholder="Früher Abend"
                     value={d.label}
                     onChange={set('label')}
                   />

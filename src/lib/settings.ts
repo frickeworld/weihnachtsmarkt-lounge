@@ -46,17 +46,17 @@ const tier = (
 /** Startwerte bis zur Antwort der Datenbank (Preisstaffel Stand 07.10.2026). */
 const FALLBACK_PRICE_LIST: PriceTier[] = [
   ...[1, 2, 3, 4].flatMap((d) => [
-    tier(d, '16:45', '18:45', 149, 75, 'Abend'),
-    tier(d, '19:00', '21:00', 149, 75, 'Abend'),
+    tier(d, '16:45', '18:45', 149, 75, 'Früher Abend'),
+    tier(d, '19:00', '21:00', 149, 75, 'Später Abend'),
   ]),
   ...[5, 6].flatMap((d) => [
     tier(d, '15:30', '17:30', 149, 75, 'Nachmittag'),
-    tier(d, '17:45', '19:45', 199, 100, 'Abend'),
-    tier(d, '20:00', '22:00', 199, 100, 'Abend'),
+    tier(d, '17:45', '19:45', 199, 100, 'Früher Abend'),
+    tier(d, '20:00', '22:00', 199, 100, 'Später Abend'),
   ]),
   tier(7, '14:30', '16:30', 149, 75, 'Nachmittag'),
-  tier(7, '16:45', '18:45', 149, 75, 'Abend'),
-  tier(7, '19:00', '21:00', 149, 75, 'Abend'),
+  tier(7, '16:45', '18:45', 149, 75, 'Früher Abend'),
+  tier(7, '19:00', '21:00', 149, 75, 'Später Abend'),
 ];
 
 export const PUBLIC_SETTINGS_FALLBACK: PublicSettings = {

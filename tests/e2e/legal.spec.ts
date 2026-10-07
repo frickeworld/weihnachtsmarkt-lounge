@@ -24,11 +24,13 @@ test('AGB nennen die Preisstaffel aus der Datenbank', async ({ page }) => {
   ).toBeVisible();
   await expect(
     page.getByText(
-      /Montag bis Donnerstag, Abend \(16:45–18:45 oder 19:00–21:00 Uhr\): 149,00\s€ inkl\. 75 € Freiverzehr/,
+      /Montag bis Donnerstag, Früher Abend \(16:45–18:45 Uhr\): 149,00\s€ inkl\. 75 € Freiverzehr/,
     ),
   ).toBeVisible();
   await expect(
-    page.getByText(/Freitag und Samstag, Abend .*199,00\s€ inkl\. 100 € Freiverzehr/),
+    page.getByText(
+      /Freitag und Samstag, Später Abend \(20:00–22:00 Uhr\): 199,00\s€ inkl\. 100 € Freiverzehr/,
+    ),
   ).toBeVisible();
 });
 

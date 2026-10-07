@@ -24,7 +24,7 @@ describe('Preisstaffel', () => {
     expect(weekdayLabel([1, 3, 5])).toBe('Montag, Mittwoch und Freitag');
   });
 
-  it('Übersicht: Mo–Do, Fr–Sa, So mit zusammengefassten Abend-Zeiten', () => {
+  it('Übersicht: Mo–Do, Fr–Sa, So – je Zeitfenster eine Zeile', () => {
     const g = priceGroups(s.priceList);
     expect(g.map((x) => x.days)).toEqual([
       'Montag bis Donnerstag',
@@ -33,12 +33,14 @@ describe('Preisstaffel', () => {
     ]);
     // Mo–Do nur abends (Nachmittag seit 07.10.2026 gestrichen)
     expect(g[0]!.rows).toEqual([
-      { label: 'Abend', times: ['16:45–18:45', '19:00–21:00'], totalCents: 14900, talerCount: 75 },
+      { label: 'Früher Abend', times: ['16:45–18:45'], totalCents: 14900, talerCount: 75 },
+      { label: 'Später Abend', times: ['19:00–21:00'], totalCents: 14900, talerCount: 75 },
     ]);
-    expect(g[1]!.rows.map((r) => [r.totalCents, r.talerCount])).toEqual([
-      [14900, 75],
-      [19900, 100],
+    expect(g[1]!.rows.map((r) => [r.label, r.totalCents, r.talerCount])).toEqual([
+      ['Nachmittag', 14900, 75],
+      ['Früher Abend', 19900, 100],
+      ['Später Abend', 19900, 100],
     ]);
-    expect(g[2]!.rows.map((r) => r.totalCents)).toEqual([14900, 14900]);
+    expect(g[2]!.rows.map((r) => r.label)).toEqual(['Nachmittag', 'Früher Abend', 'Später Abend']);
   });
 });
