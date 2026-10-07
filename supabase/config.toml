@@ -456,3 +456,6 @@ verify_jwt = false
 
 [functions.instagram-sync]
 verify_jwt = false
+
+[functions.daily-report]
+verify_jwt = false
