@@ -19,6 +19,7 @@
   --color-brown: #24221e; /* Dunkle Flächen: Header, Hero, Footer */
   --color-brown-deep: #141311;
   --color-on-dark: #f8f3e8; /* Text auf Dunkelbraun */
+  --color-amber: #e8892b; /* Bernstein-Orange der Markthütten (Lounge-Illustration) */
   --color-haendler-red: #cd131c; /* Händler-Rot, gemessen aus dem Logo-Schriftzug */
   --color-fir: #1f3a2e;
   --color-chart: #a8761c; /* Diagramm-Balken (Kontrast ≥ 3:1, geprüft mit dem Paletten-Validator) */
@@ -258,6 +259,38 @@
   animation: sparkle 3.6s ease-in-out infinite;
 }
 
+/* Lounge-Illustration: LEDs funkeln, Kerzen flackern, Schnee fällt */
+@keyframes hut-led {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.hut-led {
+  animation: hut-led 2.4s ease-in-out infinite;
+}
+
+.hut-flame {
+  animation: candle-flicker 1.6s ease-in-out infinite;
+}
+
+@keyframes hut-snow {
+  from {
+    transform: translateY(-40px);
+  }
+  to {
+    transform: translateY(440px);
+  }
+}
+
+.hut-snow circle {
+  animation: hut-snow linear infinite;
+}
+
 /* Adventskerzen */
 @keyframes candle-flicker {
   0%,
@@ -296,6 +329,9 @@
 @media (prefers-reduced-motion: reduce) {
   .sparkle,
   .candle-flame,
+  .hut-led,
+  .hut-flame,
+  .hut-snow circle,
   .btn-gold::after {
     animation: none !important;
   }

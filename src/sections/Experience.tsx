@@ -1,4 +1,5 @@
 import { IconCoin, IconHut, IconPeople, IconService } from '@/components/Icons';
+import { LoungeHut } from '@/components/LoungeHut';
 import { Reveal } from '@/components/Reveal';
 import { SectionHeading } from '@/components/SectionHeading';
 import { maxTalerCount } from '@/lib/settings';
@@ -41,6 +42,14 @@ export function Experience() {
             lang nur dir und deinen Leuten.
           </p>
         </SectionHeading>
+        <Reveal className="mb-8 overflow-hidden rounded-[28px] shadow-[0_30px_60px_-40px_rgba(36,34,30,0.7)] sm:mb-12">
+          <figure>
+            <LoungeHut className="block aspect-[16/10] w-full sm:aspect-[800/440]" />
+            <figcaption className="bg-brown px-4 py-2 text-right text-[11px] text-on-dark/70">
+              Illustration – die echte Lounge kann im Detail abweichen
+            </figcaption>
+          </figure>
+        </Reveal>
         <ul className="grid gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
           {cards.map((c, i) => (
             <Reveal
