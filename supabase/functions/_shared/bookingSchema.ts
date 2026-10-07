@@ -115,8 +115,26 @@ export function createCheckoutRequestSchema(maxPersons: number) {
     date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Ungültiges Datum.'),
     startTime: z.string().regex(/^\d{2}:\d{2}$/, 'Ungültige Uhrzeit.'),
     form: createBookingSchema(maxPersons),
+    /** Persönlicher Code aus dem Gewinnspiel (optional) */
+    discountCode: z
+      .string()
+      .trim()
+      .toUpperCase()
+      .max(24)
+      .regex(/^[A-Z0-9-]*$/, 'Bitte prüfe den Code.')
+      .optional()
+      .transform((v) => v || undefined),
   });
 }
+
+/** Meldungen zu einem Code (gleich in Browser und Edge Function). */
+export const DISCOUNT_REASON_TEXT: Record<string, string> = {
+  unknown: 'Diesen Code kennen wir nicht. Bitte prüfe die Schreibweise.',
+  expired: 'Dieser Code ist abgelaufen.',
+  used: 'Dieser Code wurde bereits eingelöst.',
+  weekday: 'Dieser Code gilt nur montags bis donnerstags.',
+  special: 'Für Sonderveranstaltungen gilt dieser Code leider nicht.',
+};
 
 /** Manuelle Buchung im Admin (Telefon, Sonderfälle). Ticket geht trotzdem per E-Mail raus. */
 export const PAYMENT_METHODS_MANUAL = [

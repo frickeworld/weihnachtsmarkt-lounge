@@ -2,12 +2,15 @@
 //   resend_ticket   Ticket erneut senden
 //   manual_booking  Buchung per Telefon / Sonderfall (bar, Überweisung, kostenlos)
 //   invite_user     Zugang per Einladung (Rolle studio_admin oder haendler)
+//   giveaway_draw   Gewinnspiel: Gewinner ziehen, Gewinn- und Trostpreis-Mails senden
 import { createClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 import { createManualBookingRequestSchema } from '../_shared/bookingSchema.ts';
 import { adminClient } from '../_shared/db.ts';
 import { json, preflight, requireEnv } from '../_shared/http.ts';
 import { deliverTicket } from '../_shared/ticket.ts';
+import { sendTransactionalEmail } from '../_shared/brevo.ts';
+import { renderGiveawayConsolation, renderGiveawayWin } from '../_shared/giveawayEmails.ts';
 
 const STATUS_TEXT: Record<string, string> = {
   past: 'Der Buchungsschluss für dieses Zeitfenster ist vorbei.',
@@ -66,6 +69,9 @@ Deno.serve(async (req) => {
 
     case 'invite_user':
       return inviteUser(db, body);
+
+    case 'giveaway_draw':
+      return giveawayDraw(db, auth.userId);
 
     default:
       return json({ error: 'unknown_action' }, 400);
@@ -219,4 +225,99 @@ async function inviteUser(
   if (roleError)
     return json({ ok: false, message: 'Die Rolle konnte nicht gespeichert werden.' }, 500);
   return json({ ok: true, invited, userId });
+}
+
+interface DrawRow {
+  draw_id: number;
+  role: 'gewinn' | 'trostpreis';
+  entry_id: string;
+  email: string;
+  first_name: string;
+  code: string;
+  code_used: boolean;
+  unsubscribe_token: string;
+}
+
+/** Ziehung: Datenbank wählt per gewichtetem Zufall, danach Mails an Gewinner und alle anderen. */
+async function giveawayDraw(db: ReturnType<typeof adminClient>, userId: string): Promise<Response> {
+  const { data, error } = await db.rpc('giveaway_draw', { p_admin: userId });
+  if (error) {
+    if (error.code === 'P0002')
+      return json(
+        { ok: false, message: 'Im Lostopf ist noch niemand (bestätigte Teilnahme).' },
+        409,
+      );
+    console.error('giveaway_draw', error);
+    return json({ ok: false, message: 'Die Ziehung ist fehlgeschlagen.' }, 500);
+  }
+  const rows = (data ?? []) as DrawRow[];
+  const winner = rows.find((r) => r.role === 'gewinn');
+  if (!winner) return json({ ok: false, message: 'Die Ziehung ist fehlgeschlagen.' }, 500);
+
+  const { data: s } = await db
+    .from('settings')
+    .select('season_end, giveaway_end, giveaway_discount_percent')
+    .eq('id', 1)
+    .single<{
+      season_end: string;
+      giveaway_end: string | null;
+      giveaway_discount_percent: number;
+    }>();
+  const { data: info } = await db.rpc('get_giveaway_info').single<{ ends: string }>();
+  const site = requireEnv('PUBLIC_SITE_URL').replace(/\/$/, '');
+  const validUntil = s?.season_end ?? info?.ends ?? '';
+  // Nächste Ziehung: der nächste Montag nach heute – nur, wenn er vor Aktionsende liegt
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Berlin' }).format(new Date());
+  const isoDow = ((new Date(`${today}T00:00:00Z`).getUTCDay() + 6) % 7) + 1;
+  const next = addDaysIso(today, 8 - isoDow);
+  const nextDraw = info?.ends && next <= info.ends ? next : null;
+
+  let sent = 0;
+  for (const r of rows) {
+    const unsubscribeUrl = `${site}/gewinnspiel/abmelden?token=${r.unsubscribe_token}`;
+    const mail =
+      r.role === 'gewinn'
+        ? renderGiveawayWin({
+            firstName: r.first_name,
+            code: r.code,
+            validUntil,
+            bookUrl: `${site}/?code=${encodeURIComponent(r.code)}#buchen`,
+            unsubscribeUrl,
+          })
+        : renderGiveawayConsolation({
+            firstName: r.first_name,
+            code: r.code_used ? null : r.code,
+            percent: s?.giveaway_discount_percent ?? 30,
+            validUntil,
+            nextDraw,
+            bookUrl: `${site}/?code=${encodeURIComponent(r.code)}#buchen`,
+            unsubscribeUrl,
+          });
+    try {
+      await sendTransactionalEmail({
+        to: { email: r.email },
+        subject: mail.subject,
+        html: mail.html,
+        text: mail.text,
+        tags: [r.role === 'gewinn' ? 'gewinnspiel-gewinn' : 'gewinnspiel-trostpreis'],
+      });
+      sent++;
+    } catch (e) {
+      console.error('giveaway mail', r.email, e);
+    }
+  }
+  await db.from('giveaway_draws').update({ mails_sent: sent }).eq('id', winner.draw_id);
+  return json({
+    ok: true,
+    drawId: winner.draw_id,
+    winner: { firstName: winner.first_name, email: winner.email },
+    participants: rows.length,
+    mailsSent: sent,
+  });
+}
+
+function addDaysIso(d: string, n: number): string {
+  const x = new Date(`${d}T00:00:00Z`);
+  x.setUTCDate(x.getUTCDate() + n);
+  return x.toISOString().slice(0, 10);
 }

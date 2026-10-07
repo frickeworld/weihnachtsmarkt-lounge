@@ -81,3 +81,17 @@ export function requestNewsletterDoubleOptIn(
     redirectionUrl: `${site}/newsletter/bestaetigt`,
   });
 }
+
+/**
+ * Kontakt direkt in die Newsletter-Liste (und optional „Gewinnspiel“) – nur nach eigenem
+ * Double-Opt-in (Gewinnspiel-Bestätigung), sonst requestNewsletterDoubleOptIn verwenden.
+ */
+export function upsertNewsletterContact(
+  email: string,
+  attributes: Record<string, string>,
+): Promise<void> {
+  const lists = [Number(requireEnv('BREVO_LIST_NEWSLETTER'))];
+  const giveawayList = Deno.env.get('BREVO_LIST_GIVEAWAY');
+  if (giveawayList) lists.push(Number(giveawayList));
+  return call('/contacts', { email, attributes, listIds: lists, updateEnabled: true });
+}

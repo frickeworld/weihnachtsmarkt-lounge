@@ -1,11 +1,16 @@
 // create-checkout: Reserviert ein Zeitfenster (30 Minuten) und startet Stripe Checkout.
 // Preise kommen ausschließlich aus der Tabelle settings – nie vom Browser.
 import type Stripe from 'stripe';
-import { createCheckoutRequestSchema, needsBillingAddress } from '../_shared/bookingSchema.ts';
+import {
+  createCheckoutRequestSchema,
+  DISCOUNT_REASON_TEXT,
+  needsBillingAddress,
+} from '../_shared/bookingSchema.ts';
 import { adminClient, type SettingsRow } from '../_shared/db.ts';
 import { formatLongDate, slotLabel } from '../_shared/format.ts';
 import { hashClientIp, json, preflight, requireEnv } from '../_shared/http.ts';
 import { stripeClient } from '../_shared/stripe.ts';
+import { deliverTicket } from '../_shared/ticket.ts';
 
 const SLOT_UNAVAILABLE = 'Dieser Termin ist leider nicht mehr buchbar. Bitte wähle einen anderen.';
 const SLOT_TAKEN = 'Dieser Termin wurde gerade gebucht. Bitte wähle einen anderen.';
@@ -48,7 +53,7 @@ Deno.serve(async (req) => {
     for (const issue of parsed.error.issues) fields[issue.path.join('.')] ??= issue.message;
     return json({ error: 'validation', message: 'Bitte prüfe deine Angaben.', fields }, 400);
   }
-  const { date, startTime, form } = parsed.data;
+  const { date, startTime, form, discountCode } = parsed.data;
 
   // 2. Zeitfenster prüfen: gleiche Logik wie der Kalender (Saison, Schließtag, Sperre, Buchungsschluss)
   //    get_availability gibt abgelaufene Reservierungen vorher frei.
@@ -73,6 +78,87 @@ Deno.serve(async (req) => {
   if (slot.status === 'taken') return json({ error: 'slot_taken', message: SLOT_TAKEN }, 409);
   if (slot.status !== 'free')
     return json({ error: 'slot_unavailable', message: SLOT_UNAVAILABLE }, 422);
+
+  // Persönlicher Code aus dem Gewinnspiel: Preis rechnet ausschließlich die Datenbank.
+  type Discounted = {
+    reason: string | null;
+    discount_cents: number;
+    total_cents: number;
+    fee_cents: number;
+    price_cents: number;
+    taler_cents: number;
+    haendler_share_cents: number;
+  };
+  let discount: Discounted | null = null;
+  if (discountCode) {
+    const { data: rows, error: discountError } = await db.rpc('discount_pricing', {
+      p_code: discountCode,
+      p_date: date,
+      p_start: slot.start_time,
+    });
+    const d = (rows as Discounted[] | null)?.[0];
+    if (discountError || !d) {
+      console.error('discount', discountError);
+      return json(
+        { error: 'server', message: 'Der Code konnte gerade nicht geprüft werden.' },
+        500,
+      );
+    }
+    if (d.reason) {
+      const message = DISCOUNT_REASON_TEXT[d.reason] ?? 'Bitte prüfe den Code.';
+      return json({ error: 'validation', message, fields: { discountCode: message } }, 400);
+    }
+    discount = d;
+  }
+  const amounts = discount
+    ? {
+        discount_code: discountCode,
+        discount_cents: discount.discount_cents,
+        amount_total_cents: discount.total_cents,
+        fee_cents: discount.fee_cents,
+        price_cents: discount.price_cents,
+        taler_cents: discount.taler_cents,
+        haendler_share_cents: discount.haendler_share_cents,
+      }
+    : {};
+
+  // Gewinn (100 %): keine Zahlung – Buchung direkt bestätigen und Ticket senden.
+  if (discount && discount.total_cents === 0) {
+    const { data: won, error: wonError } = await db
+      .from('bookings')
+      .insert({
+        date,
+        start_time: slot.start_time,
+        end_time: slot.end_time,
+        status: 'paid',
+        source: 'online',
+        payment_method: 'kostenlos',
+        first_name: form.firstName,
+        last_name: form.lastName,
+        email: form.email,
+        phone: form.phone,
+        persons: form.persons,
+        occasion: form.occasion ?? null,
+        company_name: form.companyName || null,
+        notes: form.notes || null,
+        newsletter_opt_in: form.newsletterOptIn,
+        terms_accepted_at: new Date().toISOString(),
+        paid_at: new Date().toISOString(),
+        include_in_settlement: true,
+        ...amounts,
+      })
+      .select('id, ticket_token')
+      .single<{ id: string; ticket_token: string }>();
+    if (wonError || !won) {
+      if (wonError?.code === '23505')
+        return json({ error: 'slot_taken', message: SLOT_TAKEN }, 409);
+      console.error('insert gewinn', wonError);
+      return json({ error: 'server', message: 'Gerade ist ein Fehler aufgetreten.' }, 500);
+    }
+    await deliverTicket(db, won.id, 'ticket');
+    const site = requireEnv('PUBLIC_SITE_URL').replace(/\/$/, '');
+    return json({ url: `${site}/ticket/${won.ticket_token}?gewonnen=1`, bookingId: won.id });
+  }
 
   // Schutz vor Massen-Reservierungen: Gezählt werden nur echte Reservierungen (nicht jeder Versuch),
   // damit Gäste hinter einer geteilten Mobilfunk-IP nicht ausgesperrt werden.
@@ -121,6 +207,7 @@ Deno.serve(async (req) => {
       newsletter_opt_in: form.newsletterOptIn,
       terms_accepted_at: new Date().toISOString(),
       hold_expires_at: holdExpiresAt.toISOString(),
+      ...amounts,
     })
     .select('id, booking_code, price_cents, fee_cents, taler_cents')
     .single<{
@@ -164,7 +251,11 @@ Deno.serve(async (req) => {
         currency: 'eur',
         unit_amount: booking.price_cents - booking.taler_cents,
         product_data: {
-          name: `Weihnachtsmarkt-Lounge am ${when} – bis zu ${settings.max_persons} Personen`,
+          name: `Weihnachtsmarkt-Lounge am ${when} – bis zu ${settings.max_persons} Personen${
+            discount
+              ? ` (Gewinnspiel-Code ${discountCode}, −${(discount.discount_cents / 100).toFixed(2).replace('.', ',')} €)`
+              : ''
+          }`,
         },
       },
       ...(taxLounge ? { tax_rates: [taxLounge] } : {}),
