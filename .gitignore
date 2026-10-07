@@ -14,3 +14,6 @@ test-results
 !.vscode/extensions.json
 supabase/functions/.local-ca.pem
 dist-vorschau
+
+# Instagram-Kacheln (npm run social)
+social/

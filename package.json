@@ -18,7 +18,8 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "build:preview": "vite build --mode vorschau && node scripts/build-preview-artifact.mjs",
-    "images": "node scripts/build-images.mjs"
+    "images": "node scripts/build-images.mjs",
+    "social": "node scripts/social-tiles.mjs"
   },
   "dependencies": {
     "@fontsource/jost": "^5.3.0",
