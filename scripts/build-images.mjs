@@ -268,6 +268,32 @@ for (const file of await readdir('assets/sponsoren')) {
   }
 }
 
+// KI-Bild der Lounge: assets/lounge-ki → src/assets/lounge-ki/lounge-ki-1000|1800.(webp|avif)
+// ---------------------------------------------------------------------------------------
+{
+  const [file] = (await readdir('assets/lounge-ki')).filter((f) => /\.(jpe?g|png|webp)$/i.test(f));
+  if (file) {
+    for (const width of [1000, 1800]) {
+      const img = sharp(`assets/lounge-ki/${file}`)
+        .rotate()
+        .resize({
+          width,
+          height: Math.round((width * 9) / 16),
+          fit: 'cover',
+          withoutEnlargement: true,
+        });
+      await img
+        .clone()
+        .webp({ quality: 78 })
+        .toFile(`src/assets/lounge-ki/lounge-ki-${width}.webp`);
+      await img
+        .clone()
+        .avif({ quality: 52 })
+        .toFile(`src/assets/lounge-ki/lounge-ki-${width}.avif`);
+    }
+  }
+}
+
 // Weihnachtsmarkt-Taler (Quelle: die-haendler-detmold.de) als runde Münze mit transparentem Rand –
 // für den Taler-Regen nach der Buchung und die Tages-Überraschungen.
 {
@@ -293,4 +319,9 @@ for (const file of await readdir('assets/sponsoren')) {
       .webp({ quality: 88, alphaQuality: 90 })
       .toFile(`src/assets/taler-${size}.webp`);
   }
+  // PNG für Geschenk-Karte (PDF) und Mails
+  await sharp(coin)
+    .resize({ width: 240 })
+    .png({ compressionLevel: 9 })
+    .toFile('public/email/taler.png');
 }
