@@ -103,6 +103,23 @@ export function DatenschutzPage() {
         kannst die Einwilligung jederzeit per E-Mail an uns widerrufen.
       </p>
 
+      <H2>6a. Gewinnspiel und Newsletter</H2>
+      <p>
+        Für das Gewinnspiel „Jede Woche einen Abend in der Lounge gewinnen“ speichern wir Vor- und
+        Nachname, E-Mail-Adresse, optional die Firma, die Zeitpunkte von Anmeldung, Bestätigung und
+        ggf. Abmeldung, die Version der Einwilligung sowie, über wessen Einladungslink du
+        teilgenommen hast. Veranstalter ist {L.partner}; die technische Durchführung übernimmt
+        STUDIO/F ({L.company}). [ANWALT PRÜFEN: Rollen Verantwortlicher/Auftragsverarbeiter]
+      </p>
+      <p>
+        Mit der Teilnahme willigst du in den Newsletter ein (Art. 6 Abs. 1 lit. a DSGVO). Wir senden
+        dir zuerst eine Bestätigungsmail (Double-Opt-in); erst danach bist du im Lostopf und im
+        Newsletter (Versand über Brevo). Nach jeder Ziehung bekommst du eine Mail mit dem Ergebnis
+        und ggf. einem persönlichen Code. Abmelden kannst du dich jederzeit über den Link in jeder
+        Mail. Unbestätigte Anmeldungen löschen wir nach 30 Tagen, alle Gewinnspiel-Daten nach Ende
+        der Saison (spätestens zum 31. März). [ANWALT PRÜFEN: Kopplung Teilnahme/Newsletter]
+      </p>
+
       <H2>7. Anmeldebereich für Partner</H2>
       <p>
         Für Mitarbeitende und Partner gibt es einen Anmeldebereich. Die Anmeldung wird technisch

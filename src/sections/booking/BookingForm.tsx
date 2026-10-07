@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMemo, useState } from 'react';
-import { startCheckout } from '@/lib/api';
+import { startCheckout, type DiscountPreview } from '@/lib/api';
 import { useForm, useWatch } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import {
@@ -16,6 +16,7 @@ import { formatCents } from '@/lib/money';
 import { totalCents } from '@/lib/settings';
 import { useSettings } from '@/lib/settingsContext';
 import { a11y } from './a11y';
+import { DiscountCodeField } from './DiscountCodeField';
 import { Field } from './fields';
 
 interface Props {
@@ -42,6 +43,7 @@ export function BookingForm({
   const settings = useSettings();
   const schema = useMemo(() => createBookingSchema(settings.maxPersons), [settings.maxPersons]);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [discount, setDiscount] = useState<{ code: string; preview: DiscountPreview } | null>(null);
   const navigate = useNavigate();
 
   const {
@@ -62,13 +64,20 @@ export function BookingForm({
   });
   const showBilling = needsBillingAddress({ companyName, invoiceRequested });
   // Preis des gewählten Zeitfensters (Preisstaffel); Rückfall: Standardpreis
-  const totalValue = slotTotal ?? totalCents(settings);
+  const baseValue = slotTotal ?? totalCents(settings);
+  const totalValue = discount ? discount.preview.totalCents : baseValue;
   const total = formatCents(totalValue);
+  const won = discount?.preview.totalCents === 0;
   const taler = slotTaler ?? settings.talerCount;
 
   const onSubmit = async (values: BookingFormValues) => {
     setSubmitError(null);
-    const result = await startCheckout({ date, startTime, form: values });
+    const result = await startCheckout({
+      date,
+      startTime,
+      form: values,
+      discountCode: discount?.code,
+    });
     if (result.ok) {
       // Weiter zu Stripe. Der Button bleibt gesperrt, bis die Seite wechselt.
       if (result.url.startsWith('/'))
@@ -298,18 +307,30 @@ export function BookingForm({
           )}
           <div className="flex justify-between gap-4">
             <dt>Lounge inkl. {taler} € Freiverzehr</dt>
-            <dd>{formatCents(totalValue - settings.feeCents)}</dd>
+            <dd>{formatCents(baseValue - settings.feeCents)}</dd>
           </div>
           <div className="flex justify-between gap-4">
             <dt>Vorverkaufsgebühr</dt>
             <dd>{formatCents(settings.feeCents)}</dd>
           </div>
+          {discount && (
+            <div className="flex justify-between gap-4 font-semibold text-emerald-800">
+              <dt>{won ? 'Gewinn' : `Gewinnspiel-Code −${discount.preview.percent} %`}</dt>
+              <dd>−{formatCents(discount.preview.discountCents)}</dd>
+            </div>
+          )}
           <div className="flex justify-between gap-4 pt-2 text-xl font-bold text-ink">
             <dt>Gesamt</dt>
             <dd>{total}</dd>
           </div>
         </dl>
       </div>
+
+      <DiscountCodeField
+        date={date}
+        startTime={startTime}
+        onChange={(code, preview) => setDiscount(code && preview ? { code, preview } : null)}
+      />
 
       <div className="space-y-4">
         <div>
@@ -372,7 +393,13 @@ export function BookingForm({
         aria-busy={busy}
         className="btn-gold w-full text-lg sm:w-auto sm:px-10"
       >
-        {busy ? 'Weiter zur Zahlung …' : `Zahlungspflichtig buchen – ${total}`}
+        {busy
+          ? won
+            ? 'Wird gebucht …'
+            : 'Weiter zur Zahlung …'
+          : won
+            ? 'Gewinn einlösen – kostenlos buchen'
+            : `Zahlungspflichtig buchen – ${total}`}
       </button>
       <p className="text-sm text-ink-soft">
         Sichere Zahlung über Stripe mit Karte, Apple Pay, Google Pay oder PayPal. Dein Termin ist

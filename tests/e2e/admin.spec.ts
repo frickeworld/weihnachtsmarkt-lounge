@@ -95,6 +95,34 @@ test.describe('Admin', () => {
     await expect(page.getByRole('link', { name: 'Woche danach →' })).toBeVisible();
   });
 
+  test('Gewinnspiel: Kennzahlen, Ziehung mit Rückfrage', async ({ page }) => {
+    const adminRequests: Record<string, unknown>[] = [];
+    await mockBackoffice(page, {
+      hasFactor: true,
+      adminRequests,
+      adminFn: [
+        {
+          status: 200,
+          body: {
+            ok: true,
+            winner: { firstName: 'Ben', email: 'ben@example.de' },
+            participants: 1,
+            mailsSent: 1,
+          },
+        },
+      ],
+    });
+    await enter(page, '/admin/gewinnspiel');
+    await expect(page.getByText('Gina Gewinn')).toBeVisible();
+    await page.getByRole('button', { name: 'Gewinner ziehen' }).click();
+    await expect(page.getByText(/Jetzt ziehen und 1 Mails versenden/)).toBeVisible();
+    await page.getByRole('button', { name: 'Ja, jetzt ziehen' }).click();
+    await expect(
+      page.getByText('Gewonnen hat Ben (ben@example.de). 1 von 1 Mails verschickt.'),
+    ).toBeVisible();
+    expect(adminRequests).toEqual([{ action: 'giveaway_draw' }]);
+  });
+
   test('Buchung öffnen und einchecken', async ({ page }) => {
     await mockBackoffice(page, { hasFactor: true });
     await enter(page, '/admin/buchungen');

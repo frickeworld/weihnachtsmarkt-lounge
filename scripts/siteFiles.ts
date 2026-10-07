@@ -10,7 +10,14 @@ export const PRIVATE_PATHS = [
   '/newsletter',
   '/login',
 ];
-export const PUBLIC_PATHS = ['/', '/impressum', '/datenschutz', '/agb'];
+export const PUBLIC_PATHS = [
+  '/',
+  '/gewinnspiel',
+  '/gewinnspiel/teilnahmebedingungen',
+  '/impressum',
+  '/datenschutz',
+  '/agb',
+];
 
 export function robotsTxt(siteUrl: string, noindex: boolean): string {
   if (noindex) return 'User-agent: *\nDisallow: /\n';

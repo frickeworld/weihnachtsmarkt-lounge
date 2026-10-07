@@ -10,6 +10,7 @@ const NAV = [
   { to: '/admin/kalender', label: 'Kalender' },
   { to: '/admin/einstellungen', label: 'Einstellungen' },
   { to: '/admin/zugaenge', label: 'Zugänge' },
+  { to: '/admin/gewinnspiel', label: 'Gewinnspiel' },
   { to: '/admin/abrechnung', label: 'Abrechnung' },
   { to: '/admin/export', label: 'Export' },
   { to: '/admin/datenpflege', label: 'Datenpflege' },

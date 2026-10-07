@@ -157,6 +157,8 @@ export async function startCheckout(payload: {
   date: IsoDate;
   startTime: string;
   form: unknown;
+  /** Persönlicher Code aus dem Gewinnspiel (optional) */
+  discountCode?: string;
 }): Promise<CheckoutResult> {
   if (DEMO) {
     // Vorschau: statt Stripe direkt die Erfolgsseite zeigen.
@@ -462,4 +464,158 @@ export async function fetchInstagramFollowers(): Promise<number | null> {
   if (!restConfigured()) return null;
   const r = await rpc<{ followers: number }>('get_instagram_stats', {}, 'maybe').catch(() => null);
   return r && Number.isInteger(r.followers) ? r.followers : null;
+}
+
+export interface DiscountPreview {
+  reason: string | null;
+  percent: number | null;
+  baseTotalCents: number;
+  discountCents: number;
+  totalCents: number;
+}
+
+/** Vorschau eines Gewinnspiel-Codes für ein Zeitfenster (verbindlich rechnet der Server). */
+export async function previewDiscount(
+  code: string,
+  date: IsoDate,
+  startTime: string,
+): Promise<DiscountPreview | null> {
+  if (DEMO) {
+    const c = code.trim().toUpperCase();
+    const s = await demoSettings();
+    const tier = s.priceList.find(
+      (t) => t.weekday === isoWeekday(date) && t.startTime === startTime,
+    );
+    const base = tier?.totalCents ?? 14900;
+    if (c.startsWith('GEWINN-'))
+      return {
+        reason: null,
+        percent: 100,
+        baseTotalCents: base,
+        discountCents: base,
+        totalCents: 0,
+      };
+    if (c.startsWith('LOUNGE-')) {
+      if (isoWeekday(date) > 4)
+        return {
+          reason: 'weekday',
+          percent: 30,
+          baseTotalCents: base,
+          discountCents: 0,
+          totalCents: base,
+        };
+      const d = Math.round(base * 0.3);
+      return {
+        reason: null,
+        percent: 30,
+        baseTotalCents: base,
+        discountCents: d,
+        totalCents: base - d,
+      };
+    }
+    return {
+      reason: 'unknown',
+      percent: null,
+      baseTotalCents: base,
+      discountCents: 0,
+      totalCents: base,
+    };
+  }
+  if (!restConfigured()) return null;
+  const r = await rpc<{
+    reason: string | null;
+    percent: number | null;
+    base_total_cents: number;
+    discount_cents: number;
+    total_cents: number;
+  }>('preview_discount', { p_code: code, p_date: date, p_start: startTime }, 'maybe').catch(
+    () => null,
+  );
+  return r
+    ? {
+        reason: r.reason,
+        percent: r.percent,
+        baseTotalCents: r.base_total_cents,
+        discountCents: r.discount_cents ?? 0,
+        totalCents: r.total_cents,
+      }
+    : null;
+}
+
+export interface GiveawayInfo {
+  active: boolean;
+  ends: IsoDate;
+  nextDraw: IsoDate;
+  participants: number;
+  draws: number;
+  discountPercent: number;
+}
+
+export async function fetchGiveawayInfo(): Promise<GiveawayInfo | null> {
+  if (DEMO) {
+    const s = await demoSettings();
+    const today = new Date();
+    const dow = ((today.getUTCDay() + 6) % 7) + 1;
+    const next = new Date(today);
+    next.setUTCDate(today.getUTCDate() + ((8 - dow) % 7));
+    return {
+      active: true,
+      ends: s.seasonEnd,
+      nextDraw: next.toISOString().slice(0, 10),
+      participants: 312,
+      draws: 0,
+      discountPercent: 30,
+    };
+  }
+  if (!restConfigured()) return null;
+  const r = await rpc<{
+    active: boolean;
+    ends: string;
+    next_draw: string;
+    participants: number;
+    draws: number;
+    discount_percent: number;
+  }>('get_giveaway_info', {}, 'maybe').catch(() => null);
+  return r
+    ? {
+        active: r.active,
+        ends: r.ends,
+        nextDraw: r.next_draw,
+        participants: r.participants,
+        draws: r.draws,
+        discountPercent: r.discount_percent,
+      }
+    : null;
+}
+
+export type GiveawayResult =
+  | { ok: true; firstName?: string; refCode?: string; shareUrl?: string }
+  | { ok: false; message: string; fields?: Record<string, string> };
+
+/** Gewinnspiel: Teilnahme, Bestätigung, Abmeldung (Edge Function `giveaway`). */
+export async function giveawayAction(
+  body: { action: 'join' | 'confirm' | 'unsubscribe' } & Record<string, unknown>,
+): Promise<GiveawayResult> {
+  if (DEMO) {
+    await new Promise((r) => setTimeout(r, 500));
+    return body.action === 'confirm'
+      ? {
+          ok: true,
+          firstName: 'Anna',
+          refCode: 'VORSCHAU',
+          shareUrl: `${env.publicSiteUrl}/gewinnspiel?ref=VORSCHAU`,
+        }
+      : { ok: true };
+  }
+  try {
+    const { status, data } = await callFunction('giveaway', body);
+    if (status === 200 && data.ok === true) return data as GiveawayResult;
+    return {
+      ok: false,
+      message: typeof data.message === 'string' ? data.message : GENERIC_ERROR,
+      fields: data.fields as Record<string, string> | undefined,
+    };
+  } catch {
+    return { ok: false, message: GENERIC_ERROR };
+  }
 }

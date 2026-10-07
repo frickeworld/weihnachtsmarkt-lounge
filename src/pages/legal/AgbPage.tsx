@@ -57,6 +57,12 @@ export function AgbPage() {
         ein abweichender Freiverzehr gelten; sie werden vor der Buchung beim jeweiligen Termin
         angezeigt. Maßgeblich ist der bei der Buchung angezeigte Gesamtpreis.
       </p>
+      <p>
+        Persönliche Codes aus unserem Gewinnspiel werden bei der Buchung eingegeben und gelten nach
+        den dort genannten Bedingungen (z. B. nur montags bis donnerstags, einmal einlösbar, nicht
+        für Sonderveranstaltungen). Der Freiverzehr bleibt dabei in voller Höhe enthalten. Andere
+        Rabatte gewähren wir nicht.
+      </p>
 
       <H2>{n(4)} Vertragsschluss</H2>
       <p>

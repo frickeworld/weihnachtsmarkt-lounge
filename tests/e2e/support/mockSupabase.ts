@@ -91,6 +91,15 @@ export interface MockOptions {
   scarcity?: { free_total: number; offered_total: number; free_weekend_eve: number };
   /** Follower von @diehaendlerdetmold (Standard: keine Zahl hinterlegt). */
   instagramFollowers?: number;
+  /** Gewinnspiel aktiv (Standard: aus). */
+  giveawayActive?: boolean;
+  /** Alle Anfragen an die Edge Function `giveaway`. */
+  giveawayRequests?: unknown[];
+  /** Vorschau-Antworten für Codes (Standard: unbekannt). */
+  discounts?: Record<
+    string,
+    { reason: string | null; percent: number | null; discount_cents: number; total_cents: number }
+  >;
   /** Alle Anfragen an die Warteliste. */
   waitlistRequests?: unknown[];
   /** Alle Anfragen an das Kontaktformular. */
@@ -158,6 +167,48 @@ export async function mockSupabase(page: Page, opts: MockOptions = {}) {
       ? route.fulfill({ status: 406, json: { code: 'PGRST116', message: 'no rows' } })
       : route.fulfill({ json: { followers: opts.instagramFollowers, updated_at: null } }),
   );
+  await page.route('**/rest/v1/rpc/get_giveaway_info*', (route) =>
+    route.fulfill({
+      json: {
+        active: opts.giveawayActive ?? false,
+        ends: MOCK_SETTINGS.season_end,
+        next_draw: addDays(todayIso(), 3),
+        participants: 120,
+        draws: 2,
+        discount_percent: 30,
+      },
+    }),
+  );
+  await page.route('**/rest/v1/rpc/preview_discount*', (route) => {
+    const { p_code } = route.request().postDataJSON() as { p_code: string };
+    const d = opts.discounts?.[p_code.toUpperCase()];
+    return route.fulfill({
+      json: d
+        ? { base_total_cents: d.total_cents + d.discount_cents, ...d }
+        : {
+            reason: 'unknown',
+            percent: null,
+            base_total_cents: 14900,
+            discount_cents: 0,
+            total_cents: 14900,
+          },
+    });
+  });
+  await page.route('**/functions/v1/giveaway', async (route) => {
+    const body = route.request().postDataJSON() as { action: string };
+    opts.giveawayRequests?.push(body);
+    await route.fulfill({
+      json:
+        body.action === 'confirm'
+          ? {
+              ok: true,
+              firstName: 'Anna',
+              refCode: 'ANNA2345',
+              shareUrl: 'http://127.0.0.1:4173/gewinnspiel?ref=ANNA2345',
+            }
+          : { ok: true },
+    });
+  });
   await page.route('**/rest/v1/rpc/get_scarcity*', (route) =>
     route.fulfill({
       json: opts.scarcity ?? { free_total: 90, offered_total: 100, free_weekend_eve: 20 },

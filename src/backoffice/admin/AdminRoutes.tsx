@@ -8,6 +8,7 @@ import { BookingsPage } from './BookingsPage';
 import { CalendarPage } from './CalendarPage';
 import { DataCarePage } from './DataCarePage';
 import { DayListPage } from './DayListPage';
+import { GiveawayAdminPage } from './GiveawayAdminPage';
 import { WeekPlanPage } from './WeekPlanPage';
 import { ExportPage } from './ExportPage';
 import { NewBookingPage } from './NewBookingPage';
@@ -27,6 +28,7 @@ export default function AdminRoutes() {
             <Route path="kalender" element={<CalendarPage />} />
             <Route path="einstellungen" element={<SettingsPage />} />
             <Route path="zugaenge" element={<AccessPage />} />
+            <Route path="gewinnspiel" element={<GiveawayAdminPage />} />
             <Route path="abrechnung" element={<SettlementPage />} />
             <Route path="export" element={<ExportPage />} />
             <Route path="datenpflege" element={<DataCarePage />} />

@@ -28,10 +28,10 @@ Mobile-first One-Page-Website, über die eine überdachte Lounge auf dem Weihnac
 - Buchungen sind verbindlich, keine Stornierung durch Gäste, kein Widerrufsrecht (§ 312g Abs. 2 Nr. 9 BGB). Ticket ist **übertragbar**, keine Namensprüfung.
 - Ein QR-Code pro Buchung. Inhalt nur der `ticket_token`.
 - Zahlungsarten: Karte, Apple Pay, Google Pay, PayPal. **Keine** verzögerten Methoden (SEPA, Klarna, Überweisung über Stripe).
-- **Keine Rabattcodes.**
+- **Keine öffentlichen Rabattcodes.** Einzige Ausnahme (Entscheidung Louis, 07.10.2026): persönliche Codes aus dem Gewinnspiel – Trostpreis `settings.giveaway_discount_percent` (Standard 30 %) nur Mo–Do, einmal einlösbar, keine Sonderveranstaltungen, bis Saisonende; Gewinn-Code 100 % für einen freien Abend (alle Tage, keine Sonderveranstaltungen). Preis rechnet nur `discount_pricing()` auf dem Server. Freiverzehr bleibt immer voll; beim Rabatt wird der Rest wie gewohnt halbiert (149 € → 104,30 €, Händler 87,90 €); beim Gewinn tragen Händler und Studio F den Freiverzehr je zur Hälfte (Betrag 0 €, Händler-Anteil = halber Freiverzehr).
 - Abrechnung: Pro Buchung mit `status='paid'` und `include_in_settlement=true` erhalten die Händler `haendler_share_cents` = Freiverzehr + Hälfte des Rests (Endpreis − Gebühr − Freiverzehr): 72,75 € / 110,25 € / 147,75 €, je Preisstufe oder Sondertermin überschreibbar. Auch bei No-Show. Stornierte zählen nicht. Studio-F-Anteil = `amount_total_cents − haendler_share_cents`. Beträge werden beim Anlegen in die Buchung kopiert, Preisänderungen wirken nur auf neue Buchungen.
 - Rechnung automatisch über Stripe, wenn Firmenname angegeben ODER „Ich benötige eine Rechnung“ angehakt. Optional USt-ID.
-- Newsletter nur per freiwilliger Checkbox (nicht vorausgewählt) + Brevo-Double-Opt-in. Alle Bucher kommen in die Liste „Lounge-Buchungen“ (keine Werbung).
+- Newsletter bei der Buchung nur per freiwilliger Checkbox (nicht vorausgewählt) + Brevo-Double-Opt-in. **Gewinnspiel** (Veranstalter Die Händler e. V., `/gewinnspiel`): Teilnahme = Newsletter-Anmeldung (deutlich beschriftet, eigenes Double-Opt-in), wöchentliche Ziehung per Knopf im Admin, 1 Extra-Los je bestätigtem Freund; ⚠ Kopplung vom Anwalt prüfen lassen. Alle Bucher kommen in die Liste „Lounge-Buchungen“ (keine Werbung).
 - Tracking ohne Cookies, ohne localStorage-IDs, ohne IP-Speicherung: `page_view`, `book_click`, Buchungen.
 - Kundendaten werden nach der Saison (Stichtag 31. März) per Admin-Aktion anonymisiert; Beträge und Statistik bleiben.
 

@@ -177,7 +177,63 @@ export async function mockBackoffice(page: Page, opts: BackofficeOptions = {}) {
       checkin_early_minutes: 30,
       contact_email: 'info@studio-f.club',
       lounge_location: 'Schlosspark',
+      giveaway_active: true,
+      giveaway_end: null,
+      giveaway_discount_percent: 30,
       updated_at: new Date().toISOString(),
+    }),
+  );
+  await page.route('**/rest/v1/giveaway_entries*', (route) =>
+    route.fulfill({
+      json: [
+        {
+          id: 'g1',
+          first_name: 'Gina',
+          last_name: 'Gewinn',
+          email: 'gina@example.de',
+          company: null,
+          confirmed_at: new Date().toISOString(),
+          unsubscribed_at: null,
+          won_draw_id: 1,
+          referred_by: null,
+        },
+        {
+          id: 'g2',
+          first_name: 'Ben',
+          last_name: 'B',
+          email: 'ben@example.de',
+          company: 'Muster GmbH',
+          confirmed_at: new Date().toISOString(),
+          unsubscribed_at: null,
+          won_draw_id: null,
+          referred_by: 'g1',
+        },
+        {
+          id: 'g3',
+          first_name: 'Cem',
+          last_name: 'C',
+          email: 'cem@example.de',
+          company: null,
+          confirmed_at: null,
+          unsubscribed_at: null,
+          won_draw_id: null,
+          referred_by: null,
+        },
+      ],
+    }),
+  );
+  await page.route('**/rest/v1/giveaway_draws*', (route) =>
+    route.fulfill({
+      json: [
+        {
+          id: 1,
+          drawn_at: new Date().toISOString(),
+          pool_size: 2,
+          lots: 3,
+          mails_sent: 2,
+          winner_entry_id: 'g1',
+        },
+      ],
     }),
   );
   await page.route('**/rest/v1/bookings*', (route) => route.fulfill({ json: [sampleBooking()] }));

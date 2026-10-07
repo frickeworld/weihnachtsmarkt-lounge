@@ -372,6 +372,28 @@ Alle Admin-Aktionen serverseitig mit `is_admin_aal2()` geprüft.
 
 ---
 
+### 4.9 Gewinnspiel (Entscheidung Louis, 07.10.2026)
+
+- **Seite** `/gewinnspiel` (Formular, nächste Ziehung, Teilnahmebedingungen unter
+  `/gewinnspiel/teilnahmebedingungen`), Band auf der Startseite, solange `settings.giveaway_active`
+  und `giveaway_end` (leer = Saisonende) noch nicht erreicht ist.
+- **Teilnahme** (Edge Function `giveaway`): Vorname, Nachname, E-Mail, Firma optional, Einwilligung
+  „Teilnahme = Newsletter“ + „ab 18“. Honigtopf, max. 5 je Stunde und Gerät. Eigenes Double-Opt-in
+  (`/gewinnspiel/bestaetigt?token=`), danach Lostopf + Brevo-Liste Newsletter (optional
+  `BREVO_LIST_GIVEAWAY`). Abmelden: `/gewinnspiel/abmelden?token=`. Unbestätigte nach 30 Tagen gelöscht.
+- **Freunde-Link** `/gewinnspiel?ref=CODE`: je bestätigtem Freund 1 Extra-Los.
+- **Ziehung** im Admin unter „Gewinnspiel“ per Knopf (mit Rückfrage): gewichteter Zufall
+  (`giveaway_draw()`), protokolliert in `giveaway_draws`. Danach Mails:
+  - Gewinner: Code `GEWINN-…` (100 %), freier Abend nach Wahl bis Saisonende, keine Sonderveranstaltungen.
+  - Alle anderen (nach jeder Ziehung): persönlicher Code `LOUNGE-…`, `giveaway_discount_percent`
+    (Standard 30 %), nur Mo–Do, einmal einlösbar, bis Saisonende; Hinweis auf die nächste Ziehung.
+- **Einlösen**: Feld „Gewinnspiel-Code“ im Buchungsformular (oder Link `/?code=…#buchen`).
+  `discount_pricing()` rechnet: Freiverzehr bleibt voll, Rest halbiert (149 € → 104,30 €, Händler
+  87,90 €, Studio F 16,40 €). 100 %: Buchung ohne Stripe sofort bezahlt (`payment_method =
+'kostenlos'`, `include_in_settlement = true`, Betrag 0 €, Händler-Anteil = halber Freiverzehr).
+  Ein Code ist nur einmal gültig (partieller Unique-Index wie beim Zeitfenster).
+- **Datenpflege** nach der Saison anonymisiert auch alle Teilnahmen.
+
 ## 5. One-Pager – Inhalte
 
 Texte wie im Projektplan, mit diesen Änderungen:

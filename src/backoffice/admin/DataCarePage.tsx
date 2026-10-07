@@ -14,17 +14,19 @@ export function DataCarePage() {
   const run = async () => {
     setBusy(true);
     setMsg(null);
-    const { data, error } = await requireClient().rpc('admin_anonymize_before', {
-      p_before: before,
-    });
+    const c = requireClient();
+    const { data, error } = await c.rpc('admin_anonymize_before', { p_before: before });
+    // Gewinnspiel-Teilnehmer gleich mit anonymisieren (Aktion ist mit der Saison vorbei)
+    const giveaway = error ? null : await c.rpc('admin_anonymize_giveaway');
     setBusy(false);
     setConfirm('');
+    const err = error ?? giveaway?.error;
     setMsg(
-      error
-        ? { ok: false, text: errorText(error) }
+      err
+        ? { ok: false, text: errorText(err) }
         : {
             ok: true,
-            text: `${data as number} Buchungen anonymisiert. Beträge und Statistik bleiben erhalten.`,
+            text: `${data as number} Buchungen und ${(giveaway?.data as number) ?? 0} Gewinnspiel-Teilnahmen anonymisiert. Beträge und Statistik bleiben erhalten.`,
           },
     );
   };
@@ -37,7 +39,8 @@ export function DataCarePage() {
           Entfernt Namen, E-Mail, Telefon, Firma, Adresse, USt-ID und Wünsche aller Buchungen mit
           Lounge-Datum <strong className="text-ink">vor</strong> dem Stichtag. Beträge, Datum,
           Status und Personenzahl bleiben für Statistik und Abrechnung. Stripe-Rechnungen sind davon
-          nicht betroffen (Aufbewahrungspflicht).{' '}
+          nicht betroffen (Aufbewahrungspflicht). Außerdem werden alle Gewinnspiel-Teilnahmen
+          anonymisiert.{' '}
           <strong className="text-ink">Das lässt sich nicht rückgängig machen.</strong>
         </p>
         <label className="block">

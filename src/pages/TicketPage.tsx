@@ -91,6 +91,7 @@ export function TicketPage() {
 
 function TicketView({ ticket, qr, token }: { ticket: TicketInfo; qr: string; token: string }) {
   const cancelled = ticket.status === 'cancelled';
+  const won = new URLSearchParams(window.location.search).get('gewonnen') === '1';
   const { seasonStart, seasonEnd } = useSettings();
   const note = ticketDayNote(ticket.date, seasonStart, seasonEnd);
   const status = cancelled
@@ -104,6 +105,11 @@ function TicketView({ ticket, qr, token }: { ticket: TicketInfo; qr: string; tok
 
   return (
     <>
+      {won && (
+        <p className="glitter mt-2 rounded-2xl px-5 py-3 font-semibold" role="status">
+          Herzlichen Glückwunsch – dein Gewinn ist eingelöst!
+        </p>
+      )}
       <h1 className="mt-2 text-3xl leading-tight font-medium">{formatLongDate(ticket.date)}</h1>
       <p className="mt-1 text-xl">
         {ticket.startTime}–{ticket.endTime} Uhr

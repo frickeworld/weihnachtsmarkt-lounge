@@ -15,6 +15,9 @@ geht die Seite unter der echten Domain online.
       Stand-Datum setzen (`supabase/functions/_shared/legal.ts`).
 - [ ] **Preisstaffel** (149/199 € Endpreise inkl. 3,50 € Gebühr, „ab 149 €“) vom Anwalt
       prüfen lassen (PAngV: „ab“-Preis, Gesamtpreis je Zeitfenster vor der Buchung).
+- [ ] **Gewinnspiel**: Teilnahmebedingungen, Datenschutz-Abschnitt und die Kopplung
+      „Teilnahme = Newsletter“ vom Anwalt prüfen lassen; Rollen Händler e. V. / STUDIO/F klären
+      (Auftragsverarbeitung). Erst dann im Admin unter „Gewinnspiel“ einschalten.
 - [ ] **Sonderveranstaltungen** (Partys 22./23./29./30., Weidmüller/Stegelmann) im Admin-Kalender
       mit Titel, Preis und Freiverzehr anlegen, bevor die ersten Buchungen eingehen.
 - [ ] **Umsatzsteuer**: Ausweis von Lounge-Preis, Gebühr und Residenztalern mit dem

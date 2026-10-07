@@ -9,6 +9,7 @@ import { Directions } from '@/sections/Directions';
 import { Experience } from '@/sections/Experience';
 import { Faq } from '@/sections/Faq';
 import { Gallery } from '@/sections/Gallery';
+import { GiveawayBand } from '@/sections/GiveawayBand';
 import { GroupRequest } from '@/sections/GroupRequest';
 import { Hero } from '@/sections/Hero';
 import { Highlights } from '@/sections/Highlights';
@@ -44,6 +45,7 @@ export function HomePage() {
       <main>
         <Hero />
         <Highlights />
+        <GiveawayBand />
         <Experience />
         <Gallery />
         <Occasions />

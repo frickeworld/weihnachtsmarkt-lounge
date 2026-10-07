@@ -27,6 +27,31 @@ const pages: RouteObject[] = [
     lazy: async () => ({ Component: (await import('./pages/TicketPage')).TicketPage }),
   },
   { path: '/newsletter/bestaetigt', element: <NewsletterConfirmedPage /> },
+  // Gewinnspiel als eigenes Bundle
+  {
+    path: '/gewinnspiel',
+    lazy: async () => ({ Component: (await import('./pages/GiveawayPage')).GiveawayPage }),
+  },
+  {
+    path: '/gewinnspiel/bestaetigt',
+    lazy: async () => {
+      const { GiveawayTokenPage } = await import('./pages/GiveawayTokenPage');
+      return { Component: () => <GiveawayTokenPage mode="confirm" /> };
+    },
+  },
+  {
+    path: '/gewinnspiel/abmelden',
+    lazy: async () => {
+      const { GiveawayTokenPage } = await import('./pages/GiveawayTokenPage');
+      return { Component: () => <GiveawayTokenPage mode="unsubscribe" /> };
+    },
+  },
+  {
+    path: '/gewinnspiel/teilnahmebedingungen',
+    lazy: async () => ({
+      Component: (await import('./pages/legal/GiveawayTermsPage')).GiveawayTermsPage,
+    }),
+  },
   { path: '/impressum', element: <ImpressumPage /> },
   { path: '/datenschutz', element: <DatenschutzPage /> },
   { path: '/agb', element: <AgbPage /> },

@@ -1,6 +1,6 @@
 -- pgTAP: Gewinnspiel – Rabatt-Berechnung, Code nur einmal, Ziehung mit Losen, RLS
 begin;
-select plan(16);
+select plan(18);
 
 update public.settings set season_start = '2026-11-26', season_end = '2026-12-23',
        giveaway_active = true, giveaway_end = '2026-12-20', giveaway_discount_percent = 30;
@@ -54,6 +54,15 @@ select is((select reason from public.discount_pricing('GIBTS-NICHT', '2026-12-01
 insert into public.bookings (date, start_time, end_time, status, first_name, last_name, email, phone, persons, hold_expires_at, discount_code)
 values ('2026-12-01', '16:45', '18:45', 'pending', 'R', 'Abatt', 'r@test.de', '0123456', 4, now() + interval '30 min', 'LOUNGE-TEST30');
 select is((select reason from public.discount_pricing('LOUNGE-TEST30', '2026-12-02', '16:45')), 'used', 'Code bereits verwendet');
+
+-- Datenpflege: nur Admins, danach keine Namen/E-Mails mehr
+insert into auth.users (id, email) values ('00000000-0000-0000-0000-0000000000a9', 'admin9@test.de');
+insert into public.user_roles (user_id, role) values ('00000000-0000-0000-0000-0000000000a9', 'studio_admin');
+set local role authenticated;
+set local request.jwt.claims = '{"sub":"00000000-0000-0000-0000-0000000000a9","role":"authenticated","aal":"aal2"}';
+select is(public.admin_anonymize_giveaway(), 4, 'alle vier Teilnahmen anonymisiert');
+reset role;
+select is((select count(*)::int from public.giveaway_entries where email like '%@test.de'), 0, 'keine E-Mail-Adressen mehr');
 
 -- Öffentlich: Vorschau und Eckdaten, aber keine Tabellen
 set local role anon;
