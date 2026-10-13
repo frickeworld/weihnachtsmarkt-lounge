@@ -2,6 +2,9 @@
 begin;
 select plan(4);
 
+-- Nur die Testdaten betrachten (die Weihnachts-Sondertermine aus der Migration ausblenden)
+delete from public.slot_specials;
+
 insert into public.slot_specials (date, start_time, title, act, description, price_cents, taler_count, haendler_share_cents)
 values ('2026-12-05', '20:00', 'Party-Abend', 'DJ [NAME]', 'Tanzen bis 22 Uhr.', 24900, 125, 15000),
        ('2026-12-12', '20:00', 'Live-Abend', 'Live: Weidmüller', null, 22900, 110, null),
