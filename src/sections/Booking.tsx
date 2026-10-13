@@ -162,7 +162,7 @@ export function Booking() {
     void refreshAndCheck(date, start);
   }
 
-  // Auswahl aus anderen Abschnitten („Besondere Abende“): Monat wechseln, Tag und Zeitfenster setzen.
+  // Auswahl aus anderen Abschnitten („Besondere Termine“): Monat wechseln, Tag und Zeitfenster setzen.
   useEffect(() => {
     const onSelect = (e: Event) => {
       const { date: d, startTime, waitlist } = (e as CustomEvent<SelectSlotDetail>).detail;

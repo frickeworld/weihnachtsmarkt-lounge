@@ -145,3 +145,13 @@ export interface EmailLogRow {
   error: string | null;
   created_at: string;
 }
+
+/** Einmaliges Zeitfenster an einem Tag (z. B. Heiligabend 10–13 Uhr). Preis über SlotSpecial. */
+export interface ExtraSlot {
+  date: string;
+  start_time: string;
+  end_time: string;
+  label: string | null;
+  /** true = die Vorlagen des Wochentags entfallen an diesem Tag */
+  replaces_regular: boolean;
+}

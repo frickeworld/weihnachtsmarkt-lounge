@@ -15,12 +15,12 @@ Mobile-first One-Page-Website, über die eine überdachte Lounge auf dem Weihnac
 
 ## Geschäftsregeln – NIE brechen
 
-- **Preisstaffel (Entscheidung Louis/Oliver, 05.10.2026):** Endpreise inkl. 3,50 € Vorverkaufsgebühr (geht an Studio F). Mo–Do 16:45/19:00 und So ganztags **149 €** (75 € Freiverzehr); Fr–Sa 15:30 **149 €** (75 €); Fr–Sa 17:45/20:00 **199 €** (100 €). Sonderveranstaltungen (Partys, Live-Auftritte) mit eigenem Preis je Termin (`slot_specials`). Beträge in Cent, immer aus der Datenbank (`slot_pricing()`), nie hart codiert. Der Mo–Do-Nachmittag (14:30, 99 €) ist seit 07.10.2026 gestrichen (Vorlage deaktiviert, Entscheidung Louis).
+- **Preisstaffel (Entscheidung Louis/Oliver, 05.10.2026):** Endpreise inkl. 3,50 € Vorverkaufsgebühr (geht an Studio F). Mo–Do 16:45/19:00 und So ganztags **149 €** (75 € Freiverzehr); Fr–Sa 15:30 **149 €** (75 €); Fr–Sa 17:45/20:00 **199 €** (100 €). Sonderveranstaltungen (Partys, Live-Auftritte) mit eigenem Preis je Termin (`slot_specials`). Weihnachten 2026 (Entscheidung Louis, 13.10.2026): Party-Abende 22./23./29./30.12. (16:45 und 19:00) **189 €** (100 €); Heiligabend exklusiv 24.12. nur 10:00–13:00 **299 €** (150 €); 26.12. 13:00–15:00 und 16:00–18:00 **199 €** (100 €); 25./27./28.12. geschlossen, Saison bis 30.12. Einmalige Zeitfenster in `extra_slots`. Beträge in Cent, immer aus der Datenbank (`slot_pricing()`), nie hart codiert. Der Mo–Do-Nachmittag (14:30, 99 €) ist seit 07.10.2026 gestrichen (Vorlage deaktiviert, Entscheidung Louis).
 - **Preisanzeige:** Beworben wird der günstigste Preis, derzeit **„ab 149 €“** (Endpreis, „inkl. 3,50 € Vorverkaufsgebühr“) plus Preisübersicht. Im Buchungskalender steht der genaue Preis je Zeitfenster, in Zusammenfassung und Checkout der Gesamtpreis.
 - Alle Werbe-Buttons heißen **„Lounge buchen“**. Nur der Abschluss-Button im Formular heißt „Zahlungspflichtig buchen“ (§ 312j BGB).
 - Der Anlass ist bei der Buchung **optional**.
 - Der **Freiverzehr (bis zu 100 €)** wird groß herausgestellt (Hero, Eckdaten-Band).
-- Enthalten: Lounge exklusiv 2 Stunden, bis 10 Personen, Residenztaler in Höhe des Freiverzehrs (50/75/100, je 1 €, pro gekauftem Artikel 1 Taler), Tischservice der Tanzschule Fricke.
+- Enthalten: Lounge exklusiv 2 Stunden, bis 10 Personen, Residenztaler in Höhe des Freiverzehrs (50/75/100/150, je 1 €, pro gekauftem Artikel 1 Taler), Tischservice der Tanzschule Fricke.
 - Zeitfenster Mo–Do 16:45–18:45 / 19:00–21:00, So 14:30–16:30 / 16:45–18:45 / 19:00–21:00, Fr–Sa 15:30–17:30 / 17:45–19:45 / 20:00–22:00 (`slot_templates`). Zeitzone immer **Europe/Berlin**.
 - Saison, Schließtage, gesperrte Zeitfenster: im Admin einstellbar.
 - Jedes Zeitfenster genau einmal verkaufbar (partieller Unique-Index auf `(date, start_time)` für `pending`/`paid`).

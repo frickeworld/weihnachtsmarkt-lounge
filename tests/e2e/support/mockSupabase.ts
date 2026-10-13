@@ -85,7 +85,7 @@ export interface MockOptions {
   successToken?: string | null;
   /** Eingerichtete Wallets (ticket-files?format=info). */
   wallet?: { apple: boolean; google: boolean };
-  /** Antwort von get_special_events („Besondere Abende“). */
+  /** Antwort von get_special_events („Besondere Termine“). */
   specialEvents?: Record<string, unknown>[];
   /** Antwort von get_scarcity (Standard: viel frei, kein Hinweis). */
   scarcity?: { free_total: number; offered_total: number; free_weekend_eve: number };

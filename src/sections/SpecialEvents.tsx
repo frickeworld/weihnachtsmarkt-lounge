@@ -10,7 +10,7 @@ import { trackBookClick } from '@/lib/track';
 const euro = (cents: number) => formatCents(cents).replace(/,00\s?€$/, ' €');
 
 /**
- * „Besondere Abende“: Partys und Live-Auftritte mit eigenem Preis. Erscheint nur, wenn im Admin
+ * „Besondere Termine“: Party-Abende, Feiertage und Live-Auftritte mit eigenem Preis. Erscheint nur, wenn im Admin
  * Sonderveranstaltungen angelegt sind.
  */
 export function SpecialEvents() {
@@ -30,8 +30,8 @@ export function SpecialEvents() {
   return (
     <section id="besondere-abende" className="scroll-mt-20 bg-sand px-4 py-20 sm:px-6 sm:py-24">
       <div className="mx-auto max-w-5xl">
-        <SectionHeading eyebrow="Sonderveranstaltungen" title="Besondere Abende">
-          Partys und Live-Musik in der Lounge – mit mehr Freiverzehr und eigenem Programm.
+        <SectionHeading eyebrow="Sonderveranstaltungen" title="Besondere Termine">
+          Party-Abende, Feiertage und besondere Anlässe – mit eigenem Preis und mehr Freiverzehr.
         </SectionHeading>
         <div className="grid gap-5 sm:grid-cols-2">
           {events.map((e) => {

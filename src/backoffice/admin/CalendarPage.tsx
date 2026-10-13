@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { formatLongDate, formatMonth, isoWeekday, monthGrid, todayInBerlin } from '@/lib/dates';
+import { formatLongDate, formatMonth, monthGrid, todayInBerlin } from '@/lib/dates';
 import { requireClient } from '../authClient';
 import { errorText } from '../errors';
 import { ErrorBox, Loading, PageHeader, Panel, smallBtn } from '../ui';
 import { hhmm } from './format';
 import { formatCents } from '@/lib/money';
+import { daySlots } from './daySlots';
+import { ExtraSlotForm } from './ExtraSlotForm';
 import { autoHaendlerShare } from './pricing';
 import { SpecialPriceEditor } from './SpecialPriceEditor';
-import type { SlotSpecial, SlotTemplate } from './types';
+import type { ExtraSlot, SlotSpecial, SlotTemplate } from './types';
 import { unwrap, useLoad } from './useLoad';
 
 interface MonthData {
@@ -21,6 +23,7 @@ interface MonthData {
   };
   specials: SlotSpecial[];
   templates: SlotTemplate[];
+  extras: ExtraSlot[];
   closed: { date: string; reason: string | null }[];
   blocked: { date: string; start_time: string; reason: string | null }[];
   bookings: {
@@ -53,7 +56,7 @@ export function CalendarPage() {
 
   const data = useLoad(async (): Promise<MonthData> => {
     const c = requireClient();
-    const [season, templates, closed, blocked, bookings, specials] = await Promise.all([
+    const [season, templates, closed, blocked, bookings, specials, extras] = await Promise.all([
       c
         .from('settings')
         .select('season_start, season_end, price_cents, fee_cents, taler_count')
@@ -85,6 +88,11 @@ export function CalendarPage() {
         )
         .gte('date', first)
         .lte('date', last),
+      c
+        .from('extra_slots')
+        .select('date, start_time, end_time, label, replaces_regular')
+        .gte('date', first)
+        .lte('date', last),
     ]);
     return {
       season: unwrap(season) as MonthData['season'],
@@ -93,6 +101,7 @@ export function CalendarPage() {
       blocked: unwrap(blocked) as MonthData['blocked'],
       bookings: unwrap(bookings) as MonthData['bookings'],
       specials: unwrap(specials) as SlotSpecial[],
+      extras: unwrap(extras) as ExtraSlot[],
     };
   }, [first, last]);
 
@@ -118,7 +127,7 @@ export function CalendarPage() {
 
   const d = data.data;
   const dayInfo = (date: string) => {
-    const slots = d?.templates.filter((t) => t.weekday === isoWeekday(date)) ?? [];
+    const slots = d ? daySlots(date, d.templates, d.extras) : [];
     const inSeason = !!d && date >= d.season.season_start && date <= d.season.season_end;
     const closed = d?.closed.find((c) => c.date === date);
     const booked = slots.filter((s) =>
@@ -257,6 +266,11 @@ export function CalendarPage() {
                         <div className="flex items-center justify-between gap-2">
                           <span className="font-semibold tabular-nums">
                             {hhmm(s.start_time)}–{hhmm(s.end_time)}
+                            {s.extra && (
+                              <span className="ml-2 rounded-full bg-sand px-2 py-0.5 text-xs font-semibold text-gold-deep">
+                                Einmalig
+                              </span>
+                            )}
                           </span>
                           <span className="text-sm">
                             {booking
@@ -268,7 +282,13 @@ export function CalendarPage() {
                                 : 'Frei'}
                           </span>
                         </div>
-                        {!special && (
+                        {!special && s.extra && (
+                          <p className="text-sm text-amber-900">
+                            Noch kein Sonderpreis – bitte festlegen, sonst gilt der alte
+                            Standardpreis.
+                          </p>
+                        )}
+                        {!special && !s.extra && (
                           <p className="text-sm text-ink-soft">
                             {formatCents(stdTotal)} · {stdTaler} € Freiverzehr · Händler{' '}
                             {formatCents(
@@ -314,6 +334,24 @@ export function CalendarPage() {
                             {block ? 'Sperre aufheben' : 'Zeitfenster sperren'}
                           </button>
                         )}
+                        {!booking && s.extra && (
+                          <button
+                            type="button"
+                            className={`${smallBtn} mt-2 ml-2`}
+                            disabled={busy}
+                            onClick={() =>
+                              void act(() =>
+                                requireClient()
+                                  .from('extra_slots')
+                                  .delete()
+                                  .eq('date', selected)
+                                  .eq('start_time', s.start_time),
+                              )
+                            }
+                          >
+                            Einmaliges Zeitfenster entfernen
+                          </button>
+                        )}
                         <SpecialPriceEditor
                           key={`${selected}-${s.start_time}-${special?.price_cents ?? ''}`}
                           date={selected}
@@ -327,6 +365,7 @@ export function CalendarPage() {
                     );
                   })}
                 </ul>
+                <ExtraSlotForm key={selected} date={selected} onChanged={data.reload} />
                 <div className="mt-5 border-t border-line pt-4">
                   {sel.closed ? (
                     <>

@@ -400,7 +400,7 @@ export interface SpecialEvent {
   status: 'free' | 'taken';
 }
 
-/** Kommende Sonderveranstaltungen (Partys, Live-Auftritte) für „Besondere Abende“. */
+/** Kommende Sonderveranstaltungen (Partys, Live-Auftritte) für „Besondere Termine“. */
 export async function fetchSpecialEvents(): Promise<SpecialEvent[]> {
   if (DEMO) return demoSpecialEvents();
   if (!restConfigured()) return [];

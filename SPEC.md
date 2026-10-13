@@ -45,6 +45,17 @@ Einstellungen → „Zeitfenster und Preise“.
 - **Sonderveranstaltungen** (Partys 22./23./29./30., Auftritte Weidmüller/Stegelmann): eigener Preis
   und Freiverzehr je Termin in `slot_specials`, im Admin-Kalender pflegbar; Titel erscheint im
   Buchungskalender.
+- **Weihnachten 2026 (Entscheidung Louis, 13.10.2026):**
+
+  | Termin                         | Zeit                     | Endpreis | Freiverzehr | Händler-Anteil |
+  | ------------------------------ | ------------------------ | -------- | ----------- | -------------- |
+  | Party-Abend 22./23./29./30.12. | 16:45–18:45, 19:00–21:00 | 189 €    | 100 €       | 142,75 €       |
+  | Heiligabend exklusiv 24.12.    | 10:00–13:00 (nur dieser) | 299 €    | 150 €       | 222,75 €       |
+  | 2. Weihnachtsfeiertag 26.12.   | 13:00–15:00, 16:00–18:00 | 199 €    | 100 €       | 147,75 €       |
+
+  25., 27. und 28.12. geschlossen, Saison bis 30.12. Dauer und Preis am 26.12. sind ein Vorschlag
+  (im Admin änderbar). Einmalige Zeitfenster wie am 24./26.12. stehen in `extra_slots`.
+
 - Reihenfolge der Preisfindung (`slot_pricing()`): Sondertermin → Vorlage → alter Standard aus
   `settings`. Die Beträge werden beim Anlegen in die Buchung kopiert.
 - **Änderung 07.10.2026 (Louis):** Mo–Do kein Nachmittag mehr (14:30/99 € gestrichen, Vorlage deaktiviert). Der günstigste Preis ist damit 149 €.
@@ -141,6 +152,13 @@ Constraint: `haendler_share_cents <= price_cents`, `taler_cents <= price_cents`.
 ### slot_specials
 
 `date`, `start_time` (PK), `title`, `price_cents`, `taler_count`, `haendler_share_cents`, `created_at`. Nur Admin (aal2).
+
+### extra_slots
+
+`date`, `start_time` (PK), `end_time`, `label`, `replaces_regular` (Standard true = die Vorlagen des
+Wochentags entfallen an diesem Tag), `created_at`. Einmalige Zeitfenster (z. B. Heiligabend 10–13 Uhr),
+Preis über `slot_specials`. `slot_grid()` liefert Vorlagen + einmalige Zeitfenster und ist Grundlage von
+`get_availability()` und der Dashboard-Kennzahl „verfügbar“. Nur Admin (aal2), im Admin-Kalender pflegbar.
 
 ### closed_dates
 
@@ -241,7 +259,7 @@ Spalten `scanner_pin_hash` sind nie über eine öffentliche Funktion erreichbar.
 3. „Zahlungspflichtig buchen – 178,50 €“ → `create-checkout`:
    - zod-Validierung serverseitig (E-Mail, Telefon, Personen 1–max_persons, Anlass, AGB = true, Rechnungsadresse Pflicht bei Firma/Rechnungswunsch, USt-ID optional mit Formatprüfung).
    - `expire_stale_holds()`.
-   - Prüfen: in Saison, nicht geschlossen, nicht gesperrt, Slot existiert laut slot_templates, Beginn − cutoff > jetzt.
+   - Prüfen: in Saison, nicht geschlossen, nicht gesperrt, Slot existiert laut slot_templates bzw. extra_slots (`get_availability`), Beginn − cutoff > jetzt.
    - Insert `pending`, `hold_expires_at = now() + hold_minutes`, Beträge aus settings, `amount_total_cents = price + fee`.
    - Unique-Verletzung → 409 „Dieser Termin wurde gerade gebucht. Bitte wähle einen anderen.“ → Frontend lädt Verfügbarkeit neu.
    - Stripe Checkout Session: `mode=payment`, `locale=de`, `currency=eur`, `customer_email`, `expires_at = hold_expires_at` (Stripe-Minimum 30 min beachten), `payment_method_types` = card + paypal (Apple/Google Pay über card), `metadata.booking_id`, success/cancel-URL über PUBLIC_SITE_URL.
@@ -555,7 +573,7 @@ Login, MFA, alle Admin-Seiten (4.7), Tagesliste-PDF, Anonymisierung.
 
 ## 8. Offene Platzhalter
 
-- [ ] Saison 2026 und Schließtage (aktuell 26.11.–23.12.2026)
+- [ ] Saison 2026 und Schließtage (aktuell 26.11.–30.12.2026, geschlossen 25./27./28.12.)
 - [x] Position der Lounge: Weihnachtsmarkt im Schlosspark, Detmold (Louis, 04.10.2026)
 - [x] Händler-Rot: `#CD131C` (aus dem Logo-Schriftzug gemessen; Signet-Quadrat `#CD2027`)
 - [ ] KI-Bilder (Prompt in Abschnitt 5), später echte Fotos

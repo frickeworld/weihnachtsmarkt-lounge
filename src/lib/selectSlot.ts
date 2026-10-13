@@ -1,6 +1,6 @@
 import type { IsoDate } from './dates';
 
-/** Andere Abschnitte (z. B. „Besondere Abende“) wählen einen Termin im Buchungsbereich aus. */
+/** Andere Abschnitte (z. B. „Besondere Termine“) wählen einen Termin im Buchungsbereich aus. */
 export const SELECT_SLOT_EVENT = 'lounge:select-slot';
 
 export interface SelectSlotDetail {

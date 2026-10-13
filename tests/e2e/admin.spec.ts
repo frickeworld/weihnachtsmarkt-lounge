@@ -190,4 +190,60 @@ test.describe('Admin', () => {
     await page.getByRole('button', { name: 'Abmelden' }).click();
     await expect(page).toHaveURL(/\/login/);
   });
+
+  test('Kalender: einmaliges Zeitfenster mit Sonderpreis anzeigen und anlegen', async ({
+    page,
+  }) => {
+    await mockBackoffice(page, { hasFactor: true });
+    const day = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Berlin' }).format(new Date());
+    for (const t of ['slot_templates', 'closed_dates', 'blocked_slots'])
+      await page.route(`**/rest/v1/${t}*`, (route) => route.fulfill({ json: [] }));
+    await page.route('**/rest/v1/slot_specials*', (route) =>
+      route.fulfill({
+        json: [
+          {
+            date: day,
+            start_time: '10:00:00',
+            title: 'Heiligabend exklusiv',
+            price_cents: 29900,
+            taler_count: 150,
+            haendler_share_cents: null,
+            act: null,
+            description: null,
+          },
+        ],
+      }),
+    );
+    const inserted: unknown[] = [];
+    await page.route('**/rest/v1/extra_slots*', (route) => {
+      if (route.request().method() === 'POST') {
+        inserted.push(route.request().postDataJSON());
+        return route.fulfill({ status: 201, body: '' });
+      }
+      return route.fulfill({
+        json: [
+          {
+            date: day,
+            start_time: '10:00:00',
+            end_time: '13:00:00',
+            label: 'Vormittag',
+            replaces_regular: true,
+          },
+        ],
+      });
+    });
+    await enter(page, '/admin/kalender');
+    await page.getByRole('button', { name: /0\/1 gebucht · Sonderpreis/ }).click();
+    await expect(page.getByText('10:00–13:00')).toBeVisible();
+    await expect(page.getByText('Einmalig', { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Einmaliges Zeitfenster hinzufügen' }).click();
+    await page.getByLabel('Beginn').fill('16:00');
+    await page.getByLabel('Ende').fill('18:00');
+    await page.getByRole('button', { name: 'Anlegen' }).click();
+    await expect
+      .poll(() => inserted)
+      .toEqual([
+        { date: day, start_time: '16:00', end_time: '18:00', label: null, replaces_regular: true },
+      ]);
+  });
 });

@@ -14,7 +14,7 @@ export function Waitlist({
 }: {
   bookedDays: IsoDate[];
   onFreeNow: (date: IsoDate) => void;
-  /** Direkt geöffnet mit diesem Tag (z. B. aus „Besondere Abende“) */
+  /** Direkt geöffnet mit diesem Tag (z. B. aus „Besondere Termine“) */
   openFor?: IsoDate | null;
 }) {
   const [open, setOpen] = useState(Boolean(openFor));

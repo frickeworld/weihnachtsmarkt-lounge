@@ -223,7 +223,7 @@ test.describe('Erfolgsseite', () => {
   });
 });
 
-test.describe('Besondere Abende', () => {
+test.describe('Besondere Termine', () => {
   test('ohne Sonderveranstaltungen kein Abschnitt', async ({ page }) => {
     await mockSupabase(page);
     await page.goto('/');
@@ -256,7 +256,7 @@ test.describe('Besondere Abende', () => {
     });
     await page.goto('/');
     const section = page.locator('#besondere-abende');
-    await expect(section.getByRole('heading', { name: 'Besondere Abende' })).toBeVisible();
+    await expect(section.getByRole('heading', { name: 'Besondere Termine' })).toBeVisible();
     await expect(section).toContainText('Live: Weidmüller');
     await expect(section).toContainText('inkl. 125 € Freiverzehr');
 
