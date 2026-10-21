@@ -249,12 +249,12 @@ function ScannerPinPanel() {
         Die PIN wird nur verschlüsselt gespeichert und kann nicht angezeigt werden. Eine neue PIN
         meldet alle Geräte ab. Der Scanner läuft im Handy-Browser unter{' '}
         <a
-          href="/scan"
+          href={`${import.meta.env.BASE_URL}scan`}
           target="_blank"
           rel="noreferrer"
           className="font-semibold text-gold-deep underline"
         >
-          /scan
+          {import.meta.env.BASE_URL}scan
         </a>
         .
       </p>

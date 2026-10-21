@@ -21,12 +21,22 @@ export default defineConfig({
     { name: 'mobile', use: { ...devices['Pixel 7'], launchOptions: { executablePath } } },
     { name: 'desktop', use: { ...devices['Desktop Chrome'], launchOptions: { executablePath } } },
   ],
-  webServer: {
-    // Build mit Dummy-Supabase-URL: Die Tests simulieren die Datenbank-Funktionen per page.route.
-    command:
-      'VITE_SUPABASE_URL=http://supabase.test VITE_SUPABASE_ANON_KEY=e2e-anon-key npm run build && npx vite preview --port 4173 --host 127.0.0.1',
-    url: 'http://127.0.0.1:4173',
-    reuseExistingServer: false,
-    timeout: 120_000,
-  },
+  webServer: [
+    {
+      // Build mit Dummy-Supabase-URL: Die Tests simulieren die Datenbank-Funktionen per page.route.
+      command:
+        'VITE_SUPABASE_URL=http://supabase.test VITE_SUPABASE_ANON_KEY=e2e-anon-key npm run build && npx vite preview --port 4173 --host 127.0.0.1',
+      url: 'http://127.0.0.1:4173',
+      reuseExistingServer: false,
+      timeout: 120_000,
+    },
+    {
+      // Live-Aufbau: Seite im Unterordner /lounge neben WordPress (tests/e2e/subfolder.spec.ts).
+      command:
+        'export VITE_SUPABASE_URL=http://supabase.test VITE_SUPABASE_ANON_KEY=e2e-anon-key VITE_PUBLIC_SITE_URL=http://127.0.0.1:4174/lounge && npx vite build --outDir dist-lounge --emptyOutDir && npx vite preview --outDir dist-lounge --port 4174 --host 127.0.0.1',
+      url: 'http://127.0.0.1:4174/lounge/',
+      reuseExistingServer: false,
+      timeout: 120_000,
+    },
+  ],
 });

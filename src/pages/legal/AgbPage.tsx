@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { formatCents } from '@/lib/money';
 import { priceGroups } from '@/lib/settings';
 import { useSettings } from '@/lib/settingsContext';
@@ -122,7 +123,7 @@ export function AgbPage() {
       <H2>{n(11)} Datenschutz</H2>
       <p>
         Informationen zur Verarbeitung deiner Daten findest du in der{' '}
-        <a href="/datenschutz">Datenschutzerklärung</a>.
+        <Link to="/datenschutz">Datenschutzerklärung</Link>.
       </p>
 
       <H2>{n(12)} Schlussbestimmungen</H2>

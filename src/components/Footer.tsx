@@ -73,7 +73,7 @@ export function Footer() {
         <nav aria-label="Rechtliches" className="mt-10">
           <ul className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-sm text-on-dark/75">
             <li>
-              <a href="/#kontakt" className="hover:text-gold-light">
+              <a href={`${import.meta.env.BASE_URL}#kontakt`} className="hover:text-gold-light">
                 Kontakt
               </a>
             </li>

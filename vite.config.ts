@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig, loadEnv, type Plugin } from 'vite';
 import { viteSingleFile } from 'vite-plugin-singlefile';
-import { siteFiles } from './scripts/siteFiles';
+import { basePath, siteFiles } from './scripts/siteFiles';
 
 /**
  * Setzt <meta name="robots" content="noindex"> für Vorschau- und Entwicklungs-Builds.
@@ -29,7 +29,7 @@ function noindex(enabled: boolean): Plugin {
 /**
  * Lädt Schriften, Hero-Foto und Glitzer-Textur für den sichtbaren Bereich vorab (verhindert Layout-Sprünge beim Schriftwechsel).
  */
-function preloadFonts(patterns: RegExp[]): Plugin {
+function preloadFonts(patterns: RegExp[], base: string): Plugin {
   return {
     name: 'preload-fonts',
     apply: 'build',
@@ -39,7 +39,13 @@ function preloadFonts(patterns: RegExp[]): Plugin {
         .filter((f) => patterns.some((p) => p.test(f)))
         .map((f) => ({
           tag: 'link',
-          attrs: { rel: 'preload', href: `/${f}`, as: 'font', type: 'font/woff2', crossorigin: '' },
+          attrs: {
+            rel: 'preload',
+            href: `${base}${f}`,
+            as: 'font',
+            type: 'font/woff2',
+            crossorigin: '',
+          },
           injectTo: 'head' as const,
         }));
       // Hero-Foto (größtes sichtbares Element) und Glitzer-Band früh laden
@@ -56,7 +62,7 @@ function preloadFonts(patterns: RegExp[]): Plugin {
                   rel: 'preload',
                   as: 'image',
                   type: 'image/avif',
-                  imagesrcset: `/${hero800} 800w, /${hero1200} 1200w`,
+                  imagesrcset: `${base}${hero800} 800w, ${base}${hero1200} 1200w`,
                   imagesizes: '100vw',
                   fetchpriority: 'high',
                 },
@@ -68,7 +74,7 @@ function preloadFonts(patterns: RegExp[]): Plugin {
           ? [
               {
                 tag: 'link',
-                attrs: { rel: 'preload', as: 'image', href: `/${glitter}` },
+                attrs: { rel: 'preload', as: 'image', href: `${base}${glitter}` },
                 injectTo: 'head' as const,
               },
             ]
@@ -86,16 +92,22 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), 'VITE_');
   // Für absolute URLs in index.html (og:image). Ohne Angabe relativ.
   process.env.VITE_PUBLIC_SITE_URL ??= env.VITE_PUBLIC_SITE_URL ?? '';
+  // Unterordner aus der Adresse, z. B. https://weihnachtsmarkt-detmold.de/lounge → „/lounge/“.
+  const base = vorschau ? '/' : basePath(env.VITE_PUBLIC_SITE_URL ?? '');
   return {
+    base,
     plugins: [
       react(),
       tailwindcss(),
       noindex(env.VITE_NOINDEX !== 'false'),
-      preloadFonts([
-        /jost-latin-500-normal-.*\.woff2$/,
-        /manrope-latin-400-normal-.*\.woff2$/,
-        /manrope-latin-600-normal-.*\.woff2$/,
-      ]),
+      preloadFonts(
+        [
+          /jost-latin-500-normal-.*\.woff2$/,
+          /manrope-latin-400-normal-.*\.woff2$/,
+          /manrope-latin-600-normal-.*\.woff2$/,
+        ],
+        base,
+      ),
       ...(vorschau
         ? [viteSingleFile()]
         : [

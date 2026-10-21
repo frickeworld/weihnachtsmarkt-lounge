@@ -32,7 +32,7 @@ export function SettlementPage() {
     if (!s) return;
     setBusy('pdf');
     try {
-      const logo = await fetch('/email/haendler-logo-weiss.png')
+      const logo = await fetch(`${import.meta.env.BASE_URL}email/haendler-logo-weiss.png`)
         .then((r) => (r.ok ? r.arrayBuffer() : null))
         .then((b) => (b ? new Uint8Array(b) : null))
         .catch(() => null);

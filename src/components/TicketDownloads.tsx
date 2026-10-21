@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { fetchWalletInfo, ticketFileUrl } from '@/lib/api';
 import { DEMO } from '@/lib/demo';
+import { env } from '@/lib/env';
 import { googleCalendarUrl } from '../../supabase/functions/_shared/ics';
 
 /** Termin für den Kalender-Link (Google Kalender) */
@@ -17,7 +18,7 @@ function GoogleCalendarLink({ slot, token }: { slot: CalendarSlot; token: string
   const href = googleCalendarUrl({
     ...slot,
     location: LOCATION,
-    ticketUrl: `${window.location.origin}/ticket/${token}`,
+    ticketUrl: `${env.publicSiteUrl}/ticket/${token}`,
   });
   return (
     <a href={href} target="_blank" rel="noopener" className="btn-outline w-full">

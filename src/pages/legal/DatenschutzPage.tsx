@@ -22,10 +22,10 @@ export function DatenschutzPage() {
 
       <H2>3. Aufruf der Website</H2>
       <p>
-        Beim Aufruf verarbeitet unser Hosting-Anbieter [HOSTING: Mittwald CM Service GmbH & Co. KG,
-        Espelkamp] technisch notwendige Daten (IP-Adresse, Zeitpunkt, aufgerufene Seite, Browser) in
-        Server-Logdateien, um die Website sicher auszuliefern (Art. 6 Abs. 1 lit. f DSGVO).
-        [SPEICHERDAUER DER LOGS]
+        Beim Aufruf verarbeitet unser Hosting-Anbieter [HOSTING: STRATO GmbH, Berlin –
+        Vertragspartner und Auftragsverarbeitung klären] technisch notwendige Daten (IP-Adresse,
+        Zeitpunkt, aufgerufene Seite, Browser) in Server-Logdateien, um die Website sicher
+        auszuliefern (Art. 6 Abs. 1 lit. f DSGVO). [SPEICHERDAUER DER LOGS]
       </p>
       <H3>Reichweitenmessung ohne Cookies</H3>
       <p>

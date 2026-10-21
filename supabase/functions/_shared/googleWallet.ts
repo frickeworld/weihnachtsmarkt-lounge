@@ -164,7 +164,8 @@ export async function googleSaveUrl(cfg: GoogleWalletConfig, d: GoogleTicketData
       aud: 'google',
       typ: 'savetowallet',
       iat: Math.floor(Date.now() / 1000),
-      origins: [d.siteUrl.replace(/\/$/, '')],
+      // Google erwartet die Herkunft ohne Pfad (die Seite kann in einem Unterordner liegen)
+      origins: [new URL(d.siteUrl).origin],
       payload: { eventTicketObjects: [buildEventObject(cfg, d)] },
     },
     cfg.privateKeyPem,

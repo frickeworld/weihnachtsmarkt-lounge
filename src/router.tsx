@@ -66,4 +66,7 @@ const pages: RouteObject[] = [
 const routes: RouteObject[] = [{ errorElement: <ErrorPage />, children: pages }];
 
 // Vorschau (Artifact) läuft unter fremder URL – dort navigiert der Router nur im Speicher.
-export const router = DEMO ? createMemoryRouter(routes) : createBrowserRouter(routes);
+// Live liegt die Seite in einem Unterordner (z. B. /lounge neben WordPress) – Vite setzt BASE_URL.
+export const router = DEMO
+  ? createMemoryRouter(routes)
+  : createBrowserRouter(routes, { basename: import.meta.env.BASE_URL.replace(/\/$/, '') || '/' });
