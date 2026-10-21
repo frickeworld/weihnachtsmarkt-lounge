@@ -34,13 +34,13 @@ geht die Seite unter der echten Domain online.
 
 - [ ] **Stripe auf Live** (SETUP 6): Live-Schlüssel als Supabase-Secret `STRIPE_SECRET_KEY`,
       neuen Live-Webhook anlegen (gleiche Ereignisse) und `STRIPE_WEBHOOK_SECRET` ersetzen.
-      PayPal, Apple Pay und Google Pay im Live-Konto aktiv; Apple-Pay-Domain verifizieren.
+      PayPal, Apple Pay und Google Pay im Live-Konto aktiv; (Apple-Pay-Domain-Verifizierung ist bei Stripe Checkout nicht nötig).
       Rechnungs-Mails in Stripe einschalten (SETUP 9).
 - [ ] **Brevo** (SETUP 7): Absender-Domain mit SPF/DKIM/DMARC verifiziert, Listen-IDs und
       Double-Opt-in-Vorlage geprüft. SMTP für Auth-Mails eingetragen (SETUP 10.1).
 - [ ] **Supabase-Secrets** vollständig (SETUP 5, 8, 11, 12): u. a. `PUBLIC_SITE_URL` = echte
-      Domain, `CRON_SECRET`, `SCANNER_TOKEN_SECRET`, Brevo, Stripe, ggf. Wallet.
-- [ ] **Supabase Auth** (SETUP 4): Site URL und Redirect URLs auf die echte Domain;
+      Adresse mit Unterordner (`https://<domain>/lounge`), `CRON_SECRET`, `SCANNER_TOKEN_SECRET`, Brevo, Stripe, ggf. Wallet.
+- [ ] **Supabase Auth** (SETUP 4): Site URL und Redirect URLs auf die echte Adresse mit `/lounge` (STRATO.md, Abschnitt 3);
       Registrierung aus, E-Mail-Anbieter an, TOTP an. Deutsche Auth-Mails (SETUP 10.2).
 - [ ] **Wallet** (optional, SETUP 11): Apple-Zertifikat und Google-Konto; offizielle
       Wallet-Badges statt der schwarzen Platzhalter-Buttons einbauen.
@@ -59,22 +59,16 @@ geht die Seite unter der echten Domain online.
 
 - [ ] Branch `main` = live: Pull Request vom Arbeits-Branch nach `main` mergen. Die GitHub
       Action spielt Migrationen und Edge Functions ein (`deploy-supabase.yml`).
-- [ ] **Live-Build** erzeugen (auf dem eigenen Rechner oder in der CI):
-      `bash
-VITE_SUPABASE_URL=https://<projekt>.supabase.co \
-VITE_SUPABASE_ANON_KEY=<anon-key> \
-VITE_PUBLIC_SITE_URL=https://<domain> \
-VITE_NOINDEX=false \
-npm run build
-`
-      `VITE_NOINDEX=false` nur für die echte Domain – sonst bleibt die Seite für Suchmaschinen
-      gesperrt.
-- [ ] Inhalt von `dist/` per SFTP zu **Mittwald** hochladen (inkl. der versteckten Datei
-      `.htaccess`: SPA-Weiterleitung, HTTPS, Sicherheits-Header, Caching). SSL-Zertifikat für
-      die Domain in Mittwald aktivieren.
-- [ ] Prüfen: `https://<domain>/robots.txt` erlaubt die Startseite und sperrt `/admin`,
-      `/haendler`, `/scan`, `/ticket`, `/buchung`, `/newsletter`, `/login`;
-      `https://<domain>/sitemap.xml` ist erreichbar.
+- [ ] **Website bei Strato** im Unterordner `/lounge` neben WordPress einrichten:
+      `docs/STRATO.md` (SFTP-Zugang, Zielordner, GitHub-Variablen und -Secrets, Supabase-Auth-URLs,
+      Menüpunkt und robots.txt in WordPress). Danach lädt die Action „Deploy Website (Strato)“
+      bei jedem Push auf `main` hoch. Notfalls von Hand: STRATO.md, Abschnitt 6.
+- [ ] `VITE_NOINDEX=false` erst setzen, wenn die Seite wirklich live gehen soll. Sonst bleibt
+      sie für Suchmaschinen gesperrt.
+- [ ] Prüfen (STRATO.md, Abschnitt 5): Hauptseite zeigt weiter WordPress,
+      `https://<domain>/lounge/` zeigt die Lounge, Direktlinks wie `/lounge/agb` laden,
+      `/lounge/admin` leitet zum Login, http leitet auf https um.
+- [ ] `https://<domain>/lounge/sitemap.xml` ist erreichbar und in der Search Console eingereicht.
 - [ ] Cloudflare-Vorschau bleibt bestehen (immer `noindex`), aber nicht öffentlich verlinken.
 
 ## E. Abnahme auf der echten Domain

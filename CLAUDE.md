@@ -55,7 +55,7 @@ Mobile-first One-Page-Website, über die eine überdachte Lounge auf dem Weihnac
 - Im Frontend nur `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_PUBLIC_SITE_URL`.
 - Alle URLs über `PUBLIC_SITE_URL`. Keine Domain hart codieren.
 - Datenschutz: Fonts über @fontsource, kein Google-Fonts-CDN, keine eingebetteten Karten, keine Drittanbieter-Skripte ohne Rückfrage.
-- Statischer Build, später Mittwald mit `.htaccess`-SPA-Fallback. Vorschau: Cloudflare Pages (noindex).
+- Statischer Build. Live bei **Strato im Unterordner `/lounge`** neben der WordPress-Seite des Weihnachtsmarkts (Entscheidung Louis, 21.10.2026). Eigene `.htaccess` im Ordner, Upload per GitHub Action (`deploy-site.yml`, SFTP, löscht nie etwas), Anleitung `docs/STRATO.md`. Der Unterordner ergibt sich nur aus `VITE_PUBLIC_SITE_URL`. Interne Links laufen über den Router oder `import.meta.env.BASE_URL`, nie mit fest geschriebenem `/`. Vorschau: Cloudflare Pages (noindex).
 - Deployment: GitHub Action spielt bei Push auf `main` Migrations + Functions ein.
 - Tests: Vitest (Kernlogik: Preise, Abrechnung, Zeitfenster, Zeitzone), pgTAP/SQL-Tests (RLS, Doppelbuchung), Playwright (Buchung mit Stripe-Testkarte). CI bei jedem Push.
 

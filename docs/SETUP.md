@@ -62,8 +62,8 @@ Ab Phase 3 kommt `STRIPE_TEST_SECRET_KEY` für den automatischen Klicktest dazu.
 1. **Authentication → Sign In / Providers:** Unter „User Signups“ den Schalter **„Allow new users to sign up“ aus**. Den Anbieter **„Email“ selbst eingeschaltet lassen** – sonst funktioniert auch die Anmeldung nicht.
 2. **Authentication → Multi-Factor:** TOTP (Authenticator App) **aktiviert**.
 3. **Authentication → URL Configuration:**
-   - Site URL: die Cloudflare-URL (später die Live-Domain)
-   - Redirect URLs: `http://localhost:5173/**`, `https://*.weihnachtsmarkt-lounge.pages.dev/**`, die Cloudflare-URL mit `/**`
+   - Site URL: die Cloudflare-URL (live: `https://weihnachtsmarkt-detmold.de/lounge`, siehe docs/STRATO.md)
+   - Redirect URLs: `http://localhost:5173/**`, `https://*.weihnachtsmarkt-lounge.pages.dev/**`, die Cloudflare-URL mit `/**`, live zusätzlich `https://weihnachtsmarkt-detmold.de/lounge/**`
    - Einladungen und „Passwort vergessen“ führen auf `/login/neues-passwort` – das deckt `/**` ab.
 4. **Database → Extensions:** `pg_cron` und `pg_net` aktivieren (brauchen wir ab Phase 2 für Reservierungs-Ablauf und Erinnerungsmails). Falls es nicht klappt: Ich mache es per Migration.
 
@@ -81,7 +81,7 @@ Supabase → **Edge Functions → Secrets** (oder Project Settings → Edge Func
 | `BREVO_LIST_BOOKINGS`   | ID der Liste „Lounge-Buchungen 2026“                                          |
 | `BREVO_LIST_NEWSLETTER` | ID der Newsletter-Liste                                                       |
 | `BREVO_DOI_TEMPLATE_ID` | ID der Double-Opt-in-Vorlage                                                  |
-| `PUBLIC_SITE_URL`       | die Cloudflare-URL (später die Live-Domain), ohne `/` am Ende                 |
+| `PUBLIC_SITE_URL`       | die Cloudflare-URL (live mit Unterordner, z. B. `…/lounge`), ohne `/` am Ende |
 | `SCANNER_TOKEN_SECRET`  | lange Zufallszeichenkette – ich sage dir in Phase 6, wie du sie erzeugst      |
 | `CRON_SECRET`           | lange Zufallszeichenkette für die Erinnerungsmails, siehe Abschnitt 8         |
 

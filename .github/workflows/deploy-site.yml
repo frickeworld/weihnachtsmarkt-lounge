@@ -1,0 +1,67 @@
+name: Deploy Website (Strato)
+
+# main = live. Baut die Website und lädt sie per SFTP in den Unterordner neben der
+# WordPress-Seite (z. B. weihnachtsmarkt-detmold.de/lounge). Einrichtung: docs/STRATO.md.
+# Es wird nichts gelöscht – WordPress und alte Bundle-Dateien bleiben unangetastet.
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'supabase/**'
+      - 'docs/**'
+      - '*.md'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-site
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      # Öffentliche Werte als Repository-Variablen (Settings → Secrets and variables → Variables)
+      VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+      VITE_PUBLIC_SITE_URL: ${{ vars.VITE_PUBLIC_SITE_URL }}
+      VITE_NOINDEX: ${{ vars.VITE_NOINDEX }}
+      # Zugang zu Strato als Secrets
+      STRATO_SFTP_HOST: ${{ secrets.STRATO_SFTP_HOST }}
+      STRATO_SFTP_USER: ${{ secrets.STRATO_SFTP_USER }}
+      STRATO_SFTP_PASSWORD: ${{ secrets.STRATO_SFTP_PASSWORD }}
+      STRATO_TARGET_DIR: ${{ secrets.STRATO_TARGET_DIR }}
+      STRATO_SSH_KNOWN_HOSTS: ${{ secrets.STRATO_SSH_KNOWN_HOSTS }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Variablen und Secrets vorhanden?
+        run: |
+          for v in VITE_SUPABASE_URL VITE_SUPABASE_ANON_KEY VITE_PUBLIC_SITE_URL STRATO_SFTP_HOST STRATO_SFTP_USER STRATO_SFTP_PASSWORD STRATO_TARGET_DIR; do
+            if [ -z "${!v}" ]; then echo "::error::$v fehlt (siehe docs/STRATO.md)"; exit 1; fi
+          done
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+      - name: lftp installieren
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+
+      # Prüft Zielordner und Build, lädt dann hoch (zuletzt .htaccess und index.html)
+      - name: Hochladen
+        run: bash scripts/deploy-strato.sh
+
+      - name: Live-Seite erreichbar?
+        run: |
+          url="${VITE_PUBLIC_SITE_URL%/}/"
+          for i in 1 2 3; do
+            if curl -fsS "$url" | grep -q '<div id="root">'; then echo "ok: $url"; exit 0; fi
+            sleep 5
+          done
+          echo "::error::$url liefert nicht die Lounge-Seite"; exit 1
