@@ -7,14 +7,14 @@ Dauer: etwa 45 Minuten. Am besten zu zweit (eine Person bucht, eine scannt).
 ## 0. Vorbereitung
 
 - [ ] Im Admin (mit 2FA) unter **Einstellungen**: Saison, Kontakt-E-Mail, Treffpunkt prüfen.
-- [ ] **Zeitfenster und Preise**: Mo–Do 16:45/19:00, Fr–Sa 15:30/17:45/20:00, So 14:30/16:45/19:00 aktiv, Preise 149/199 €.
+- [ ] **Zeitfenster und Preise**: Mo–Do 14:30/16:45/19:00, Fr–Sa 15:30/17:45/20:00, So 14:30/16:45/19:00 aktiv, Preise 99/149/199 €.
 - [ ] **Kalender**: einen Testtag wählen, der sonst nicht verkauft wird; Sonderpreise eintragen, falls schon bekannt.
 - [ ] Scanner-PIN setzen und notieren (nicht per Chat verschicken).
 - [ ] Tagesbericht-Empfänger und Instagram-Follower eintragen.
 
 ## 1. Website
 
-- [ ] Startseite auf dem Handy öffnen: „ab 149 €“, Preisübersicht, Freiverzehr, Galerie/Bild, Kontakt, Impressum, Datenschutz, AGB erreichbar.
+- [ ] Startseite auf dem Handy öffnen: „ab 99 €“, Preisübersicht, Freiverzehr, Galerie/Bild, Kontakt, Impressum, Datenschutz, AGB erreichbar.
 - [ ] Kalender: Preise je Zeitfenster sichtbar, Sondertermine mit rotem Schild.
 
 ## 2. Buchung mit echter Zahlung
@@ -39,7 +39,7 @@ Dauer: etwa 45 Minuten. Am besten zu zweit (eine Person bucht, eine scannt).
 
 ## 5. Admin und Händler
 
-- [ ] Admin-Übersicht: Buchung, Umsatz, Händler-Anteil (149 € → 110,25 €, 199 € → 147,75 €), Heatmap.
+- [ ] Admin-Übersicht: Buchung, Umsatz, Händler-Anteil (99 € → 72,75 €, 149 € → 110,25 €, 199 € → 147,75 €), Heatmap.
 - [ ] Ticket erneut senden funktioniert.
 - [ ] Belegungsplan und Tagesliste drucken.
 - [ ] Händler-Zugang (ohne Admin-Rechte): sieht Buchung ohne E-Mail/Telefon, Abrechnung stimmt.

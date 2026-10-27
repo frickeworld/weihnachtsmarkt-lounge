@@ -48,7 +48,7 @@ insert into public.extra_slots (date, start_time, end_time, label, replaces_regu
 values ('2026-12-21', '12:00', '14:00', 'Mittag', false);
 select results_eq(
   $$select to_char(start_time, 'HH24:MI') from public.get_availability('2026-12-21', '2026-12-21')$$,
-  $$values ('12:00'), ('16:45'), ('19:00')$$,
+  $$values ('12:00'), ('14:30'), ('16:45'), ('19:00')$$,
   'Zusätzliches Zeitfenster ergänzt die Vorlagen');
 
 -- Buchung auf einem einmaligen Zeitfenster: Beträge aus dem Sonderpreis, Doppelbuchung unmöglich

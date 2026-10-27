@@ -61,6 +61,7 @@ Deno.test({
         for (const [st, et] of [
           ['16:45', '18:45'],
           ['19:00', '21:00'],
+          ['14:30', '16:30'],
         ]) {
           const { data, error } = await db
             .from('bookings')

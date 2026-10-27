@@ -147,9 +147,15 @@ Deno.test({
       assertEquals(r.status, 409);
     });
 
-    await t.step('Mo–Do Nachmittag 14:30 gibt es nicht mehr → 422', async () => {
+    await t.step('Mo–Do Nachmittag 14:30: 99 € inkl. 50 €, Händler 72,75 €', async () => {
       const r = await post(FN.checkout, { date: day, startTime: '14:30', form });
-      assertEquals(r.status, 422);
+      assertEquals(r.status, 200, JSON.stringify(r.body));
+      const b = await booking(r.body.bookingId);
+      assertEquals(
+        [b.amount_total_cents, b.taler_cents, b.haendler_share_cents, b.end_time],
+        [9900, 5000, 7275, '16:30:00'],
+      );
+      await post(FN.release, { bookingId: r.body.bookingId });
     });
 
     await t.step('ungültige Eingaben → 400 mit Feldern', async () => {

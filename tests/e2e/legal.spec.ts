@@ -50,7 +50,7 @@ test('Startseite: strukturierte Daten mit Preisspanne', async ({ page }) => {
   );
   expect(json.offers).toMatchObject({
     '@type': 'AggregateOffer',
-    lowPrice: '149.00',
+    lowPrice: '99.00',
     highPrice: '199.00',
     priceCurrency: 'EUR',
   });

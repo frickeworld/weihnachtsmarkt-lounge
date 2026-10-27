@@ -43,9 +43,10 @@ const tier = (
   label,
 });
 
-/** Startwerte bis zur Antwort der Datenbank (Preisstaffel Stand 07.10.2026). */
+/** Startwerte bis zur Antwort der Datenbank (Preisstaffel Stand 27.10.2026). */
 const FALLBACK_PRICE_LIST: PriceTier[] = [
   ...[1, 2, 3, 4].flatMap((d) => [
+    tier(d, '14:30', '16:30', 99, 50, 'Nachmittag'),
     tier(d, '16:45', '18:45', 149, 75, 'Früher Abend'),
     tier(d, '19:00', '21:00', 149, 75, 'Später Abend'),
   ]),
@@ -75,7 +76,7 @@ export function totalCents(s: Pick<PublicSettings, 'priceCents' | 'feeCents'>): 
   return s.priceCents + s.feeCents;
 }
 
-/** Günstigster Endpreis („ab 149 €“). */
+/** Günstigster Endpreis („ab 99 €“). */
 export function minPriceCents(
   s: Pick<PublicSettings, 'priceList' | 'priceCents' | 'feeCents'>,
 ): number {

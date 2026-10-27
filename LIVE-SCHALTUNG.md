@@ -13,7 +13,7 @@ geht die Seite unter der echten Domain online.
       § 18 MStV, Gültigkeit der Residenztaler, Haftung, Streitbeilegung). Danach den Vermerk
       „Entwurf – noch nicht freigegeben“ entfernen (`src/pages/legal/LegalLayout.tsx`) und
       Stand-Datum setzen (`supabase/functions/_shared/legal.ts`).
-- [ ] **Preisstaffel** (149/199 € Endpreise inkl. 3,50 € Gebühr, „ab 149 €“) vom Anwalt
+- [ ] **Preisstaffel** (99/149/199 € Endpreise inkl. 3,50 € Gebühr, „ab 99 €“) vom Anwalt
       prüfen lassen (PAngV: „ab“-Preis, Gesamtpreis je Zeitfenster vor der Buchung).
 - [ ] **Gewinnspiel**: Teilnahmebedingungen, Datenschutz-Abschnitt und die Kopplung
       „Teilnahme = Newsletter“ vom Anwalt prüfen lassen; Rollen Händler e. V. / STUDIO/F klären

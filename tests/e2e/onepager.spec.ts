@@ -15,16 +15,15 @@ test.describe('One-Pager', () => {
     await mockSupabase(page);
   });
 
-  test('wirbt mit „ab 149 €“, Preisstaffel und Freiverzehr, ohne Kaminfeuer-Versprechen', async ({
+  test('wirbt mit „ab 99 €“, Preisstaffel und Freiverzehr, ohne Kaminfeuer-Versprechen', async ({
     page,
   }) => {
     await page.goto('/');
     const preis = page.locator('#preis');
-    await expect(preis).toContainText('Deine Lounge ab 149 €');
+    await expect(preis).toContainText('Deine Lounge ab 99 €');
     await expect(preis).toContainText('inkl. 3,50 € Vorverkaufsgebühr');
-    for (const p of ['149 €', '199 €']) await expect(preis).toContainText(p);
-    await expect(preis).not.toContainText('99,00');
-    await expect(preis).not.toContainText('14:30–16:30 Uhr: 99');
+    for (const p of ['99 €', '149 €', '199 €']) await expect(preis).toContainText(p);
+    await expect(preis).toContainText('inkl. 50 € Freiverzehr');
     await expect(preis).toContainText('inkl. 100 € Freiverzehr');
     await expect(preis).not.toContainText('175');
     await expect(page.locator('#start')).toContainText('Freiverzehr');
@@ -244,7 +243,7 @@ test.describe('Mobile Buchungsleiste', () => {
     test.skip(!isMobile, 'nur mobil');
     await mockSupabase(page);
     await page.goto('/');
-    const bar = page.getByRole('link', { name: 'Lounge buchen · ab 149 €' });
+    const bar = page.getByRole('link', { name: 'Lounge buchen · ab 99 €' });
     await expect(bar).toHaveCount(0);
     await page.locator('#anlaesse').scrollIntoViewIfNeeded();
     await expect(bar).toBeVisible();
