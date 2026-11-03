@@ -16,6 +16,20 @@ for (const [path, heading, must] of [
   });
 }
 
+test('Impressum nennt Verkäufer und Veranstalter', async ({ page }) => {
+  await mockSupabase(page);
+  await page.goto('/impressum');
+  const main = page.getByRole('main');
+  await expect(main).toContainText('MF Coaching & Promotion GmbH');
+  await expect(main).toContainText('Vertreten durch den Geschäftsführer: Oliver Fricke');
+  await expect(main).toContainText('DE248046234');
+  await expect(
+    page.getByRole('heading', { name: 'Gastgeber und Veranstalter der Lounge' }),
+  ).toBeVisible();
+  await expect(main).toContainText('Werbegemeinschaft Detmold e. V.');
+  await expect(main).toContainText('Vereinsregister Amtsgericht Lemgo, VR 60389');
+});
+
 test('AGB nennen die Preisstaffel aus der Datenbank', async ({ page }) => {
   await mockSupabase(page);
   await page.goto('/agb');

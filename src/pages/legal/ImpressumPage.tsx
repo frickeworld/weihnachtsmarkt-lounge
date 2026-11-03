@@ -8,30 +8,48 @@ export function ImpressumPage() {
     <LegalLayout title="Impressum">
       <H2>Angaben gemäß § 5 DDG</H2>
       <p>
+        Anbieter dieser Buchungsseite, Verkäufer der Lounge-Buchungen, Zahlungsempfänger und
+        Rechnungssteller:
+      </p>
+      <p>
         {L.company}
         <br />
         {L.address}
       </p>
       <p>
-        Vertreten durch die Geschäftsführung: {L.managingDirector}
+        Vertreten durch den Geschäftsführer: {L.managingDirector}
         <br />
         Registereintrag: {L.register}
         <br />
         Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG: {L.vatId}
       </p>
-
-      <H2>Kontakt</H2>
       <p>
-        E-Mail: <a href={`mailto:${contactEmail}`}>{contactEmail}</a>
-        <br />
         Telefon: {L.phone}
+        <br />
+        E-Mail: <a href={`mailto:${contactEmail}`}>{contactEmail}</a>
       </p>
+      <p>Technischer Betrieb und Betreuung der Buchungen: STUDIO/F, eine Marke der {L.company}.</p>
 
-      <H2>Veranstaltung</H2>
+      <H2>Gastgeber und Veranstalter der Lounge</H2>
       <p>
-        Die Weihnachtsmarkt-Lounge ist eine Aktion von {L.partner} ({L.partnerAddress}). Verkauf,
-        Zahlungsabwicklung und Rechnungsstellung erfolgen durch die {L.company}. Der technische
-        Betrieb und die Betreuung der Buchungen liegen bei STUDIO/F, einer Marke der {L.company}.
+        Werbegemeinschaft Detmold e. V. („Die Händler“)
+        <br />
+        {L.partnerAddress}
+      </p>
+      <p>
+        Vertreten durch den Vorstand: {L.partnerBoard}
+        <br />
+        Registereintrag: {L.partnerRegister}
+      </p>
+      <p>
+        Telefon: {L.partnerPhone}
+        <br />
+        E-Mail: <a href={`mailto:${L.partnerEmail}`}>{L.partnerEmail}</a>
+      </p>
+      <p>
+        Die Weihnachtsmarkt-Lounge ist eine Aktion der Werbegemeinschaft Detmold e. V. auf dem
+        Weihnachtsmarkt im Schlosspark Detmold. Verkauf, Zahlungsabwicklung und Rechnungsstellung
+        erfolgen durch die {L.company}. Fragen zu Buchungen beantwortet STUDIO/F.
       </p>
 
       <H2>Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV</H2>
