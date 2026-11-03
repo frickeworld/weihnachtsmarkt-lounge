@@ -65,7 +65,7 @@ export const PUBLIC_SETTINGS_FALLBACK: PublicSettings = {
   feeCents: 350,
   talerCount: 100,
   maxPersons: 10,
-  seasonStart: '2026-11-26',
+  seasonStart: '2026-11-30',
   seasonEnd: '2026-12-30',
   contactEmail: 'info@studio-f.club',
   bookingCutoffMinutes: 60,

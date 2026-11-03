@@ -37,7 +37,7 @@ export function specialDay(
   if (date === seasonStart)
     return {
       kind: 'opening',
-      title: 'Heute öffnet der Weihnachtsmarkt',
+      title: 'Heute öffnet die Lounge',
       text: 'Sei am ersten Abend dabei – die Lounge ist geheizt und der Glühwein warm.',
     };
   if (date.slice(5) === '12-06')
@@ -73,7 +73,7 @@ export function ticketDayNote(
   if (!d || d.kind === 'adventWeek') return null;
   switch (d.kind) {
     case 'opening':
-      return 'Dein Termin ist am Eröffnungstag des Weihnachtsmarkts.';
+      return 'Dein Termin ist am Eröffnungstag der Lounge.';
     case 'nikolaus':
       return 'Dein Termin fällt auf Nikolaus.';
     case 'advent':

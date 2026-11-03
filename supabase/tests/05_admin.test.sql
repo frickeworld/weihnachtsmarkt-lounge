@@ -67,7 +67,7 @@ select throws_ok($$select public.admin_set_scanner_pin('12ab56')$$, '22023', nul
 select throws_ok($$select scanner_pin_hash from public.settings$$, '42501', null, 'Admin kann den PIN-Hash nicht lesen');
 
 -- Anonymisieren (Stichtag darf nicht in der Zukunft liegen)
-select throws_ok($$select public.admin_anonymize_before(current_date + 1)$$, '22023', null, 'Stichtag in der Zukunft abgelehnt');
+select throws_ok($$select public.admin_anonymize_before((now() at time zone 'Europe/Berlin')::date + 1)$$, '22023', null, 'Stichtag in der Zukunft abgelehnt');
 reset role;
 insert into public.bookings (date, start_time, end_time, status, first_name, last_name, email, phone, persons, company_name, notes)
 values ('2025-12-05', '17:30', '19:30', 'paid', 'Alt', 'Kunde', 'alt@test.de', '0123456', 3, 'Alt GmbH', 'Wunsch');

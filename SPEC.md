@@ -46,16 +46,16 @@ Einstellungen → „Zeitfenster und Preise“.
 - **Sonderveranstaltungen** (Partys 22./23./29./30., Auftritte Weidmüller/Stegelmann): eigener Preis
   und Freiverzehr je Termin in `slot_specials`, im Admin-Kalender pflegbar; Titel erscheint im
   Buchungskalender.
-- **Weihnachten 2026 (Entscheidung Louis, 13.10.2026):**
+- **Weihnachten 2026 (Entscheidung Louis, 13.10. und 04.11.2026):**
 
   | Termin                         | Zeit                     | Endpreis | Freiverzehr | Händler-Anteil |
   | ------------------------------ | ------------------------ | -------- | ----------- | -------------- |
   | Party-Abend 22./23./29./30.12. | 16:45–18:45, 19:00–21:00 | 189 €    | 100 €       | 142,75 €       |
   | Heiligabend exklusiv 24.12.    | 10:00–13:00 (nur dieser) | 299 €    | 150 €       | 222,75 €       |
-  | 2. Weihnachtsfeiertag 26.12.   | 13:00–15:00, 16:00–18:00 | 199 €    | 100 €       | 147,75 €       |
 
-  25., 27. und 28.12. geschlossen, Saison bis 30.12. Dauer und Preis am 26.12. sind ein Vorschlag
-  (im Admin änderbar). Einmalige Zeitfenster wie am 24./26.12. stehen in `extra_slots`.
+  Saison 30.11.–30.12.2026. Geschlossen 25. und 26.12. (die früher geplanten Vermietungen am
+  26.12. entfallen) sowie 31.12. Der 27. und 28.12. sind normal geöffnet. Einmalige Zeitfenster
+  wie am 24.12. stehen in `extra_slots`.
 
 - Reihenfolge der Preisfindung (`slot_pricing()`): Sondertermin → Vorlage → alter Standard aus
   `settings`. Die Beträge werden beim Anlegen in die Buchung kopiert.
@@ -129,8 +129,8 @@ Alle Tabellen im Schema `public`, **RLS aktiv**. Zeitstempel `timestamptz`, Date
 
 | Spalte                 | Typ         | Start                    |
 | ---------------------- | ----------- | ------------------------ |
-| season_start           | date        | 2026-11-26 (Platzhalter) |
-| season_end             | date        | 2026-12-23 (Platzhalter) |
+| season_start           | date        | 2026-11-30               |
+| season_end             | date        | 2026-12-30               |
 | price_cents            | int         | 17500                    |
 | fee_cents              | int         | 350                      |
 | taler_count            | int         | 100                      |
@@ -575,7 +575,7 @@ Login, MFA, alle Admin-Seiten (4.7), Tagesliste-PDF, Anonymisierung.
 
 ## 8. Offene Platzhalter
 
-- [ ] Saison 2026 und Schließtage (aktuell 26.11.–30.12.2026, geschlossen 25./27./28.12.)
+- [ ] Saison 2026 und Schließtage (aktuell 30.11.–30.12.2026, geschlossen 25./26.12.)
 - [x] Position der Lounge: Weihnachtsmarkt im Schlosspark, Detmold (Louis, 04.10.2026)
 - [x] Händler-Rot: `#CD131C` (aus dem Logo-Schriftzug gemessen; Signet-Quadrat `#CD2027`)
 - [ ] KI-Bilder (Prompt in Abschnitt 5), später echte Fotos

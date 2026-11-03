@@ -36,29 +36,16 @@ const HEILIGABEND: DemoSpecial = {
   totalCents: 29900,
   talerCount: 150,
 };
-const FEIERTAG: DemoSpecial = {
-  title: '2. Weihnachtsfeiertag',
-  act: null,
-  description:
-    'Weihnachten in der Lounge ausklingen lassen: zwei Stunden für dich und deine Gäste, mit 100 € Freiverzehr und Tischservice.',
-  totalCents: 19900,
-  talerCount: 100,
-};
 const PARTY_DAYS = ['2026-12-22', '2026-12-23', '2026-12-29', '2026-12-30'];
-const CLOSED_DAYS = ['2026-12-25', '2026-12-27', '2026-12-28'];
+const CLOSED_DAYS = ['2026-12-25', '2026-12-26'];
 /** Einmalige Zeitfenster, die die Vorlagen des Tages ersetzen. */
 const EXTRA_SLOTS: Record<IsoDate, { startTime: string; endTime: string; label: string }[]> = {
   '2026-12-24': [{ startTime: '10:00', endTime: '13:00', label: 'Vormittag' }],
-  '2026-12-26': [
-    { startTime: '13:00', endTime: '15:00', label: 'Mittag' },
-    { startTime: '16:00', endTime: '18:00', label: 'Nachmittag' },
-  ],
 };
 
 function demoSpecial(date: IsoDate): DemoSpecial | undefined {
   if (PARTY_DAYS.includes(date)) return PARTY;
   if (date === '2026-12-24') return HEILIGABEND;
-  if (date === '2026-12-26') return FEIERTAG;
   return undefined;
 }
 
@@ -75,15 +62,12 @@ export async function demoAvailability(from: IsoDate, to: IsoDate): Promise<Slot
       totalCents?: number;
       talerCount?: number;
     }[] = EXTRA_SLOTS[d] ?? s.priceList.filter((t) => t.weekday === isoWeekday(d));
-    const day = parseIsoDate(d).getUTCDate();
     const special = demoSpecial(d);
-    tiers.forEach(({ startTime, endTime, label, totalCents, talerCount }, i) => {
+    tiers.forEach(({ startTime, endTime, label, totalCents, talerCount }) => {
       let status: SlotStatus = 'free';
       if (d < s.seasonStart || d > s.seasonEnd) status = 'out_of_season';
       else if (d < today) status = 'past';
       else if (CLOSED_DAYS.includes(d)) status = 'closed';
-      else if (!special && day % 6 === 4) status = 'taken';
-      else if (!special && day % 5 === 2 && i === 1) status = 'taken';
       out.push({
         date: d,
         startTime,

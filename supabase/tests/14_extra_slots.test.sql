@@ -11,7 +11,8 @@ select a.*, p.total_cents, p.taler_count, p.special_title, p.label,
   from public.get_availability('2026-12-21', '2026-12-31') a
   cross join lateral public.slot_pricing(a.slot_date, a.start_time) p;
 
-select is((select season_end from public.settings), '2026-12-30'::date, 'Saison bis 30.12. verlängert');
+select is((select season_start || ' ' || season_end from public.settings), '2026-11-30 2026-12-30',
+  'Saison 30.11.–30.12.2026');
 
 -- Party-Abende
 select results_eq(
@@ -29,15 +30,16 @@ select results_eq(
   $$values ('10:00', '13:00', 'free', 29900, 150, 22275, 'Vormittag'::text)$$,
   'Heiligabend: nur 10–13 Uhr, 299 € inkl. 150 €, Händler 222,75 €');
 
--- 26.12.: zwei Vermietungen statt der Samstags-Vorlagen
+-- 25. und 26.12. geschlossen (die Vermietungen am 26.12. entfallen), 27. und 28.12. normal
+select is((select count(*)::int from av where slot_date in ('2026-12-25', '2026-12-26') and status <> 'closed'),
+  0, '25. und 26.12. geschlossen');
 select results_eq(
-  $$select to_char(start_time, 'HH24:MI'), to_char(end_time, 'HH24:MI'), total_cents, taler_count
-      from av where slot_date = '2026-12-26' order by 1$$,
-  $$values ('13:00', '15:00', 19900, 100), ('16:00', '18:00', 19900, 100)$$,
-  '26.12.: 13:00 und 16:00, Vorlagen entfallen');
-
-select is((select count(*)::int from av where slot_date in ('2026-12-25', '2026-12-27', '2026-12-28') and status <> 'closed'),
-  0, '25., 27. und 28.12. geschlossen');
+  $$select slot_date, to_char(start_time, 'HH24:MI'), status, total_cents
+      from av where slot_date in ('2026-12-27', '2026-12-28') order by 1, 2$$,
+  $$values ('2026-12-27'::date, '14:30', 'free', 14900), ('2026-12-27', '16:45', 'free', 14900),
+           ('2026-12-27', '19:00', 'free', 14900), ('2026-12-28', '14:30', 'free', 9900),
+           ('2026-12-28', '16:45', 'free', 14900), ('2026-12-28', '19:00', 'free', 14900)$$,
+  '27. (So) und 28.12. (Mo) normal geöffnet');
 select is((select count(*)::int from av where slot_date = '2026-12-31' and status <> 'out_of_season'),
   0, '31.12. außerhalb der Saison');
 select is((select count(*)::int from av where slot_date = '2026-12-21' and special_title is null and total_cents = 14900),
@@ -66,8 +68,8 @@ select is((select status from public.get_availability('2026-12-24', '2026-12-24'
 -- Gewinn-Codes gelten nicht für Sonderveranstaltungen
 insert into public.discount_codes (code, kind, percent, valid_until, weekdays, allow_specials)
 values ('GEWINN-TEST1', 'gewinn', 100, '2026-12-30', null, false);
-select is((select reason from public.discount_pricing('GEWINN-TEST1', '2026-12-26', '13:00')), 'special',
-  'Gewinn-Code nicht am 26.12.');
+select is((select reason from public.discount_pricing('GEWINN-TEST1', '2026-12-22', '19:00')), 'special',
+  'Gewinn-Code nicht an Party-Abenden');
 
 -- Rechte: öffentlich nur über get_availability
 set local role anon;
@@ -80,9 +82,9 @@ set local role authenticated;
 set local request.jwt.claims = '{"sub":"00000000-0000-0000-0000-0000000000a1","role":"authenticated","aal":"aal2"}';
 select lives_ok($$insert into public.extra_slots (date, start_time, end_time) values ('2026-12-20', '11:00', '13:00')$$,
   'Admin legt einmaliges Zeitfenster an');
--- 24.12.: 1 (gebucht zählt mit), 26.12.: 2
-select is((public.admin_dashboard('2026-12-24', '2026-12-26') ->> 'available_slots')::int, 3,
-  'Dashboard: 24.12. ein, 25.12. kein, 26.12. zwei Zeitfenster');
+-- 24.12.: 1 (gebucht zählt mit), 25./26.12.: 0, 27. und 28.12.: je 3
+select is((public.admin_dashboard('2026-12-24', '2026-12-28') ->> 'available_slots')::int, 7,
+  'Dashboard: 24.12. ein Zeitfenster, 25./26.12. keins, 27./28.12. je drei');
 reset role;
 
 select * from finish();
