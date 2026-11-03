@@ -20,9 +20,10 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      # Öffentliche Werte als Repository-Variablen (Settings → Secrets and variables → Variables)
-      VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
-      VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+      # Öffentliche Werte als Repository-Variablen (Settings → Secrets and variables → Variables);
+      # die Supabase-Werte dürfen auch als Secrets angelegt sein (docs/SETUP.md, Abschnitt 3)
+      VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL || secrets.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY || secrets.VITE_SUPABASE_ANON_KEY }}
       VITE_PUBLIC_SITE_URL: ${{ vars.VITE_PUBLIC_SITE_URL }}
       VITE_NOINDEX: ${{ vars.VITE_NOINDEX }}
       # Zugang zu Strato als Secrets
