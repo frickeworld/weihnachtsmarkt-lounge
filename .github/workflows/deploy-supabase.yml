@@ -42,7 +42,12 @@ jobs:
       - name: Migrations einspielen
         run: |
           if ls supabase/migrations/*.sql >/dev/null 2>&1; then
-            supabase db push --password "$SUPABASE_DB_PASSWORD"
+            # Erst mit Datenbank-Passwort; klappt das nicht, meldet sich die CLI über den
+            # Access Token mit einem vorübergehenden Login an (kein Passwort nötig).
+            if ! supabase db push --password "$SUPABASE_DB_PASSWORD"; then
+              echo "::warning::Datenbank-Passwort abgelehnt – versuche Anmeldung über den Access Token"
+              env -u SUPABASE_DB_PASSWORD supabase db push
+            fi
           else
             echo "Noch keine Migrations."
           fi
