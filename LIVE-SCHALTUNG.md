@@ -18,8 +18,9 @@ geht die Seite unter der echten Domain online.
 - [ ] **Gewinnspiel**: Teilnahmebedingungen, Datenschutz-Abschnitt und die Kopplung
       „Teilnahme = Newsletter“ vom Anwalt prüfen lassen; Rollen Händler e. V. / STUDIO/F klären
       (Auftragsverarbeitung). Erst dann im Admin unter „Gewinnspiel“ einschalten.
-- [ ] **Sonderveranstaltungen** (Partys 22./23./29./30., Weidmüller/Stegelmann) im Admin-Kalender
-      mit Titel, Preis und Freiverzehr anlegen, bevor die ersten Buchungen eingehen.
+- [ ] **Sonderveranstaltungen**: Partys 22./23./29./30.12., Heiligabend und 26.12. sind per
+      Migration angelegt. Weitere (z. B. Weidmüller/Stegelmann) im Admin-Kalender mit Titel,
+      Preis und Freiverzehr anlegen, bevor die ersten Buchungen eingehen.
 - [ ] **Umsatzsteuer**: Ausweis von Lounge-Preis, Gebühr und Residenztalern mit dem
       Steuerberater klären (Stripe-Rechnungen, AGB § 3).
 - [ ] **Bildrechte**: Foto Stadt Detmold, Gold-Glitzer-Textur und Markt-Schriftzug von
@@ -39,8 +40,8 @@ geht die Seite unter der echten Domain online.
 - [ ] **Brevo** (SETUP 7): Absender-Domain mit SPF/DKIM/DMARC verifiziert, Listen-IDs und
       Double-Opt-in-Vorlage geprüft. SMTP für Auth-Mails eingetragen (SETUP 10.1).
 - [ ] **Supabase-Secrets** vollständig (SETUP 5, 8, 11, 12): u. a. `PUBLIC_SITE_URL` = echte
-      Adresse mit Unterordner (`https://<domain>/lounge`), `CRON_SECRET`, `SCANNER_TOKEN_SECRET`, Brevo, Stripe, ggf. Wallet.
-- [ ] **Supabase Auth** (SETUP 4): Site URL und Redirect URLs auf die echte Adresse mit `/lounge` (STRATO.md, Abschnitt 3);
+      Adresse der Subdomain (`https://buchen.weihnachtsmarkt-detmold.de`), `CRON_SECRET`, `SCANNER_TOKEN_SECRET`, Brevo, Stripe, ggf. Wallet.
+- [ ] **Supabase Auth** (SETUP 4): Site URL und Redirect URLs auf die Subdomain (STRATO.md, Abschnitt 3);
       Registrierung aus, E-Mail-Anbieter an, TOTP an. Deutsche Auth-Mails (SETUP 10.2).
 - [ ] **Wallet** (optional, SETUP 11): Apple-Zertifikat und Google-Konto; offizielle
       Wallet-Badges statt der schwarzen Platzhalter-Buttons einbauen.
@@ -59,16 +60,15 @@ geht die Seite unter der echten Domain online.
 
 - [ ] Branch `main` = live: Pull Request vom Arbeits-Branch nach `main` mergen. Die GitHub
       Action spielt Migrationen und Edge Functions ein (`deploy-supabase.yml`).
-- [ ] **Website bei Strato** im Unterordner `/lounge` neben WordPress einrichten:
-      `docs/STRATO.md` (SFTP-Zugang, Zielordner, GitHub-Variablen und -Secrets, Supabase-Auth-URLs,
-      Menüpunkt und robots.txt in WordPress). Danach lädt die Action „Deploy Website (Strato)“
-      bei jedem Push auf `main` hoch. Notfalls von Hand: STRATO.md, Abschnitt 6.
-- [ ] `VITE_NOINDEX=false` erst setzen, wenn die Seite wirklich live gehen soll. Sonst bleibt
-      sie für Suchmaschinen gesperrt.
-- [ ] Prüfen (STRATO.md, Abschnitt 5): Hauptseite zeigt weiter WordPress,
-      `https://<domain>/lounge/` zeigt die Lounge, Direktlinks wie `/lounge/agb` laden,
-      `/lounge/admin` leitet zum Login, http leitet auf https um.
-- [ ] `https://<domain>/lounge/sitemap.xml` ist erreichbar und in der Search Console eingereicht.
+- [ ] **Website bei Strato** auf der Subdomain (z. B. `buchen.weihnachtsmarkt-detmold.de`)
+      einrichten: `docs/STRATO.md` (Subdomain mit eigenem Ordner und SSL, SFTP-Zugang,
+      GitHub-Variablen und -Secrets, Supabase-Auth-URLs, Links für Toms WordPress-Seite).
+      Danach lädt die Action „Deploy Website (Strato)“ bei jedem Push auf `main` hoch.
+      Notfalls von Hand: STRATO.md, Abschnitt 6.
+- [ ] `VITE_NOINDEX=false` setzen, sobald die Seite gefunden werden soll.
+- [ ] Prüfen (STRATO.md, Abschnitt 5): WordPress unverändert, Subdomain zeigt die Buchungsseite,
+      Direktlinks wie `/agb` laden, `/admin` leitet zum Login, http leitet auf https um,
+      `/sitemap.xml` erreichbar und in der Search Console eingereicht.
 - [ ] Cloudflare-Vorschau bleibt bestehen (immer `noindex`), aber nicht öffentlich verlinken.
 
 ## E. Abnahme auf der echten Domain

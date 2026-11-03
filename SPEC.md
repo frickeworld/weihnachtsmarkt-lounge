@@ -6,26 +6,26 @@ Stand: 3. Okt. 2026 · Verantwortlich: Louis Fricke · Projektregeln: `CLAUDE.md
 
 ## 1. Überblick
 
-| Thema                    | Festlegung                                                                                            |
-| ------------------------ | ----------------------------------------------------------------------------------------------------- |
-| Produkt                  | Überdachte Lounge, Weihnachtsmarkt im Schlosspark Detmold, bis 10 Personen, 2 h exklusiv              |
-| Preis                    | Preisstaffel je Wochentag/Zeitfenster, Endpreise inkl. 3,50 € Gebühr: 99 € / 149 € / 199 € (siehe 1a) |
-| Zeitfenster              | Mo–Do und So 14:30, 16:45, 19:00 · Fr–Sa 15:30, 17:45, 20:00, je 2 h (Europe/Berlin)                  |
-| Buchungsschluss online   | 60 min vor Beginn (`settings.booking_cutoff_minutes`)                                                 |
-| Reservierung im Checkout | 30 min (`settings.hold_minutes`)                                                                      |
-| Stornierung              | Keine durch Gäste. Admin kann stornieren, Erstattung manuell in Stripe                                |
-| Zahlung                  | Stripe Checkout (MF Coaching & Promotion GmbH): Karte, Apple Pay, Google Pay, PayPal                  |
-| Rabattcodes              | Keine                                                                                                 |
-| Rechnung                 | Automatisch über Stripe bei Firmenname oder Rechnungswunsch, optional USt-ID                          |
-| Ticket                   | Ein QR-Code pro Buchung, Mail mit PDF-Anhang direkt nach Zahlung, Erinnerung am Buchungstag 10:00 Uhr |
-| Übertragbarkeit          | Ja, ohne Namensprüfung                                                                                |
-| Team-Benachrichtigung    | Keine Mail (Admin + Scanner-Liste „Heute“)                                                            |
-| Newsletter               | Freiwillige Checkbox + Brevo-Double-Opt-in                                                            |
-| Tracking                 | Cookielos: page_view, book_click, Buchungen                                                           |
-| Zugänge                  | studio_admin (2FA Pflicht), haendler (2FA optional), Scanner (PIN)                                    |
-| Backend                  | Ein Supabase-Projekt (Frankfurt) für Test und Live                                                    |
-| Hosting                  | Vorschau Cloudflare Pages · Live Strato, Unterordner `/lounge` neben WordPress (docs/STRATO.md)       |
-| Datenhaltung             | Anonymisierung der Kontaktdaten zum 31. März nach der Saison                                          |
+| Thema                    | Festlegung                                                                                               |
+| ------------------------ | -------------------------------------------------------------------------------------------------------- |
+| Produkt                  | Überdachte Lounge, Weihnachtsmarkt im Schlosspark Detmold, bis 10 Personen, 2 h exklusiv                 |
+| Preis                    | Preisstaffel je Wochentag/Zeitfenster, Endpreise inkl. 3,50 € Gebühr: 99 € / 149 € / 199 € (siehe 1a)    |
+| Zeitfenster              | Mo–Do und So 14:30, 16:45, 19:00 · Fr–Sa 15:30, 17:45, 20:00, je 2 h (Europe/Berlin)                     |
+| Buchungsschluss online   | 60 min vor Beginn (`settings.booking_cutoff_minutes`)                                                    |
+| Reservierung im Checkout | 30 min (`settings.hold_minutes`)                                                                         |
+| Stornierung              | Keine durch Gäste. Admin kann stornieren, Erstattung manuell in Stripe                                   |
+| Zahlung                  | Stripe Checkout (MF Coaching & Promotion GmbH): Karte, Apple Pay, Google Pay, PayPal                     |
+| Rabattcodes              | Keine                                                                                                    |
+| Rechnung                 | Automatisch über Stripe bei Firmenname oder Rechnungswunsch, optional USt-ID                             |
+| Ticket                   | Ein QR-Code pro Buchung, Mail mit PDF-Anhang direkt nach Zahlung, Erinnerung am Buchungstag 10:00 Uhr    |
+| Übertragbarkeit          | Ja, ohne Namensprüfung                                                                                   |
+| Team-Benachrichtigung    | Keine Mail (Admin + Scanner-Liste „Heute“)                                                               |
+| Newsletter               | Freiwillige Checkbox + Brevo-Double-Opt-in                                                               |
+| Tracking                 | Cookielos: page_view, book_click, Buchungen                                                              |
+| Zugänge                  | studio_admin (2FA Pflicht), haendler (2FA optional), Scanner (PIN)                                       |
+| Backend                  | Ein Supabase-Projekt (Frankfurt) für Test und Live                                                       |
+| Hosting                  | Vorschau Cloudflare Pages · Live Strato, Subdomain z. B. `buchen.weihnachtsmarkt-detmold.de` (STRATO.md) |
+| Datenhaltung             | Anonymisierung der Kontaktdaten zum 31. März nach der Saison                                             |
 
 ### 1a. Preisstaffel (Änderung 05.10.2026, Vorschlag Oliver, freigegeben von Louis)
 

@@ -1,8 +1,8 @@
 name: Deploy Website (Strato)
 
-# main = live. Baut die Website und lädt sie per SFTP in den Unterordner neben der
-# WordPress-Seite (z. B. weihnachtsmarkt-detmold.de/lounge). Einrichtung: docs/STRATO.md.
-# Es wird nichts gelöscht – WordPress und alte Bundle-Dateien bleiben unangetastet.
+# main = live. Baut die Website und lädt sie per SFTP in den Ordner der Subdomain
+# (z. B. buchen.weihnachtsmarkt-detmold.de). Einrichtung: docs/STRATO.md.
+# Es wird nichts gelöscht; liegt im Zielordner WordPress, bricht der Upload ab.
 on:
   push:
     branches: [main]
