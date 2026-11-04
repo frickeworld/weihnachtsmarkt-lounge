@@ -112,7 +112,7 @@ export interface SlotTemplate {
   start_time: string;
   end_time: string;
   active: boolean;
-  /** Endpreis inkl. Vorverkaufsgebühr; null = Standardpreis aus den Einstellungen */
+  /** Endpreis inkl. Verarbeitungsgebühr; null = Standardpreis aus den Einstellungen */
   price_cents: number | null;
   taler_count: number | null;
   /** null = automatisch (Freiverzehr + Hälfte des Rests) */

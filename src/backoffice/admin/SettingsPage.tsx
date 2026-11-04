@@ -189,7 +189,7 @@ function SettingsForm({ initial, onSaved }: { initial: AdminSettings; onSaved: (
             suffix: '%',
             hint: 'Endpreis = Lounge-Preis + Prozent, auf volle Euro gerundet. Leer = fester Betrag.',
           })}
-          {input('fee', 'Feste Vorverkaufsgebühr (nur ohne Prozentsatz)', { suffix: '€' })}
+          {input('fee', 'Feste Verarbeitungsgebühr (nur ohne Prozentsatz)', { suffix: '€' })}
           {input('haendler', 'Standard: Anteil Händler', { suffix: '€' })}
           {input('taler_count', 'Standard: Anzahl Residenztaler', { suffix: 'Stk.' })}
           {input('taler', 'Standard: Wert der Taler', { suffix: '€' })}

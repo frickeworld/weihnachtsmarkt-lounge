@@ -16,7 +16,11 @@ async function fillAndSubmit(page: Page, extra?: (p: Page) => Promise<void>) {
   await page.getByLabel('Nachname').fill('Muster');
   await page.locator('#buchen').getByLabel('E-Mail').fill('anna@example.de');
   await page.getByLabel('Telefon').fill('05231 123456');
-  await page.getByRole('radio', { name: '8 Personen' }).check({ force: true });
+  await page
+    .locator('label')
+    .filter({ has: page.getByRole('radio', { name: '8 Personen' }) })
+    .click();
+  await expect(page.getByRole('radio', { name: '8 Personen' })).toBeChecked();
   if (extra) await extra(page);
   await page.getByLabel(/Ich akzeptiere die/).check();
   await page.getByRole('button', { name: /Zahlungspflichtig buchen – \d+,\d\d €/ }).click();
@@ -65,10 +69,10 @@ test.describe('Checkout (Phase 3)', () => {
     await expect(
       page.getByRole('button', { name: /Zahlungspflichtig buchen – 156,00\s€/ }),
     ).toBeVisible();
-    // Zusammenfassung: 156 € = Lounge 149 € + 7 € Vorverkaufsgebühr (5 %)
-    const summary = page.locator('#buchen dl').filter({ hasText: 'Vorverkaufsgebühr' });
+    // Zusammenfassung: 156 € = Lounge 149 € + 7 € Verarbeitungsgebühr (5 %)
+    const summary = page.locator('#buchen dl').filter({ hasText: 'Verarbeitungsgebühr' });
     await expect(summary).toContainText(/Lounge inkl\. 75 € Freiverzehr\s*149,00\s€/);
-    await expect(summary).toContainText(/Vorverkaufsgebühr\s*7,00\s€/);
+    await expect(summary).toContainText(/Verarbeitungsgebühr\s*7,00\s€/);
     await slots.nth(0).click();
     await expect(
       page.getByRole('button', { name: /Zahlungspflichtig buchen – 104,00\s€/ }),
@@ -243,7 +247,7 @@ test.describe('Besondere Termine', () => {
     await expect(section).toContainText('Live: Weidmüller');
     // Beworben wird der Lounge-Preis ohne Gebühr: 249 € = 237 € + 12 € (5 %)
     await expect(section).toContainText('237 €');
-    await expect(section).toContainText('inkl. 125 € Freiverzehr, zzgl. 5 % Vorverkaufsgebühr');
+    await expect(section).toContainText('inkl. 125 € Freiverzehr, zzgl. 5 % Verarbeitungsgebühr');
 
     await section.getByRole('link', { name: /19:00 Uhr buchen$/ }).click();
     await expect(

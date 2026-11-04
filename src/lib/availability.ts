@@ -8,7 +8,7 @@ export interface SlotAvailability {
   startTime: string; // HH:MM
   endTime: string; // HH:MM
   status: SlotStatus;
-  /** Endpreis inkl. Vorverkaufsgebühr (Preisstaffel / Sondertermin) */
+  /** Endpreis inkl. Verarbeitungsgebühr (Preisstaffel / Sondertermin) */
   totalCents?: number;
   talerCount?: number;
   /** z. B. „Party-Abend“ bei Sonderveranstaltungen */

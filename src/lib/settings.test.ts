@@ -21,7 +21,7 @@ describe('Preisstaffel', () => {
     expect(minLoungeCents(s)).toBe(9900);
     expect(loungeCents(20900, s)).toBe(19900);
     expect(loungeCents(19800, s)).toBe(18900);
-    expect(feeNote(s)).toBe('zzgl. 5 % Vorverkaufsgebühr');
+    expect(feeNote(s)).toBe('zzgl. 5 % Verarbeitungsgebühr');
     expect(maxTalerCount(s)).toBe(100);
     expect(talerLevels(s)).toEqual([50, 75, 100]);
   });

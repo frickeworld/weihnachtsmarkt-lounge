@@ -70,7 +70,7 @@ Einstellungen → „Zeitfenster und Preise“ (Prozentsatz unter „Saison, Pre
 | Posten                      | Betrag       | Geht an                            |
 | --------------------------- | ------------ | ---------------------------------- |
 | Gast zahlt gesamt           | 209,00 €     | –                                  |
-| Vorverkaufsgebühr (5 %)     | 10,00 €      | Studio F                           |
+| Verarbeitungsgebühr (5 %)   | 10,00 €      | Studio F                           |
 | Residenztaler (Freiverzehr) | 100,00 €     | Händler                            |
 | Hälfte Rest (99,00 €)       | 49,50 €      | Händler                            |
 | Andere Hälfte Rest          | 49,50 €      | Studio F                           |
@@ -267,7 +267,7 @@ Spalten `scanner_pin_hash` sind nie über eine öffentliche Funktion erreichbar.
    - Insert `pending`, `hold_expires_at = now() + hold_minutes`, Beträge aus settings, `amount_total_cents = price + fee`.
    - Unique-Verletzung → 409 „Dieser Termin wurde gerade gebucht. Bitte wähle einen anderen.“ → Frontend lädt Verfügbarkeit neu.
    - Stripe Checkout Session: `mode=payment`, `locale=de`, `currency=eur`, `customer_email`, `expires_at = hold_expires_at` (Stripe-Minimum 30 min beachten), `payment_method_types` = card + paypal (Apple/Google Pay über card), `metadata.booking_id`, success/cancel-URL über PUBLIC_SITE_URL.
-   - Positionen: „Weihnachtsmarkt-Lounge am [Datum], [Zeitfenster] – bis zu 10 Personen“ = price − taler (75,00 €) · „Freiverzehr: 100 Residenztaler“ = taler (100,00 €) · „Vorverkaufsgebühr“ = fee (3,50 €). Tax-Rates nur, wenn Secrets gesetzt (Lounge + Gebühr; Taler ohne).
+   - Positionen: „Weihnachtsmarkt-Lounge am [Datum], [Zeitfenster] – bis zu 10 Personen“ = price − taler (75,00 €) · „Freiverzehr: 100 Residenztaler“ = taler (100,00 €) · „Verarbeitungsgebühr“ = fee (3,50 €). Tax-Rates nur, wenn Secrets gesetzt (Lounge + Gebühr; Taler ohne).
    - Bei Firma/Rechnungswunsch: Stripe-Customer (Name = Firma sonst Vor-/Nachname, E-Mail, Adresse, USt-ID als `eu_vat` Tax-ID), `invoice_creation.enabled = true`, Beschreibung mit Datum, Zeitfenster, Buchungscode.
    - Session-ID speichern, Redirect-URL zurückgeben.
 4. **Webhook** `stripe-webhook` (ohne JWT, Signatur prüfen):
@@ -420,7 +420,7 @@ Alle Admin-Aktionen serverseitig mit `is_admin_aal2()` geprüft.
 
 Texte wie im Projektplan, mit diesen Änderungen:
 
-- **Preis-Abschnitt:** groß „ab 99 €“ (günstigster Lounge-Preis ohne Gebühr, dynamisch), „zzgl. 5 % Vorverkaufsgebühr“, Preisübersicht mit Lounge-Preisen nach Tagen und Zeitfenstern (seit 04.11.2026, vorher Endpreise „ab 104 €“).
+- **Preis-Abschnitt:** groß „ab 99 €“ (günstigster Lounge-Preis ohne Gebühr, dynamisch), „zzgl. 5 % Verarbeitungsgebühr“, Preisübersicht mit Lounge-Preisen nach Tagen und Zeitfenstern (seit 04.11.2026, vorher Endpreise „ab 104 €“).
 - **Erlebnis-Karte 2:** „Holzhütte mit Fellen, Lichterketten und leiser Musik.“ (ohne Kaminfeuer).
 - **Mobile Leiste:** „Lounge buchen · ab 99 €“.
 - Alle Preise, Personenzahl, Taler und Kontakt-E-Mail dynamisch aus `get_public_settings` (mit statischem Fallback nur für den ersten Render).

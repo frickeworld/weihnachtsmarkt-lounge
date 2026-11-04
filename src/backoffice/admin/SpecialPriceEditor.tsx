@@ -46,7 +46,7 @@ export function SpecialPriceEditor({
     setError(null);
     if (!title.trim()) return setError('Bitte einen Titel angeben, z. B. „Party-Abend“.');
     if (priceCents === null || priceCents <= feeFor(priceCents, fee))
-      return setError('Bitte einen Preis angeben (inkl. Vorverkaufsgebühr), z. B. 249,00.');
+      return setError('Bitte einen Preis angeben (inkl. Verarbeitungsgebühr), z. B. 249,00.');
     if (!talerOk || Number(taler) * 100 > priceCents)
       return setError('Freiverzehr bitte als ganze Euro, höchstens der Preis.');
     let shareCents: number | null = null;
@@ -181,8 +181,8 @@ export function SpecialPriceEditor({
             </label>
           </div>
           <p className="text-xs text-ink-soft">
-            Preis inkl. {feeLabel(fee)} Vorverkaufsgebühr. Händler-Anteil leer lassen = Freiverzehr
-            + Hälfte des Rests.
+            Preis inkl. {feeLabel(fee)} Verarbeitungsgebühr. Händler-Anteil leer lassen =
+            Freiverzehr + Hälfte des Rests.
             {booked && ' Die bestehende Buchung behält ihren Preis.'}
           </p>
           <div className="flex flex-wrap gap-2">

@@ -21,7 +21,7 @@ test.describe('One-Pager', () => {
     await page.goto('/');
     const preis = page.locator('#preis');
     await expect(preis).toContainText('Deine Lounge ab 99 €');
-    await expect(preis).toContainText('zzgl. 5 % Vorverkaufsgebühr');
+    await expect(preis).toContainText('zzgl. 5 % Verarbeitungsgebühr');
     for (const p of ['99 €', '149 €', '199 €']) await expect(preis).toContainText(p);
     await expect(preis).not.toContainText('104 €');
     await expect(preis).toContainText('inkl. 50 € Freiverzehr');
@@ -77,7 +77,11 @@ test.describe('One-Pager', () => {
     await page.getByLabel('Nachname').fill('Muster');
     await page.locator('#buchen').getByLabel('E-Mail').fill('anna@example.de');
     await page.getByLabel('Telefon').fill('05231 123456');
-    await page.getByRole('radio', { name: '8 Personen' }).check({ force: true });
+    await page
+      .locator('label')
+      .filter({ has: page.getByRole('radio', { name: '8 Personen' }) })
+      .click();
+    await expect(page.getByRole('radio', { name: '8 Personen' })).toBeChecked();
     await expect(page.getByText('Anlass (optional)')).toBeVisible();
     await page.getByLabel('Straße und Hausnummer').fill('Schloßplatz 1');
     await page.getByLabel('PLZ').fill('32756');

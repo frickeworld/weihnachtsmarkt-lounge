@@ -102,7 +102,7 @@ Optionale Supabase-Secrets für Stripe:
 | ----------------------------- | ----------------------------------------------------------------------------------------- |
 | `STRIPE_PAYMENT_METHOD_TYPES` | Standard `card,paypal`. Nur falls PayPal (noch) nicht aktiv ist: `card`                   |
 | `STRIPE_TAX_RATE_LOUNGE`      | Steuersatz-ID (`txr_…`) für die Lounge-Position – erst nach Rücksprache mit Steuerberater |
-| `STRIPE_TAX_RATE_FEE`         | Steuersatz-ID für die Vorverkaufsgebühr                                                   |
+| `STRIPE_TAX_RATE_FEE`         | Steuersatz-ID für die Verarbeitungsgebühr                                                 |
 
 ## 7. Brevo
 

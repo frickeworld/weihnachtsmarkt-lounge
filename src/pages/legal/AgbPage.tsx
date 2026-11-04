@@ -40,7 +40,7 @@ export function AgbPage() {
       <H2>{n(3)} Preise</H2>
       <p>
         Preis und Freiverzehr hängen vom Wochentag und Zeitfenster ab. Zum Lounge-Preis kommt eine
-        Vorverkaufsgebühr von{' '}
+        Verarbeitungsgebühr von{' '}
         {s.feePercent == null
           ? formatCents(s.feeCents)
           : `${s.feePercent.toLocaleString('de-DE')} % des Lounge-Preises (Gesamtpreis auf volle Euro gerundet)`}{' '}
@@ -53,7 +53,7 @@ export function AgbPage() {
             <li key={g.days + r.label + r.totalCents}>
               {g.days}, {r.label} ({r.times.join(' oder ')} Uhr): Lounge-Preis{' '}
               {formatCents(loungeCents(r.totalCents, s))}, Gesamtpreis {formatCents(r.totalCents)}{' '}
-              inkl. Vorverkaufsgebühr und {r.talerCount} € Freiverzehr
+              inkl. Verarbeitungsgebühr und {r.talerCount} € Freiverzehr
             </li>
           )),
         )}

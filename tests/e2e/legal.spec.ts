@@ -34,16 +34,16 @@ test('AGB nennen die Preisstaffel aus der Datenbank', async ({ page }) => {
   await mockSupabase(page);
   await page.goto('/agb');
   await expect(
-    page.getByText(/Zum Lounge-Preis kommt eine Vorverkaufsgebühr von 5 % des Lounge-Preises/),
+    page.getByText(/Zum Lounge-Preis kommt eine Verarbeitungsgebühr von 5 % des Lounge-Preises/),
   ).toBeVisible();
   await expect(
     page.getByText(
-      /Montag bis Donnerstag, Früher Abend \(16:45–18:45 Uhr\): Lounge-Preis 149,00\s€, Gesamtpreis 156,00\s€ inkl\. Vorverkaufsgebühr und 75 € Freiverzehr/,
+      /Montag bis Donnerstag, Früher Abend \(16:45–18:45 Uhr\): Lounge-Preis 149,00\s€, Gesamtpreis 156,00\s€ inkl\. Verarbeitungsgebühr und 75 € Freiverzehr/,
     ),
   ).toBeVisible();
   await expect(
     page.getByText(
-      /Freitag und Samstag, Später Abend \(20:00–22:00 Uhr\): Lounge-Preis 199,00\s€, Gesamtpreis 209,00\s€ inkl\. Vorverkaufsgebühr und 100 € Freiverzehr/,
+      /Freitag und Samstag, Später Abend \(20:00–22:00 Uhr\): Lounge-Preis 199,00\s€, Gesamtpreis 209,00\s€ inkl\. Verarbeitungsgebühr und 100 € Freiverzehr/,
     ),
   ).toBeVisible();
 });

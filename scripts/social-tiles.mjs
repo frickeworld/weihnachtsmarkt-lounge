@@ -102,7 +102,7 @@ const motifs = {
     <div style="padding:${tall ? 110 : 40}px 64px 0">
       <p class="eyebrow" style="color:#7A5A1E">Preise und Zeiten</p>
       <h1 class="display" style="font-size:${tall ? 88 : 76}px;margin-top:12px">Deine Lounge ab ${euro(minPrice)}</h1>
-      <p style="font-size:${tall ? 30 : 26}px;color:#5F574B;margin-top:10px">Endpreise inkl. 3,50 € Vorverkaufsgebühr und Freiverzehr · bis zu 10 Personen · 2 Stunden</p>
+      <p style="font-size:${tall ? 30 : 26}px;color:#5F574B;margin-top:10px">Lounge-Preise zzgl. 5 % Verarbeitungsgebühr, inkl. Freiverzehr · bis zu 10 Personen · 2 Stunden</p>
       ${groups
         .map(
           (

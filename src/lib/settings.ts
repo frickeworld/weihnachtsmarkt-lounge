@@ -3,7 +3,7 @@
  * PUBLIC_SETTINGS_FALLBACK ist nur der Startwert für den ersten Render, bis die Datenbank antwortet –
  * die verbindlichen Beträge liegen in der Tabelle settings und werden nur serverseitig verwendet.
  */
-/** Preis eines Zeitfensters laut Vorlage (Endpreis inkl. Vorverkaufsgebühr). */
+/** Preis eines Zeitfensters laut Vorlage (Endpreis inkl. Verarbeitungsgebühr). */
 export interface PriceTier {
   weekday: number; // 1 = Montag … 7 = Sonntag
   startTime: string; // HH:MM
@@ -90,7 +90,7 @@ export function feeFor(total: number, s: Pick<PublicSettings, 'feeCents' | 'feeP
   return total - Math.round(total / (1 + s.feePercent / 100) / 100) * 100;
 }
 
-/** „5 %“ bzw. „3,50 €“ für Texte wie „inkl. … Vorverkaufsgebühr“. */
+/** „5 %“ bzw. „3,50 €“ für Texte wie „inkl. … Verarbeitungsgebühr“. */
 export function feeLabel(s: Pick<PublicSettings, 'feeCents' | 'feePercent'>): string {
   if (s.feePercent == null)
     return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(
@@ -100,7 +100,7 @@ export function feeLabel(s: Pick<PublicSettings, 'feeCents' | 'feePercent'>): st
 }
 
 /**
- * Lounge-Preis ohne Vorverkaufsgebühr (z. B. 104 € → 99 €). Beworben wird dieser Preis
+ * Lounge-Preis ohne Verarbeitungsgebühr (z. B. 104 € → 99 €). Beworben wird dieser Preis
  * (Entscheidung Louis, 04.11.2026); die Gebühr kommt im Buchungsformular und im Checkout dazu.
  */
 export function loungeCents(
@@ -117,9 +117,9 @@ export function minLoungeCents(
   return loungeCents(minPriceCents(s), s);
 }
 
-/** „zzgl. 5 % Vorverkaufsgebühr“ */
+/** „zzgl. 5 % Verarbeitungsgebühr“ */
 export function feeNote(s: Pick<PublicSettings, 'feeCents' | 'feePercent'>): string {
-  return `zzgl. ${feeLabel(s)} Vorverkaufsgebühr`;
+  return `zzgl. ${feeLabel(s)} Verarbeitungsgebühr`;
 }
 
 /** Günstigster Endpreis inkl. Gebühr (104 €). */

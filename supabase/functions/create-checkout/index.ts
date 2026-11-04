@@ -273,7 +273,7 @@ Deno.serve(async (req) => {
       price_data: {
         currency: 'eur',
         unit_amount: booking.fee_cents,
-        product_data: { name: 'Vorverkaufsgebühr' },
+        product_data: { name: 'Verarbeitungsgebühr' },
       },
       ...(taxFee ? { tax_rates: [taxFee] } : {}),
     },

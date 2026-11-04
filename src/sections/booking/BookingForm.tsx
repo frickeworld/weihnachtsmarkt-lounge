@@ -23,7 +23,7 @@ interface Props {
   date: IsoDate;
   startTime: string;
   endTime: string;
-  /** Endpreis dieses Zeitfensters inkl. Vorverkaufsgebühr (Anzeige; abgerechnet wird serverseitig) */
+  /** Endpreis dieses Zeitfensters inkl. Verarbeitungsgebühr (Anzeige; abgerechnet wird serverseitig) */
   totalCents?: number;
   talerCount?: number;
   specialTitle?: string | null;
@@ -326,7 +326,7 @@ export function BookingForm({
             <dd>{formatCents(baseValue - feeFor(baseValue, settings))}</dd>
           </div>
           <div className="flex justify-between gap-4">
-            <dt>Vorverkaufsgebühr</dt>
+            <dt>Verarbeitungsgebühr</dt>
             <dd>{formatCents(feeFor(baseValue, settings))}</dd>
           </div>
           {discount && (

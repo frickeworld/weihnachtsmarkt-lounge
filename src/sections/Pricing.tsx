@@ -15,7 +15,7 @@ import { trackBookClick } from '@/lib/track';
 
 const euro = (cents: number) => formatCents(cents).replace(/,00\s?€$/, ' €');
 
-/** Preisstaffel nach Wochentag und Tageszeit (Lounge-Preise, Vorverkaufsgebühr kommt dazu). */
+/** Preisstaffel nach Wochentag und Tageszeit (Lounge-Preise, Verarbeitungsgebühr kommt dazu). */
 export function Pricing() {
   const s = useSettings();
   const groups = priceGroups(s.priceList);
@@ -96,7 +96,7 @@ export function Pricing() {
               ))}
             </div>
             <p className="mt-6 text-sm text-ink-soft">
-              Alle Preise zzgl. {feeLabel(s)} Vorverkaufsgebühr (auf volle Euro gerundet). Den
+              Alle Preise zzgl. {feeLabel(s)} Verarbeitungsgebühr (auf volle Euro gerundet). Den
               Gesamtpreis siehst du vor dem Bezahlen in der Buchungsübersicht. An besonderen Abenden
               (z. B. Partys oder Live-Auftritte) gelten eigene Preise – du siehst sie bei der
               Auswahl im Kalender.
