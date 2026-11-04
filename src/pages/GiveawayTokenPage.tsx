@@ -35,7 +35,7 @@ export function GiveawayTokenPage({ mode }: { mode: 'confirm' | 'unsubscribe' })
 
   return (
     <>
-      <Header home={false} />
+      <Header home={false} giveaway={false} />
       <GlitterBand className="h-3" />
       <main className="min-h-[60vh] px-4 pt-6 pb-20 sm:px-6">
         <div className="mx-auto max-w-xl text-center">

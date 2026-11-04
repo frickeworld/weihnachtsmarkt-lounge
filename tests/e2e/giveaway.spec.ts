@@ -7,12 +7,21 @@ test.describe('Gewinnspiel', () => {
     await mockSupabase(page);
     await page.goto('/');
     await expect(page.locator('#start h1')).toBeVisible();
-    await expect(page.getByRole('heading', { name: /Jede Woche einen Abend/ })).toHaveCount(0);
+    await expect(page.getByRole('heading', { name: /Jeden Sonntag eine Lounge/ })).toHaveCount(0);
+    await expect(page.getByRole('link', { name: 'Lounge gewinnen' })).toHaveCount(0);
 
     await mockSupabase(page, { giveawayActive: true });
     await page.reload();
+    // Laufende Leiste und Geschenk oben, Countdown im Band
+    await expect(page.getByRole('link', { name: /^Lounge gewinnen: Ziehung/ })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Lounge gewinnen', exact: true })).toBeVisible();
+    await expect(page.getByLabel(/^Noch 3 Tage, 5 Stunden/)).toBeVisible();
+    await expect(
+      page.getByText('Alle anderen bekommen 25 % Rabatt', { exact: false }),
+    ).toBeVisible();
     await page.getByRole('link', { name: 'Jetzt mitmachen' }).click();
     await expect(page).toHaveURL(/\/gewinnspiel$/);
+    await expect(page.getByText(/48 Stunden einlösbar/)).toBeVisible();
   });
 
   test('Teilnahme mit Freunde-Link, Einwilligung Pflicht', async ({ page }) => {

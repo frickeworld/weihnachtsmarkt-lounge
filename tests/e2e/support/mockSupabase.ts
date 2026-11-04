@@ -184,8 +184,15 @@ export async function mockSupabase(page: Page, opts: MockOptions = {}) {
         next_draw: addDays(todayIso(), 3),
         participants: 120,
         draws: 2,
-        discount_percent: 30,
+        discount_percent: 25,
       },
+    }),
+  );
+  await page.route('**/rest/v1/rpc/next_giveaway_draw*', (route) =>
+    route.fulfill({
+      json: opts.giveawayActive
+        ? new Date(Date.now() + ((3 * 24 + 5) * 3600 + 7 * 60) * 1000).toISOString()
+        : null,
     }),
   );
   await page.route('**/rest/v1/rpc/preview_discount*', (route) => {

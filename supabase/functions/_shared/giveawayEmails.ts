@@ -80,20 +80,41 @@ ${button(d.bookUrl, 'Jetzt Abend aussuchen')}`,
   return { subject, html, text };
 }
 
+/** „Dienstag, 8. Dezember 2026, 18:00 Uhr“ (Europe/Berlin) */
+export function formatBerlinDateTime(iso: string): string {
+  const d = new Date(iso);
+  const day = new Intl.DateTimeFormat('de-DE', {
+    timeZone: 'Europe/Berlin',
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(d);
+  const time = new Intl.DateTimeFormat('de-DE', {
+    timeZone: 'Europe/Berlin',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(d);
+  return `${day}, ${time} Uhr`;
+}
+
 export function renderGiveawayConsolation(d: {
   firstName: string;
   code: string | null;
   percent: number;
-  validUntil: string;
+  /** Bis wann gebucht werden muss (ISO-Zeitpunkt, 48 Stunden nach der Ziehung) */
+  redeemBy: string;
+  /** Nächste Ziehung (ISO-Zeitpunkt) oder null nach der letzten */
   nextDraw: string | null;
   bookUrl: string;
   unsubscribeUrl: string;
 }): MailParts {
+  const deadline = formatBerlinDateTime(d.redeemBy);
   const subject = d.code
-    ? `Diesmal nicht – aber ${d.percent} % für deinen Lounge-Abend`
+    ? `Nur 48 Stunden: ${d.percent} % auf deinen Lounge-Abend`
     : 'Diesmal nicht – du bleibst im Lostopf';
   const next = d.nextDraw
-    ? `Du bleibst im Lostopf: Die nächste Ziehung ist am ${escapeHtml(formatLongDate(d.nextDraw))}.`
+    ? `Du bleibst im Lostopf: Die nächste Ziehung ist am ${escapeHtml(formatBerlinDateTime(d.nextDraw))}.`
     : 'Danke fürs Mitmachen!';
   const html = frame(
     'Gewinnspiel Weihnachtsmarkt-Lounge',
@@ -101,9 +122,9 @@ export function renderGiveawayConsolation(d: {
     `<p style="margin:0 0 12px;line-height:1.6;">${next}</p>
 ${
   d.code
-    ? `<p style="margin:0 0 8px;line-height:1.6;">Damit du nicht bis dahin warten musst: Mit deinem persönlichen Code sparst du <strong>${d.percent} %</strong> auf einen Abend von Montag bis Donnerstag – der Freiverzehr bleibt voll erhalten.</p>
+    ? `<p style="margin:0 0 8px;line-height:1.6;">Dafür haben wir etwas für dich: Mit deinem persönlichen Code sparst du <strong>${d.percent} %</strong> auf deinen Lounge-Abend – der Freiverzehr bleibt voll erhalten. <strong>Der Code gilt nur 48 Stunden.</strong></p>
 <p style="margin:16px 0;text-align:center;font-family:Courier New,monospace;font-size:24px;font-weight:bold;letter-spacing:3px;background:#F3EBDC;padding:14px;border-radius:10px;">${escapeHtml(d.code)}</p>
-<p style="margin:0;color:#5F574B;font-size:13px;line-height:1.6;">Gültig bis ${escapeHtml(formatLongDate(d.validUntil))}, montags bis donnerstags, einmal einlösbar, nicht für Sonderveranstaltungen.</p>
+<p style="margin:0;color:#5F574B;font-size:13px;line-height:1.6;">Einlösbar bis ${escapeHtml(deadline)}. Der Termin selbst darf später in der Saison liegen. Gilt an allen Tagen außer an den Party-Abenden (22., 23., 29. und 30. Dezember) und an Heiligabend. Einmal einlösbar, keine Barauszahlung.</p>
 ${button(d.bookUrl, 'Lounge buchen')}`
     : ''
 }`,
@@ -113,13 +134,14 @@ ${button(d.bookUrl, 'Lounge buchen')}`
     `Diesmal hat es nicht geklappt, ${d.firstName}.`,
     '',
     d.nextDraw
-      ? `Du bleibst im Lostopf: Die nächste Ziehung ist am ${formatLongDate(d.nextDraw)}.`
+      ? `Du bleibst im Lostopf: Die nächste Ziehung ist am ${formatBerlinDateTime(d.nextDraw)}.`
       : 'Danke fürs Mitmachen!',
     ...(d.code
       ? [
           '',
-          `Dein persönlicher Code: ${d.code} – ${d.percent} % auf einen Abend Mo–Do (Freiverzehr bleibt voll).`,
-          `Gültig bis ${formatLongDate(d.validUntil)}, einmal einlösbar, nicht für Sonderveranstaltungen.`,
+          `Dein persönlicher Code: ${d.code} – ${d.percent} % auf deinen Lounge-Abend (Freiverzehr bleibt voll).`,
+          `Nur 48 Stunden einlösbar: bis ${deadline}. Der Termin darf später in der Saison liegen.`,
+          'Gilt an allen Tagen außer an den Party-Abenden (22., 23., 29. und 30. Dezember) und an Heiligabend. Einmal einlösbar.',
           `Lounge buchen: ${d.bookUrl}`,
         ]
       : []),

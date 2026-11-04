@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useSettings } from '@/lib/settingsContext';
+import { useGiveawayInfo } from '@/lib/useGiveawayInfo';
 import { formatLongDate } from '@/lib/dates';
 import { LEGAL_SHORT as L } from '../../../supabase/functions/_shared/legal.ts';
 import { H2, LegalLayout } from './LegalLayout';
@@ -7,6 +8,7 @@ import { H2, LegalLayout } from './LegalLayout';
 /** Teilnahmebedingungen Gewinnspiel – Entwurf, vor dem Start anwaltlich prüfen. */
 export function GiveawayTermsPage() {
   const s = useSettings();
+  const info = useGiveawayInfo();
   return (
     <LegalLayout title="Teilnahmebedingungen Gewinnspiel">
       <p>„Jede Woche einen Abend in der Lounge gewinnen“</p>
@@ -35,11 +37,11 @@ export function GiveawayTermsPage() {
 
       <H2>3. Ablauf und Ziehung</H2>
       <p>
-        Das Gewinnspiel läuft bis {s.seasonEnd ? formatLongDate(s.seasonEnd) : '[ENDDATUM]'}. In der
-        Regel jeden Montag wird unter allen bestätigten Teilnehmenden, die noch nicht gewonnen
-        haben, ein Gewinner per Zufall gezogen. Wer einmal angemeldet ist, nimmt an allen folgenden
-        Ziehungen teil. Für jede Person, die über den persönlichen Einladungslink teilnimmt und ihre
-        Teilnahme bestätigt, erhält die einladende Person ein zusätzliches Los.
+        Das Gewinnspiel läuft bis {s.seasonEnd ? formatLongDate(s.seasonEnd) : '[ENDDATUM]'}. Jeden
+        Sonntag um 18:00 Uhr wird automatisch unter allen bestätigten Teilnehmenden, die noch nicht
+        gewonnen haben, ein Gewinner per Zufall gezogen. Wer einmal angemeldet ist, nimmt an allen
+        folgenden Ziehungen teil. Für jede Person, die über den persönlichen Einladungslink
+        teilnimmt und ihre Teilnahme bestätigt, erhält die einladende Person ein zusätzliches Los.
       </p>
 
       <H2>4. Gewinn</H2>
@@ -55,10 +57,13 @@ export function GiveawayTermsPage() {
 
       <H2>5. Code für alle anderen</H2>
       <p>
-        Teilnehmende, die nicht gewonnen haben, erhalten nach jeder Ziehung einen persönlichen,
-        einmal einlösbaren Code über einen Preisnachlass auf einen Abend von Montag bis Donnerstag
-        (nicht für Sonderveranstaltungen), gültig bis zum Saisonende. Der Freiverzehr bleibt in
-        voller Höhe enthalten. Der Code ist nicht mit anderen Aktionen kombinierbar.
+        Teilnehmende, die nicht gewonnen haben, erhalten nach jeder Ziehung per E-Mail einen
+        persönlichen, einmal einlösbaren Code über {info?.discountPercent ?? 25} % Preisnachlass auf
+        einen Lounge-Abend. Der Code muss innerhalb von 48 Stunden nach der Ziehung eingelöst, also
+        gebucht werden; der gebuchte Termin darf bis zum Saisonende liegen. Er gilt an allen Tagen
+        außer an Sonderveranstaltungen (Party-Abende am 22., 23., 29. und 30. Dezember sowie
+        Heiligabend). Der Freiverzehr bleibt in voller Höhe enthalten. Der Code ist nicht mit
+        anderen Aktionen kombinierbar.
       </p>
 
       <H2>6. Benachrichtigung</H2>

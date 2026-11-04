@@ -549,12 +549,33 @@ export interface GiveawayInfo {
   active: boolean;
   ends: IsoDate;
   nextDraw: IsoDate;
+  /** Genaue nächste Ziehung (ISO-Zeitpunkt, sonntags 18:00 Uhr Berlin) – null nach der letzten */
+  nextDrawAt: string | null;
   participants: number;
   draws: number;
   discountPercent: number;
 }
 
-export async function fetchGiveawayInfo(): Promise<GiveawayInfo | null> {
+let giveawayInfoPromise: Promise<GiveawayInfo | null> | null = null;
+
+/** Einmal je Seitenaufruf laden (Kopfzeile, Band und Gewinnspiel-Seite teilen sich das Ergebnis). */
+export function fetchGiveawayInfo(): Promise<GiveawayInfo | null> {
+  giveawayInfoPromise ??= loadGiveawayInfo();
+  return giveawayInfoPromise;
+}
+
+/** Nächster Sonntag 18:00 Uhr Berliner Zeit (nur für die Vorschau ohne Datenbank). */
+function demoNextDraw(now = new Date()): Date {
+  const berlin = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Berlin' }));
+  const offset = berlin.getTime() - now.getTime();
+  const target = new Date(berlin);
+  target.setDate(berlin.getDate() + ((7 - berlin.getDay()) % 7));
+  target.setHours(18, 0, 0, 0);
+  if (target <= berlin) target.setDate(target.getDate() + 7);
+  return new Date(target.getTime() - offset);
+}
+
+async function loadGiveawayInfo(): Promise<GiveawayInfo | null> {
   if (DEMO) {
     const s = await demoSettings();
     const today = new Date();
@@ -565,9 +586,10 @@ export async function fetchGiveawayInfo(): Promise<GiveawayInfo | null> {
       active: true,
       ends: s.seasonEnd,
       nextDraw: next.toISOString().slice(0, 10),
+      nextDrawAt: demoNextDraw().toISOString(),
       participants: 312,
       draws: 0,
-      discountPercent: 30,
+      discountPercent: 25,
     };
   }
   if (!restConfigured()) return null;
@@ -579,11 +601,15 @@ export async function fetchGiveawayInfo(): Promise<GiveawayInfo | null> {
     draws: number;
     discount_percent: number;
   }>('get_giveaway_info', {}, 'maybe').catch(() => null);
+  const nextDrawAt = r
+    ? await rpc<string | null>('next_giveaway_draw', {}).catch(() => null)
+    : null;
   return r
     ? {
         active: r.active,
         ends: r.ends,
         nextDraw: r.next_draw,
+        nextDrawAt: typeof nextDrawAt === 'string' ? nextDrawAt : null,
         participants: r.participants,
         draws: r.draws,
         discountPercent: r.discount_percent,

@@ -462,3 +462,6 @@ verify_jwt = false
 
 [functions.giveaway]
 verify_jwt = false
+
+[functions.giveaway-draw]
+verify_jwt = false

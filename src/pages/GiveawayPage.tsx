@@ -1,3 +1,5 @@
+import { GiveawayCountdown } from '@/components/GiveawayCountdown';
+import { formatDrawTime } from '@/lib/drawCountdown';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -79,26 +81,26 @@ export function GiveawayPage() {
 
   return (
     <>
-      <Header home={false} />
+      <Header home={false} giveaway={false} />
       <GlitterBand className="h-3" />
       <main className="px-4 pt-10 pb-20 sm:px-6">
         <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-start">
           <div>
             <p className="eyebrow mb-3">Gewinnspiel der Händler</p>
             <h1 className="text-4xl leading-tight font-medium sm:text-6xl">
-              Jede Woche einen Abend in der Lounge gewinnen
+              Jeden Sonntag eine Lounge gewinnen
             </h1>
             <p className="mt-6 text-lg leading-relaxed text-ink-soft">
-              Jeden Montag verlosen wir einen Abend in unserer Lounge auf dem Weihnachtsmarkt im
-              Schlosspark – für dich und bis zu {s.maxPersons - 1} Gäste, mit bis zu{' '}
-              {maxTalerCount(s)} € Freiverzehr und Tischservice. Ob Firma oder Freundeskreis: Einmal
-              anmelden, und du bist bei allen Ziehungen bis zum Ende der Aktion dabei.
+              Jeden Sonntag um 18 Uhr verlosen wir automatisch einen Abend in unserer Lounge auf dem
+              Weihnachtsmarkt im Schlosspark – für dich und bis zu {s.maxPersons - 1} Gäste, mit bis
+              zu {maxTalerCount(s)} € Freiverzehr und Tischservice. Einmal anmelden, und du bist bei
+              allen Ziehungen bis zum Ende der Aktion dabei.
             </p>
             <ul className="mt-8 space-y-3">
               {[
                 'Einmal mitmachen – jede Woche neue Chance',
                 'Gewinner suchen sich einen freien Abend selbst aus',
-                `Nicht gewonnen? Du bekommst einen persönlichen Code: ${info?.discountPercent ?? 30} % auf einen Abend Mo–Do`,
+                `Nicht gewonnen? Du bekommst sofort einen persönlichen Code: ${info?.discountPercent ?? 25} % auf deinen Lounge-Abend, 48 Stunden einlösbar`,
                 'Freunde einladen = Extra-Los für dich',
               ].map((t) => (
                 <li key={t} className="flex gap-3">
@@ -108,12 +110,19 @@ export function GiveawayPage() {
               ))}
             </ul>
             {info && active && (
-              <div className="mt-8 flex flex-wrap gap-3">
+              <div className="mt-8 flex flex-wrap items-end gap-3">
                 <div className="card px-5 py-3">
                   <div className="text-xs text-ink-soft">Nächste Ziehung</div>
                   <div className="font-display text-xl font-medium">
-                    {formatLongDate(info.nextDraw)}
+                    {info.nextDrawAt
+                      ? formatDrawTime(info.nextDrawAt)
+                      : formatLongDate(info.nextDraw)}
                   </div>
+                  {info.nextDrawAt && (
+                    <div className="mt-3">
+                      <GiveawayCountdown target={info.nextDrawAt} tone="dark" />
+                    </div>
+                  )}
                 </div>
                 {info.participants >= 20 && (
                   <div className="card px-5 py-3">

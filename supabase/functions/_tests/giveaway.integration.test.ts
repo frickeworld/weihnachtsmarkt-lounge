@@ -1,5 +1,5 @@
 // Integrationstest Gewinnspiel: Teilnahme mit Freunde-Link, Double-Opt-in, Ziehung im Admin mit
-// Mails, Buchung mit Trostpreis-Code (30 % über Stripe) und Gewinn-Code (ohne Zahlung).
+// Mails, Buchung mit Trostpreis-Code (25 % über Stripe, 48 Stunden) und Gewinn-Code (ohne Zahlung).
 import { assert, assertEquals, assertMatch } from 'jsr:@std/assert@1';
 import { createClient } from '@supabase/supabase-js';
 
@@ -8,6 +8,7 @@ const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
 const FN = {
   giveaway: Deno.env.get('FN_GIVEAWAY') ?? 'http://127.0.0.1:8114',
+  giveawayDraw: Deno.env.get('FN_GIVEAWAY_DRAW') ?? 'http://127.0.0.1:8115',
   admin: Deno.env.get('FN_ADMIN') ?? 'http://127.0.0.1:8106',
   checkout: Deno.env.get('FN_CHECKOUT') ?? 'http://127.0.0.1:8101',
 };
@@ -211,9 +212,18 @@ Deno.test({
           .map((m) => m.subject)
           .sort();
         assertEquals(subjects, [
-          'Diesmal nicht – aber 30 % für deinen Lounge-Abend',
           'Du hast gewonnen: ein Abend in der Weihnachtsmarkt-Lounge',
+          'Nur 48 Stunden: 25 % auf deinen Lounge-Abend',
         ]);
+      });
+
+      await t.step('automatische Ziehung: nur mit Cron-Secret, nicht zweimal am Tag', async () => {
+        const anon = await fetch(FN.giveawayDraw, { method: 'POST', body: '{}' });
+        assertEquals(anon.status, 401);
+        await anon.body?.cancel();
+        const r = await post(FN.giveawayDraw, {}, { Authorization: `Bearer ${SERVICE_KEY}` });
+        assertEquals(r.status, 200, JSON.stringify(r.body));
+        assertEquals(r.body.skipped, 'already_drawn');
       });
 
       const { data: codes } = await db
@@ -229,18 +239,50 @@ Deno.test({
       const winCode = codes!.find((c) => c.kind === 'gewinn')!.code;
       const loserCode = codes!.find((c) => c.kind === 'trostpreis')!.code;
 
-      await t.step('Trostpreis-Code am Freitag → abgelehnt mit Hinweis', async () => {
+      await t.step(
+        'Trostpreis-Code an einer Sonderveranstaltung → abgelehnt mit Hinweis',
+        async () => {
+          await db.from('slot_specials').insert({
+            date: friday,
+            start_time: '17:45',
+            title: 'Integrationstest-Party',
+            price_cents: 24900,
+            taler_count: 125,
+          });
+          const r = await post(FN.checkout, {
+            date: friday,
+            startTime: '17:45',
+            form: form(`gina-${tag}@example.de`),
+            discountCode: loserCode,
+          });
+          assertEquals(r.status, 400);
+          assertEquals(
+            r.body.fields.discountCode,
+            'Für Sonderveranstaltungen gilt dieser Code leider nicht.',
+          );
+        },
+      );
+
+      await t.step('Trostpreis-Code nach 48 Stunden → abgelaufen', async () => {
+        await db
+          .from('discount_codes')
+          .update({ redeem_by: new Date(Date.now() - 60_000).toISOString() })
+          .eq('code', loserCode);
         const r = await post(FN.checkout, {
-          date: friday,
-          startTime: '20:00',
+          date: tuesday,
+          startTime: '16:45',
           form: form(`gina-${tag}@example.de`),
           discountCode: loserCode,
         });
         assertEquals(r.status, 400);
-        assertEquals(r.body.fields.discountCode, 'Dieser Code gilt nur montags bis donnerstags.');
+        assertEquals(r.body.fields.discountCode, 'Dieser Code ist abgelaufen.');
+        await db
+          .from('discount_codes')
+          .update({ redeem_by: new Date(Date.now() + 3600_000).toISOString() })
+          .eq('code', loserCode);
       });
 
-      await t.step('Trostpreis-Code Dienstag 16:45 → Stripe mit 109,20 €', async () => {
+      await t.step('Trostpreis-Code Dienstag 16:45 → Stripe mit 117,34 € (25 %)', async () => {
         const r = await post(FN.checkout, {
           date: tuesday,
           startTime: '16:45',
@@ -258,10 +300,10 @@ Deno.test({
           .single();
         assertEquals(b, {
           status: 'pending',
-          amount_total_cents: 10920,
-          discount_cents: 4680,
+          amount_total_cents: 11734, // 156,45 € − 25 % (39,11 €)
+          discount_cents: 3911,
           taler_cents: 7500,
-          haendler_share_cents: 8860,
+          haendler_share_cents: 9244, // 75 € + (117,34 € − 7,45 € − 75 €) / 2
           discount_code: loserCode,
         });
         const again = await post(FN.checkout, {
@@ -339,6 +381,7 @@ Deno.test({
           .in('id', ids);
         await db.from('giveaway_entries').delete().in('id', ids);
       }
+      await db.from('slot_specials').delete().eq('title', 'Integrationstest-Party');
       await db.from('settings').update(original!).eq('id', 1);
       await db.auth.admin.deleteUser(created.user!.id);
       await brevo.shutdown();

@@ -1,21 +1,17 @@
-import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import taler192 from '@/assets/taler-192.webp';
+import { GiveawayCountdown } from '@/components/GiveawayCountdown';
 import { GlitterBand } from '@/components/GlitterBand';
 import { Reveal } from '@/components/Reveal';
-import { fetchGiveawayInfo, type GiveawayInfo } from '@/lib/api';
-import { formatLongDate } from '@/lib/dates';
+import { formatDrawTime } from '@/lib/drawCountdown';
+import { useGiveawayInfo } from '@/lib/useGiveawayInfo';
 
-/** Band „Jede Woche einen Abend gewinnen“ – nur sichtbar, solange das Gewinnspiel aktiv ist. */
+/**
+ * Band „Jeden Sonntag eine Lounge gewinnen“ mit Countdown bis zur automatischen Ziehung
+ * (sonntags 18:00 Uhr). Nur sichtbar, solange das Gewinnspiel aktiv ist.
+ */
 export function GiveawayBand() {
-  const [info, setInfo] = useState<GiveawayInfo | null>(null);
-  useEffect(() => {
-    let active = true;
-    void fetchGiveawayInfo().then((i) => active && setInfo(i));
-    return () => {
-      active = false;
-    };
-  }, []);
+  const info = useGiveawayInfo();
   if (!info?.active) return null;
 
   return (
@@ -30,18 +26,23 @@ export function GiveawayBand() {
               height={112}
               className="h-24 w-24 shrink-0 drop-shadow-lg motion-safe:animate-[taler-pop_900ms_ease-out] sm:h-28 sm:w-28"
             />
-            <div className="flex-1">
-              <p className="text-sm font-bold tracking-[0.2em] uppercase">Gewinnspiel</p>
-              <h2
-                id="gewinnspiel-band"
-                className="font-display mt-1 text-3xl font-medium sm:text-4xl"
-              >
-                Jede Woche einen Abend in der Lounge gewinnen
-              </h2>
-              <p className="mt-2 font-medium">
-                Nächste Ziehung: {formatLongDate(info.nextDraw)} · Einmal mitmachen, jede Woche
-                dabei
-              </p>
+            <div className="flex flex-1 flex-col items-center gap-4 md:items-start">
+              <div>
+                <p className="text-sm font-bold tracking-[0.2em] uppercase">Gewinnspiel</p>
+                <h2
+                  id="gewinnspiel-band"
+                  className="font-display mt-1 text-3xl font-medium sm:text-4xl"
+                >
+                  Jeden Sonntag eine Lounge gewinnen
+                </h2>
+                <p className="mt-2 font-medium">
+                  {info.nextDrawAt
+                    ? `Nächste Ziehung: ${formatDrawTime(info.nextDrawAt)}`
+                    : 'Einmal mitmachen, jede Woche dabei'}{' '}
+                  · Alle anderen bekommen {info.discountPercent} % Rabatt
+                </p>
+              </div>
+              {info.nextDrawAt && <GiveawayCountdown target={info.nextDrawAt} />}
             </div>
             <Link
               to="/gewinnspiel"

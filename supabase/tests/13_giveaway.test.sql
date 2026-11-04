@@ -1,6 +1,6 @@
 -- pgTAP: Gewinnspiel – Rabatt-Berechnung, Code nur einmal, Ziehung mit Losen, RLS
 begin;
-select plan(18);
+select plan(22);
 
 update public.settings set season_start = '2026-11-26', season_end = '2026-12-23',
        giveaway_active = true, giveaway_end = '2026-12-20', giveaway_discount_percent = 30;
@@ -22,7 +22,19 @@ select is((select count(*)::int from d1 where role = 'gewinn'), 1, 'genau ein Ge
 select ok((select code like 'GEWINN-%' from d1 where role = 'gewinn'), 'Gewinner bekommt GEWINN-Code');
 select ok((select code like 'LOUNGE-%' from d1 where role = 'trostpreis'), 'alle anderen einen LOUNGE-Code');
 
--- Zweite Ziehung: der Gewinner ist raus, der andere behält seinen Code
+-- Trostpreis: alle Wochentage, keine Sonderveranstaltungen, 48 Stunden Einlösefrist
+select ok((select weekdays is null and not allow_specials
+              and redeem_by between now() + interval '47 hours' and now() + interval '49 hours'
+             from public.discount_codes where kind = 'trostpreis'),
+  'Trostpreis-Code: alle Tage, ohne Sonderveranstaltungen, 48 Stunden einlösbar');
+
+-- Automatische Ziehung höchstens einmal in 12 Stunden
+select throws_ok($$select * from public.giveaway_draw(null)$$, 'P0003', null,
+  'keine zweite automatische Ziehung direkt danach');
+
+-- Zweite Ziehung eine Woche später: der Gewinner ist raus, der andere behält seinen Code
+update public.giveaway_draws set drawn_at = now() - interval '7 days';
+update public.discount_codes set redeem_by = now() - interval '5 days' where kind = 'trostpreis';
 create temp table d2 as select * from public.giveaway_draw(null);
 select is((select count(*)::int from d2), 1, 'Gewinner nimmt nicht mehr teil');
 select is((select count(*)::int from public.discount_codes where kind = 'trostpreis'), 1,
@@ -69,6 +81,21 @@ set local role anon;
 select is((select participants from public.get_giveaway_info()), 2, 'öffentlich: Anzahl Teilnehmer');
 select throws_ok($$select * from public.giveaway_entries$$, '42501', null, 'Teilnehmer nicht öffentlich');
 reset role;
+
+-- Einlösefrist abgelaufen → expired
+update public.discount_codes set redeem_by = now() - interval '1 minute'
+ where code = (select code from d1 where role = 'trostpreis');
+select is((select reason from public.discount_pricing(
+            (select code from d1 where role = 'trostpreis'), '2026-12-15', '16:45')),
+  'expired', 'nach 48 Stunden nicht mehr einlösbar');
+
+-- Countdown: nächste Ziehung ist ein Sonntag 18:00 Uhr Berliner Zeit (sofern vor Aktionsende)
+update public.settings set giveaway_end = null, season_end = (now() + interval '30 days')::date;
+select ok((select extract(isodow from t at time zone 'Europe/Berlin') = 7
+              and to_char(t at time zone 'Europe/Berlin', 'HH24:MI') = '18:00'
+              and t > now() and t <= now() + interval '7 days'
+             from public.next_giveaway_draw() t),
+  'nächste Ziehung: Sonntag 18:00 Uhr');
 
 select * from finish();
 rollback;

@@ -404,11 +404,18 @@ Alle Admin-Aktionen serverseitig mit `is_admin_aal2()` geprüft.
   (`/gewinnspiel/bestaetigt?token=`), danach Lostopf + Brevo-Liste Newsletter (optional
   `BREVO_LIST_GIVEAWAY`). Abmelden: `/gewinnspiel/abmelden?token=`. Unbestätigte nach 30 Tagen gelöscht.
 - **Freunde-Link** `/gewinnspiel?ref=CODE`: je bestätigtem Freund 1 Extra-Los.
-- **Ziehung** im Admin unter „Gewinnspiel“ per Knopf (mit Rückfrage): gewichteter Zufall
+- **Ziehung automatisch jeden Sonntag 18:00 Uhr** (seit 04.11.2026): pg_cron ruft stündlich sonntags
+  `invoke_giveaway_draw()` auf, das zur Ziehungsstunde (`giveaway_draw_isodow`/`giveaway_draw_hour`,
+  Berliner Zeit) die Edge Function `giveaway-draw` startet (höchstens eine automatische Ziehung in
+  12 Stunden). Im Admin unter „Gewinnspiel“ bleibt der Knopf zum Nachholen. Gewichteter Zufall
   (`giveaway_draw()`), protokolliert in `giveaway_draws`. Danach Mails:
   - Gewinner: Code `GEWINN-…` (100 %), freier Abend nach Wahl bis Saisonende, keine Sonderveranstaltungen.
   - Alle anderen (nach jeder Ziehung): persönlicher Code `LOUNGE-…`, `giveaway_discount_percent`
-    (Standard 30 %), nur Mo–Do, einmal einlösbar, bis Saisonende; Hinweis auf die nächste Ziehung.
+    (25 %), alle Tage außer Sonderveranstaltungen, einmal einlösbar, **nur 48 Stunden nach der
+    Ziehung buchbar** (`discount_codes.redeem_by`, `giveaway_code_hours`); Termin bis Saisonende.
+- **Countdown**: `next_giveaway_draw()` (öffentlich) liefert den nächsten Ziehungszeitpunkt. Startseite:
+  Gewinnspiel-Band mit Countdown, laufende Gold-Leiste „Lounge gewinnen“ ganz oben, Geschenk-Symbol in
+  der Kopfzeile (bei reduzierter Bewegung ohne Animation).
 - **Einlösen**: Feld „Gewinnspiel-Code“ im Buchungsformular (oder Link `/?code=…#buchen`).
   `discount_pricing()` rechnet: Freiverzehr bleibt voll, Rest halbiert (156,45 € → 109,51 €, Händler
   88,53 €, Studio F 20,98 €). 100 %: Buchung ohne Stripe sofort bezahlt (`payment_method =

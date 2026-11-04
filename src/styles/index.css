@@ -306,7 +306,53 @@
   }
 }
 
+/* Gewinnspiel-Leiste: Text läuft durch; Geschenk wackelt ab und zu */
+@keyframes ticker {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.ticker-track {
+  animation: ticker 32s linear infinite;
+}
+
+.ticker:hover .ticker-track,
+.ticker:focus-visible .ticker-track {
+  animation-play-state: paused;
+}
+
+@keyframes gift-wiggle {
+  0%,
+  80%,
+  100% {
+    transform: rotate(0);
+  }
+  84% {
+    transform: rotate(-14deg) scale(1.08);
+  }
+  88% {
+    transform: rotate(12deg) scale(1.08);
+  }
+  92% {
+    transform: rotate(-8deg);
+  }
+  96% {
+    transform: rotate(5deg);
+  }
+}
+
+.gift-wiggle {
+  animation: gift-wiggle 4s ease-in-out infinite;
+  transform-origin: 50% 80%;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .ticker-track,
+  .gift-wiggle,
   .sparkle,
   .candle-flame,
   .btn-gold::after {
