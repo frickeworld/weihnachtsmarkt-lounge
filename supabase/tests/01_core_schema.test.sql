@@ -43,8 +43,8 @@ select '11111111-1111-1111-1111-111111111111', d, '16:45', '18:45', 'paid', 'Ann
 select results_eq(
   $$select price_cents, fee_cents, taler_cents, haendler_share_cents, amount_total_cents
       from public.bookings where id = '11111111-1111-1111-1111-111111111111'$$,
-  $$values (14900, 700, 7500, 11200, 15600)$$,
-  'Montag 16:45: 156 € inkl. 7 € Gebühr (5 %), 75 € Freiverzehr, Händler 75 € + ½ × 74 € = 112 €'
+  $$values (14900, 745, 7500, 11200, 15645)$$,
+  'Montag 16:45: 156,45 € inkl. 7,45 € Gebühr (5 %), 75 € Freiverzehr, Händler 75 € + ½ × 74 € = 112 €'
 );
 select matches(
   (select booking_code from public.bookings where id = '11111111-1111-1111-1111-111111111111'),
@@ -63,12 +63,12 @@ select throws_ok(
 );
 
 -- Spätere Preisänderung betrifft alte Buchung nicht.
-update public.slot_templates set price_cents = 20900 where weekday = 1 and start_time = '16:45';
+update public.slot_templates set price_cents = 20895 where weekday = 1 and start_time = '16:45';
 select is(
   (select amount_total_cents from public.bookings where id = '11111111-1111-1111-1111-111111111111'),
-  15600, 'Preisänderung wirkt nicht auf bestehende Buchung'
+  15645, 'Preisänderung wirkt nicht auf bestehende Buchung'
 );
-update public.slot_templates set price_cents = 15600 where weekday = 1 and start_time = '16:45';
+update public.slot_templates set price_cents = 15645 where weekday = 1 and start_time = '16:45';
 
 -- ---------- Doppelbuchung ----------
 select throws_ok(

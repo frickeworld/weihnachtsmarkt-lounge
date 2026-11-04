@@ -43,7 +43,7 @@ export function AgbPage() {
         Verarbeitungsgebühr von{' '}
         {s.feePercent == null
           ? formatCents(s.feeCents)
-          : `${s.feePercent.toLocaleString('de-DE')} % des Lounge-Preises (Gesamtpreis auf volle Euro gerundet)`}{' '}
+          : `${s.feePercent.toLocaleString('de-DE')} % des Lounge-Preises`}{' '}
         hinzu. Der Gesamtpreis wird vor der Buchung in der Buchungsübersicht angezeigt. [ANGABE ZUR
         UMSATZSTEUER PRÜFEN: „inkl. gesetzlicher MwSt.“]
       </p>

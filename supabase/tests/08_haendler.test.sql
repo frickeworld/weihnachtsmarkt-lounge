@@ -14,7 +14,7 @@ insert into public.user_roles (user_id, role) values
 insert into auth.mfa_factors (id, user_id, friendly_name, factor_type, status, created_at, updated_at)
 values (gen_random_uuid(), '00000000-0000-0000-0000-0000000000c7', 'App', 'totp', 'verified', now(), now());
 
--- Rechenprobe (Freitag 05.12.2025, Abend = 209 € inkl. 10 € Gebühr, Händler 100 € + ½ × 99 € = 149,50 €):
+-- Rechenprobe (Freitag 05.12.2025, Abend = 208,95 € inkl. 9,95 € Gebühr, Händler 100 € + ½ × 99 € = 149,50 €):
 -- erschienen, nicht erschienen, storniert + kostenlose
 insert into public.bookings (id, date, start_time, end_time, status, first_name, last_name, email, phone, persons, notes, vat_id, billing_street, paid_at, checked_in_at)
 values
@@ -69,8 +69,8 @@ select results_eq($$select weekday, start_time, booked, revenue_cents from publi
 
 -- ---------- Admin ----------
 set local request.jwt.claims = '{"sub":"00000000-0000-0000-0000-0000000000a7","role":"authenticated","aal":"aal2"}';
-select is((public.settlement('2025-12-01', '2025-12-07') ->> 'studio_cents')::int, 2 * 20900 - 29900, 'Admin sieht Studio-F-Anteil (2 × 59,50 €)');
-select is((select sum(revenue_cents)::int from public.occupancy_heatmap('2025-12-01', '2025-12-07')), 2 * 20900, 'Admin sieht Umsatz je Zeitfenster');
+select is((public.settlement('2025-12-01', '2025-12-07') ->> 'studio_cents')::int, 2 * 20895 - 29900, 'Admin sieht Studio-F-Anteil (2 × 59,45 €)');
+select is((select sum(revenue_cents)::int from public.occupancy_heatmap('2025-12-01', '2025-12-07')), 2 * 20895, 'Admin sieht Umsatz je Zeitfenster');
 
 reset role;
 select * from finish();

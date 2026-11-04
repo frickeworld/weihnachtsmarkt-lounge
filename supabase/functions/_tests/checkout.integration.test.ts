@@ -123,8 +123,8 @@ Deno.test({
       const b = await booking(bookingId);
       assertEquals(b.status, 'pending');
       assertEquals(b.price_cents, 14900); // 156 € Abend (Mo–Do) − 7 € Gebühr (5 %)
-      assertEquals(b.amount_total_cents, 15600);
-      assertEquals(b.fee_cents, 700);
+      assertEquals(b.amount_total_cents, 15645);
+      assertEquals(b.fee_cents, 745);
       assertEquals(b.haendler_share_cents, 11200); // 75 € + (156 − 7 − 75) / 2
       assertEquals(b.taler_cents, 7500);
       assert(b.stripe_checkout_session_id);
@@ -148,13 +148,13 @@ Deno.test({
       assertEquals(r.status, 409);
     });
 
-    await t.step('Mo–Do Nachmittag 14:30: 104 € inkl. 50 €, Händler 74,50 €', async () => {
+    await t.step('Mo–Do Nachmittag 14:30: 103,95 € inkl. 50 €, Händler 74,50 €', async () => {
       const r = await post(FN.checkout, { date: day, startTime: '14:30', form });
       assertEquals(r.status, 200, JSON.stringify(r.body));
       const b = await booking(r.body.bookingId);
       assertEquals(
         [b.amount_total_cents, b.taler_cents, b.haendler_share_cents, b.end_time],
-        [10400, 5000, 7450, '16:30:00'],
+        [10395, 5000, 7450, '16:30:00'],
       );
       await post(FN.release, { bookingId: r.body.bookingId });
     });

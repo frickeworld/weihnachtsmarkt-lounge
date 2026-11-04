@@ -19,21 +19,21 @@ select results_eq(
   $$select slot_date, to_char(start_time, 'HH24:MI'), total_cents, taler_count, share, special_title
       from av where slot_date in ('2026-12-22','2026-12-23','2026-12-29','2026-12-30')
        and special_title is not null order by 1, 2$$,
-  $$select d::date, t, 19800, 100, 14450,
+  $$select d::date, t, 19845, 100, 14450,
        case d when '2026-12-22' then 'Jingle Beatz'
               when '2026-12-23' then 'Coming Home for Christmas'
               when '2026-12-29' then '80er- & 90er-Party mit DJ'
               else 'Discofox zum Jahresausklang' end
       from unnest(array['2026-12-22','2026-12-23','2026-12-29','2026-12-30']) d,
            unnest(array['16:45','19:00']) t order by 1, 2$$,
-  'Party-Abende 22./23./29./30.12. je 16:45 und 19:00 mit Programm-Titel: 198 € (189 € + 5 %) inkl. 100 €, Händler 144,50 €');
+  'Party-Abende 22./23./29./30.12. je 16:45 und 19:00 mit Programm-Titel: 198,45 € (189 € + 5 %) inkl. 100 €, Händler 144,50 €');
 
 -- Heiligabend: nur 10:00–13:00
 select results_eq(
   $$select to_char(start_time, 'HH24:MI'), to_char(end_time, 'HH24:MI'), status, total_cents, taler_count, share, label
       from av where slot_date = '2026-12-24'$$,
-  $$values ('10:00', '13:00', 'free', 31400, 150, 22450, 'Vormittag'::text)$$,
-  'Heiligabend: nur 10–13 Uhr, 314 € (299 € + 5 %) inkl. 150 €, Händler 224,50 €');
+  $$values ('10:00', '13:00', 'free', 31395, 150, 22450, 'Vormittag'::text)$$,
+  'Heiligabend: nur 10–13 Uhr, 313,95 € (299 € + 5 %) inkl. 150 €, Händler 224,50 €');
 
 -- 25. und 26.12. geschlossen (die Vermietungen am 26.12. entfallen), 27. und 28.12. normal
 select is((select count(*)::int from av where slot_date in ('2026-12-25', '2026-12-26') and status <> 'closed'),
@@ -41,13 +41,13 @@ select is((select count(*)::int from av where slot_date in ('2026-12-25', '2026-
 select results_eq(
   $$select slot_date, to_char(start_time, 'HH24:MI'), status, total_cents
       from av where slot_date in ('2026-12-27', '2026-12-28') order by 1, 2$$,
-  $$values ('2026-12-27'::date, '14:30', 'free', 15600), ('2026-12-27', '16:45', 'free', 15600),
-           ('2026-12-27', '19:00', 'free', 15600), ('2026-12-28', '14:30', 'free', 10400),
-           ('2026-12-28', '16:45', 'free', 15600), ('2026-12-28', '19:00', 'free', 15600)$$,
+  $$values ('2026-12-27'::date, '14:30', 'free', 15645), ('2026-12-27', '16:45', 'free', 15645),
+           ('2026-12-27', '19:00', 'free', 15645), ('2026-12-28', '14:30', 'free', 10395),
+           ('2026-12-28', '16:45', 'free', 15645), ('2026-12-28', '19:00', 'free', 15645)$$,
   '27. (So) und 28.12. (Mo) normal geöffnet');
 select is((select count(*)::int from av where slot_date = '2026-12-31' and status <> 'out_of_season'),
   0, '31.12. außerhalb der Saison');
-select is((select count(*)::int from av where slot_date = '2026-12-21' and special_title is null and total_cents = 15600),
+select is((select count(*)::int from av where slot_date = '2026-12-21' and special_title is null and total_cents = 15645),
   2, 'Normale Tage unverändert');
 
 -- Einmaliges Zeitfenster ohne Ersetzen: kommt zu den Vorlagen dazu
@@ -63,7 +63,7 @@ insert into public.bookings (date, start_time, end_time, status, first_name, las
 values ('2026-12-24', '10:00', '13:00', 'paid', 'H', 'Abend', 'h@test.de', '0123456', 8, now());
 select results_eq(
   $$select amount_total_cents, taler_cents, haendler_share_cents from public.bookings where date = '2026-12-24'$$,
-  $$values (31400, 15000, 22450)$$, 'Buchung übernimmt 314 € / 150 € / 224,50 €');
+  $$values (31395, 15000, 22450)$$, 'Buchung übernimmt 313,95 € / 150 € / 224,50 €');
 select throws_ok(
   $$insert into public.bookings (date, start_time, end_time, status, first_name, last_name, email, phone, persons, hold_expires_at)
     values ('2026-12-24', '10:00', '13:00', 'pending', 'X', 'Y', 'x@test.de', '0123456', 2, now() + interval '30 min')$$,

@@ -187,7 +187,7 @@ function SettingsForm({ initial, onSaved }: { initial: AdminSettings; onSaved: (
           {input('price', 'Standard: Lounge-Preis ohne Gebühr', { suffix: '€' })}
           {input('fee_percent', 'Verkaufsgebühr in Prozent (im Endpreis enthalten)', {
             suffix: '%',
-            hint: 'Endpreis = Lounge-Preis + Prozent, auf volle Euro gerundet. Leer = fester Betrag.',
+            hint: 'Endpreis = Lounge-Preis + Prozent, genau auf den Cent. Leer = fester Betrag.',
           })}
           {input('fee', 'Feste Verarbeitungsgebühr (nur ohne Prozentsatz)', { suffix: '€' })}
           {input('haendler', 'Standard: Anteil Händler', { suffix: '€' })}

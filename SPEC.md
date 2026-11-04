@@ -9,7 +9,7 @@ Stand: 3. Okt. 2026 · Verantwortlich: Louis Fricke · Projektregeln: `CLAUDE.md
 | Thema                    | Festlegung                                                                                                        |
 | ------------------------ | ----------------------------------------------------------------------------------------------------------------- |
 | Produkt                  | Überdachte Lounge, Weihnachtsmarkt im Schlosspark Detmold, bis 10 Personen, 2 h exklusiv                          |
-| Preis                    | Preisstaffel je Wochentag/Zeitfenster, Endpreise inkl. 5 % Gebühr: 104 € / 156 € / 209 € (siehe 1a)               |
+| Preis                    | Preisstaffel je Wochentag/Zeitfenster, Endpreise inkl. genau 5 % Gebühr: 103,95 / 156,45 / 208,95 € (1a)          |
 | Zeitfenster              | Mo–Do und So 14:30, 16:45, 19:00 · Fr–Sa 15:30, 17:45, 20:00, je 2 h (Europe/Berlin)                              |
 | Buchungsschluss online   | 60 min vor Beginn (`settings.booking_cutoff_minutes`)                                                             |
 | Reservierung im Checkout | 30 min (`settings.hold_minutes`)                                                                                  |
@@ -37,11 +37,11 @@ Einstellungen → „Zeitfenster und Preise“ (Prozentsatz unter „Saison, Pre
 
 | Tage         | Zeitfenster              | Lounge-Preis | Gebühr | Endpreis | Freiverzehr | Händler-Anteil |
 | ------------ | ------------------------ | ------------ | ------ | -------- | ----------- | -------------- |
-| Mo–Do        | 14:30–16:30              | 99 €         | 5 €    | 104 €    | 50 €        | 74,50 €        |
-| Mo–Do und So | 16:45–18:45, 19:00–21:00 | 149 €        | 7 €    | 156 €    | 75 €        | 112,00 €       |
-| So           | 14:30–16:30              | 149 €        | 7 €    | 156 €    | 75 €        | 112,00 €       |
-| Fr–Sa        | 15:30–17:30              | 149 €        | 7 €    | 156 €    | 75 €        | 112,00 €       |
-| Fr–Sa        | 17:45–19:45, 20:00–22:00 | 199 €        | 10 €   | 209 €    | 100 €       | 149,50 €       |
+| Mo–Do        | 14:30–16:30              | 99 €         | 4,95 € | 103,95 € | 50 €        | 74,50 €        |
+| Mo–Do und So | 16:45–18:45, 19:00–21:00 | 149 €        | 7,45 € | 156,45 € | 75 €        | 112,00 €       |
+| So           | 14:30–16:30              | 149 €        | 7,45 € | 156,45 € | 75 €        | 112,00 €       |
+| Fr–Sa        | 15:30–17:30              | 149 €        | 7,45 € | 156,45 € | 75 €        | 112,00 €       |
+| Fr–Sa        | 17:45–19:45, 20:00–22:00 | 199 €        | 9,95 € | 208,95 € | 100 €       | 149,50 €       |
 
 - **Händler-Anteil** = Freiverzehr + Hälfte des Rests (Endpreis − Gebühr − Freiverzehr), abgerundet
   auf ganze Cent. Je Zeitfenster oder Sondertermin überschreibbar.
@@ -52,8 +52,8 @@ Einstellungen → „Zeitfenster und Preise“ (Prozentsatz unter „Saison, Pre
 
   | Termin                         | Zeit                     | Endpreis | Freiverzehr | Händler-Anteil |
   | ------------------------------ | ------------------------ | -------- | ----------- | -------------- |
-  | Party-Abend 22./23./29./30.12. | 16:45–18:45, 19:00–21:00 | 198 €    | 100 €       | 144,50 €       |
-  | Heiligabend exklusiv 24.12.    | 10:00–13:00 (nur dieser) | 314 €    | 150 €       | 224,50 €       |
+  | Party-Abend 22./23./29./30.12. | 16:45–18:45, 19:00–21:00 | 198,45 € | 100 €       | 144,50 €       |
+  | Heiligabend exklusiv 24.12.    | 10:00–13:00 (nur dieser) | 313,95 € | 150 €       | 224,50 €       |
 
   Saison 30.11.–30.12.2026. Geschlossen 25. und 26.12. (die früher geplanten Vermietungen am
   26.12. entfallen) sowie 31.12. Der 27. und 28.12. sind normal geöffnet. Einmalige Zeitfenster
@@ -63,14 +63,14 @@ Einstellungen → „Zeitfenster und Preise“ (Prozentsatz unter „Saison, Pre
   `settings`. Die Beträge werden beim Anlegen in die Buchung kopiert.
 - **Änderung 07.10.2026 (Louis):** Mo–Do kein Nachmittag mehr (14:30/99 € gestrichen, Vorlage deaktiviert).
 - **Änderung 27.10.2026 (Louis):** Mo–Do-Nachmittag 14:30–16:30 wieder im Angebot, 99 € inkl. 50 € Freiverzehr (Migration `20261027090000_weekday_afternoon_again`). Der günstigste Preis ist damit wieder 99 €.
-- Website: „ab“ günstigstem Preis (derzeit 104 €) plus Preisübersicht; im Kalender steht der genaue Preis je Zeitfenster.
+- Website: „ab“ günstigstem Lounge-Preis (derzeit 99 € zzgl. 5 %) plus Preisübersicht; im Kalender steht der genaue Preis je Zeitfenster.
 
-### Geldverteilung pro Buchung (Beispiel 209 €)
+### Geldverteilung pro Buchung (Beispiel 208,95 €, Gebühr genau 5 % seit 04.11.2026)
 
 | Posten                      | Betrag       | Geht an                            |
 | --------------------------- | ------------ | ---------------------------------- |
-| Gast zahlt gesamt           | 209,00 €     | –                                  |
-| Verarbeitungsgebühr (5 %)   | 10,00 €      | Studio F                           |
+| Gast zahlt gesamt           | 208,95 €     | –                                  |
+| Verarbeitungsgebühr (5 %)   | 9,95 €       | Studio F                           |
 | Residenztaler (Freiverzehr) | 100,00 €     | Händler                            |
 | Hälfte Rest (99,00 €)       | 49,50 €      | Händler                            |
 | Andere Hälfte Rest          | 49,50 €      | Studio F                           |
@@ -410,8 +410,8 @@ Alle Admin-Aktionen serverseitig mit `is_admin_aal2()` geprüft.
   - Alle anderen (nach jeder Ziehung): persönlicher Code `LOUNGE-…`, `giveaway_discount_percent`
     (Standard 30 %), nur Mo–Do, einmal einlösbar, bis Saisonende; Hinweis auf die nächste Ziehung.
 - **Einlösen**: Feld „Gewinnspiel-Code“ im Buchungsformular (oder Link `/?code=…#buchen`).
-  `discount_pricing()` rechnet: Freiverzehr bleibt voll, Rest halbiert (156 € → 109,20 €, Händler
-  88,60 €, Studio F 20,60 €). 100 %: Buchung ohne Stripe sofort bezahlt (`payment_method =
+  `discount_pricing()` rechnet: Freiverzehr bleibt voll, Rest halbiert (156,45 € → 109,51 €, Händler
+  88,53 €, Studio F 20,98 €). 100 %: Buchung ohne Stripe sofort bezahlt (`payment_method =
 'kostenlos'`, `include_in_settlement = true`, Betrag 0 €, Händler-Anteil = halber Freiverzehr).
   Ein Code ist nur einmal gültig (partieller Unique-Index wie beim Zeitfenster).
 - **Datenpflege** nach der Saison anonymisiert auch alle Teilnahmen.

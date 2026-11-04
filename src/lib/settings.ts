@@ -18,7 +18,7 @@ export interface PublicSettings {
   priceCents: number;
   /** Feste Gebühr (nur wenn kein Prozentsatz gesetzt ist) */
   feeCents: number;
-  /** Verkaufsgebühr in Prozent auf den Lounge-Preis (z. B. 5), Endpreis auf volle Euro gerundet */
+  /** Verarbeitungsgebühr in Prozent auf den Lounge-Preis (z. B. 5), genau auf den Cent */
   feePercent: number | null;
   talerCount: number;
   maxPersons: number;
@@ -41,26 +41,26 @@ const tier = (
   weekday,
   startTime,
   endTime,
-  totalCents: euros * 100,
+  totalCents: Math.round(euros * 100),
   talerCount: taler,
   label,
 });
 
-/** Startwerte bis zur Antwort der Datenbank (Preisstaffel Stand 04.11.2026: Lounge-Preis + 5 %). */
+/** Startwerte bis zur Antwort der Datenbank (Stand 04.11.2026: Lounge-Preis + genau 5 %). */
 const FALLBACK_PRICE_LIST: PriceTier[] = [
   ...[1, 2, 3, 4].flatMap((d) => [
-    tier(d, '14:30', '16:30', 104, 50, 'Nachmittag'),
-    tier(d, '16:45', '18:45', 156, 75, 'Früher Abend'),
-    tier(d, '19:00', '21:00', 156, 75, 'Später Abend'),
+    tier(d, '14:30', '16:30', 103.95, 50, 'Nachmittag'),
+    tier(d, '16:45', '18:45', 156.45, 75, 'Früher Abend'),
+    tier(d, '19:00', '21:00', 156.45, 75, 'Später Abend'),
   ]),
   ...[5, 6].flatMap((d) => [
-    tier(d, '15:30', '17:30', 156, 75, 'Nachmittag'),
-    tier(d, '17:45', '19:45', 209, 100, 'Früher Abend'),
-    tier(d, '20:00', '22:00', 209, 100, 'Später Abend'),
+    tier(d, '15:30', '17:30', 156.45, 75, 'Nachmittag'),
+    tier(d, '17:45', '19:45', 208.95, 100, 'Früher Abend'),
+    tier(d, '20:00', '22:00', 208.95, 100, 'Später Abend'),
   ]),
-  tier(7, '14:30', '16:30', 156, 75, 'Nachmittag'),
-  tier(7, '16:45', '18:45', 156, 75, 'Früher Abend'),
-  tier(7, '19:00', '21:00', 156, 75, 'Später Abend'),
+  tier(7, '14:30', '16:30', 156.45, 75, 'Nachmittag'),
+  tier(7, '16:45', '18:45', 156.45, 75, 'Früher Abend'),
+  tier(7, '19:00', '21:00', 156.45, 75, 'Später Abend'),
 ];
 
 export const PUBLIC_SETTINGS_FALLBACK: PublicSettings = {
@@ -122,7 +122,7 @@ export function feeNote(s: Pick<PublicSettings, 'feeCents' | 'feePercent'>): str
   return `zzgl. ${feeLabel(s)} Verarbeitungsgebühr`;
 }
 
-/** Günstigster Endpreis inkl. Gebühr (104 €). */
+/** Günstigster Endpreis inkl. Gebühr (103,95 €). */
 export function minPriceCents(
   s: Pick<PublicSettings, 'priceList' | 'priceCents' | 'feeCents'>,
 ): number {

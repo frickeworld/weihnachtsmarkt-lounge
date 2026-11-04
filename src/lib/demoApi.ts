@@ -27,7 +27,7 @@ const party = (title: string, act: string, description: string): DemoSpecial => 
   title,
   act,
   description,
-  totalCents: 19800,
+  totalCents: 19845,
   talerCount: 100,
 });
 /** Programm wie Migration 20261104150000_party_program. */
@@ -58,7 +58,7 @@ const HEILIGABEND: DemoSpecial = {
   act: null,
   description:
     'Nur einmal im Jahr: drei Stunden Lounge am Heiligabend-Vormittag, exklusiv für dich und deine Gäste – mit 150 € Freiverzehr und Tischservice. Der schönste Start in den Heiligabend.',
-  totalCents: 31400,
+  totalCents: 31395,
   talerCount: 150,
 };
 /** Party nur abends; der Nachmittag bleibt ein normales Zeitfenster. */

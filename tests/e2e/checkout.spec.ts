@@ -67,15 +67,15 @@ test.describe('Checkout (Phase 3)', () => {
     ).toBeVisible();
     await slots.nth(1).click();
     await expect(
-      page.getByRole('button', { name: /Zahlungspflichtig buchen – 156,00\s€/ }),
+      page.getByRole('button', { name: /Zahlungspflichtig buchen – 156,45\s€/ }),
     ).toBeVisible();
-    // Zusammenfassung: 156 € = Lounge 149 € + 7 € Verarbeitungsgebühr (5 %)
+    // Zusammenfassung: 156,45 € = Lounge 149 € + 7,45 € Verarbeitungsgebühr (genau 5 %)
     const summary = page.locator('#buchen dl').filter({ hasText: 'Verarbeitungsgebühr' });
     await expect(summary).toContainText(/Lounge inkl\. 75 € Freiverzehr\s*149,00\s€/);
-    await expect(summary).toContainText(/Verarbeitungsgebühr\s*7,00\s€/);
+    await expect(summary).toContainText(/Verarbeitungsgebühr\s*7,45\s€/);
     await slots.nth(0).click();
     await expect(
-      page.getByRole('button', { name: /Zahlungspflichtig buchen – 104,00\s€/ }),
+      page.getByRole('button', { name: /Zahlungspflichtig buchen – 103,95\s€/ }),
     ).toBeVisible();
   });
 

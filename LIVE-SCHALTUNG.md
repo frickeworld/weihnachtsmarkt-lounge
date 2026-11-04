@@ -13,7 +13,7 @@ geht die Seite unter der echten Domain online.
       § 18 MStV, Gültigkeit der Residenztaler, Haftung, Streitbeilegung). Danach den Vermerk
       „Entwurf – noch nicht freigegeben“ entfernen (`src/pages/legal/LegalLayout.tsx`) und
       Stand-Datum setzen (`supabase/functions/_shared/legal.ts`).
-- [ ] **Preisstaffel** (Lounge 99/149/199 € zzgl. 5 % Gebühr = 104/156/209 €, beworben „ab 99 €“)
+- [ ] **Preisstaffel** (Lounge 99/149/199 € zzgl. 5 % Gebühr = 103,95/156,45/208,95 €, beworben „ab 99 €“)
       vom Anwalt prüfen lassen (PAngV § 3: Werbung ohne Gesamtpreis – bewusste Entscheidung Louis).
 - [ ] **Gewinnspiel**: Teilnahmebedingungen, Datenschutz-Abschnitt und die Kopplung
       „Teilnahme = Newsletter“ vom Anwalt prüfen lassen; Rollen Händler e. V. / STUDIO/F klären
@@ -83,7 +83,7 @@ geht die Seite unter der echten Domain online.
       am Lounge-Standort.
 - [ ] Händler-Zugang: Übersicht, Buchungen, Abrechnung (PDF/CSV).
 - [ ] Lighthouse mobil ≥ 85 (Performance, Barrierefreiheit, Best Practices, SEO).
-- [ ] Rich-Results-Test von Google für die Startseite (Produkt mit Preisspanne 104–209 €).
+- [ ] Rich-Results-Test von Google für die Startseite (Produkt mit Preisspanne 103,95–208,95 €).
 
 ## F. Nach der Saison
 

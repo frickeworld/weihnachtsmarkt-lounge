@@ -35,7 +35,7 @@ const tier = (
   weekday,
   start_time: `${start}:00`,
   end_time: `${end}:00`,
-  total_cents: euros * 100,
+  total_cents: Math.round(euros * 100),
   taler_count: taler,
   label,
 });
@@ -43,18 +43,18 @@ const tier = (
 /** Preisstaffel wie in der Datenbank (Endpreise = Lounge-Preis + 5 % Gebühr, gerundet). */
 export const MOCK_PRICE_LIST = [
   ...[1, 2, 3, 4].flatMap((d) => [
-    tier(d, '14:30', '16:30', 104, 50, 'Nachmittag'),
-    tier(d, '16:45', '18:45', 156, 75, 'Früher Abend'),
-    tier(d, '19:00', '21:00', 156, 75, 'Später Abend'),
+    tier(d, '14:30', '16:30', 103.95, 50, 'Nachmittag'),
+    tier(d, '16:45', '18:45', 156.45, 75, 'Früher Abend'),
+    tier(d, '19:00', '21:00', 156.45, 75, 'Später Abend'),
   ]),
   ...[5, 6].flatMap((d) => [
-    tier(d, '15:30', '17:30', 156, 75, 'Nachmittag'),
-    tier(d, '17:45', '19:45', 209, 100, 'Früher Abend'),
-    tier(d, '20:00', '22:00', 209, 100, 'Später Abend'),
+    tier(d, '15:30', '17:30', 156.45, 75, 'Nachmittag'),
+    tier(d, '17:45', '19:45', 208.95, 100, 'Früher Abend'),
+    tier(d, '20:00', '22:00', 208.95, 100, 'Später Abend'),
   ]),
-  tier(7, '14:30', '16:30', 156, 75, 'Nachmittag'),
-  tier(7, '16:45', '18:45', 156, 75, 'Früher Abend'),
-  tier(7, '19:00', '21:00', 156, 75, 'Später Abend'),
+  tier(7, '14:30', '16:30', 156.45, 75, 'Nachmittag'),
+  tier(7, '16:45', '18:45', 156.45, 75, 'Früher Abend'),
+  tier(7, '19:00', '21:00', 156.45, 75, 'Später Abend'),
 ];
 
 /** Alle Startzeiten der Staffel (für Status-Überschreibungen ganzer Tage). */

@@ -10,17 +10,17 @@ select extract(isodow from d)::int wd, to_char(p_start, 'HH24:MI') st, p.*
        lateral public.slot_pricing(v.d, v.p_start) p;
 
 select results_eq($$select total_cents, taler_count, haendler_share_cents from pr where wd = 1 and st = '14:30'$$,
-  $$values (10400, 50, 7450)$$, 'Mo–Do Nachmittag: 104 € (99 € + 5 %) inkl. 50 €, Händler 74,50 €');
+  $$values (10395, 50, 7450)$$, 'Mo–Do Nachmittag: 103,95 € (99 € + 5 %) inkl. 50 €, Händler 74,50 €');
 select results_eq($$select total_cents, taler_count, haendler_share_cents from pr where wd = 1 and st = '19:00'$$,
-  $$values (15600, 75, 11200)$$, 'Mo–Do Abend: 156 € (149 € + 5 %) inkl. 75 €, Händler 112 €');
+  $$values (15645, 75, 11200)$$, 'Mo–Do Abend: 156,45 € (149 € + 5 %) inkl. 75 €, Händler 112 €');
 select results_eq($$select total_cents, taler_count from pr where wd = 5 and st = '15:30'$$,
-  $$values (15600, 75)$$, 'Fr Nachmittag: 156 € inkl. 75 €');
+  $$values (15645, 75)$$, 'Fr Nachmittag: 156,45 € inkl. 75 €');
 select results_eq($$select total_cents, taler_count, haendler_share_cents from pr where wd = 5 and st = '20:00'$$,
-  $$values (20900, 100, 14950)$$, 'Fr/Sa Abend: 209 € (199 € + 5 %) inkl. 100 €, Händler 149,50 €');
+  $$values (20895, 100, 14950)$$, 'Fr/Sa Abend: 208,95 € (199 € + 5 %) inkl. 100 €, Händler 149,50 €');
 select results_eq($$select total_cents, taler_count from pr where wd = 7 and st = '14:30'$$,
-  $$values (15600, 75)$$, 'So Nachmittag: 156 € inkl. 75 €');
+  $$values (15645, 75)$$, 'So Nachmittag: 156,45 € inkl. 75 €');
 select results_eq($$select total_cents, taler_count from pr where wd = 7 and st = '16:45'$$,
-  $$values (15600, 75)$$, 'So Abend: wie Mo–Do Abend');
+  $$values (15645, 75)$$, 'So Abend: wie Mo–Do Abend');
 
 -- Sondertermin (Party): eigener Preis und Freiverzehr, Händler-Anteil automatisch
 -- 249 € enthalten 5 % Gebühr: Lounge 237 €, Gebühr 12 €
@@ -42,7 +42,7 @@ select results_eq($$select amount_total_cents, fee_cents, price_cents, taler_cen
 set local role anon;
 select results_eq($$select total_cents, taler_count, special_title from public.get_availability_priced('2026-12-05', '2026-12-05') where start_time = '20:00'$$,
   $$values (24900, 125, 'Party-Abend'::text)$$, 'Verfügbarkeit zeigt Preis und Sondertermin');
-select is((select min(total_cents) from public.get_price_list()), 10400, 'Preisliste: ab 104 € (Mo–Do Nachmittag)');
+select is((select min(total_cents) from public.get_price_list()), 10395, 'Preisliste: ab 103,95 € (Mo–Do Nachmittag)');
 select results_eq($$select fee_percent, fee_cents from public.get_fee_info()$$, $$values (5.00::numeric, 350)$$,
   'Verkaufsgebühr 5 % öffentlich lesbar');
 select is((select max(taler_count) from public.get_price_list()), 100, 'Preisliste: bis zu 100 € Freiverzehr');

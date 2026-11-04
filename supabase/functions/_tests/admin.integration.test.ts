@@ -128,7 +128,7 @@ Deno.test({
         assertEquals(b!.status, 'paid');
         assertEquals(b!.source, 'manual');
         assertEquals(b!.payment_method, 'bar');
-        assertEquals(b!.amount_total_cents, 15600); // Dienstag 16:45: 156 € (149 € + 5 %)
+        assertEquals(b!.amount_total_cents, 15645); // Dienstag 16:45: 156,45 € (149 € + 5 %)
         assertEquals(b!.created_by, userId);
         const { data: log } = await db
           .from('email_log')

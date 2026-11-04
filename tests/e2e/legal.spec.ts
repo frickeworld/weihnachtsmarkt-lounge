@@ -38,12 +38,12 @@ test('AGB nennen die Preisstaffel aus der Datenbank', async ({ page }) => {
   ).toBeVisible();
   await expect(
     page.getByText(
-      /Montag bis Donnerstag, Früher Abend \(16:45–18:45 Uhr\): Lounge-Preis 149,00\s€, Gesamtpreis 156,00\s€ inkl\. Verarbeitungsgebühr und 75 € Freiverzehr/,
+      /Montag bis Donnerstag, Früher Abend \(16:45–18:45 Uhr\): Lounge-Preis 149,00\s€, Gesamtpreis 156,45\s€ inkl\. Verarbeitungsgebühr und 75 € Freiverzehr/,
     ),
   ).toBeVisible();
   await expect(
     page.getByText(
-      /Freitag und Samstag, Später Abend \(20:00–22:00 Uhr\): Lounge-Preis 199,00\s€, Gesamtpreis 209,00\s€ inkl\. Verarbeitungsgebühr und 100 € Freiverzehr/,
+      /Freitag und Samstag, Später Abend \(20:00–22:00 Uhr\): Lounge-Preis 199,00\s€, Gesamtpreis 208,95\s€ inkl\. Verarbeitungsgebühr und 100 € Freiverzehr/,
     ),
   ).toBeVisible();
 });
@@ -64,8 +64,8 @@ test('Startseite: strukturierte Daten mit Preisspanne', async ({ page }) => {
   );
   expect(json.offers).toMatchObject({
     '@type': 'AggregateOffer',
-    lowPrice: '104.00',
-    highPrice: '209.00',
+    lowPrice: '103.95',
+    highPrice: '208.95',
     priceCurrency: 'EUR',
   });
 });
