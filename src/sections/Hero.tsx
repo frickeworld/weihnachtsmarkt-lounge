@@ -119,8 +119,18 @@ export function Hero() {
               >
                 Lounge buchen
               </a>
-              <a href="#erlebnis" className="btn-outline w-full sm:w-auto">
-                Was dich erwartet
+              <a
+                href="#besondere-abende"
+                className="btn-outline w-full sm:w-auto"
+                onClick={(e) => {
+                  // Ohne Sondertermine (z. B. nach der Saison) gibt es den Abschnitt nicht.
+                  if (!document.getElementById('besondere-abende')) {
+                    e.preventDefault();
+                    document.getElementById('erlebnis')?.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+              >
+                Party-Abende ansehen
               </a>
             </div>
             <ScarcityNote className="mt-5 text-gold-light" />

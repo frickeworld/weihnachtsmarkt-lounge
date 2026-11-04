@@ -16,9 +16,13 @@
   --color-gold: #c6a45c; /* Gold der Markt-Seite – Flächen, Rahmen, Buttons */
   --color-gold-deep: #7a5a1e; /* Gold als Textfarbe auf hellem Grund (Kontrast ~6:1) */
   --color-gold-light: #e8d6a8; /* Gold auf dunklem Grund */
-  --color-brown: #24221e; /* Dunkle Flächen: Header, Hero, Footer */
-  --color-brown-deep: #141311;
-  --color-on-dark: #f8f3e8; /* Text auf Dunkelbraun */
+  /* Dunkle Flächen: Header, Hero, Footer, Partys. Seit 04.11.2026 das Tannengrün der
+     Weihnachtsmarkt-Seite (CI wie weihnachtsmarkt-detmold.de), vorher Dunkelbraun #24221e.
+     Der Token-Name bleibt, damit nichts umbenannt werden muss. */
+  --color-brown: #13251c;
+  --color-brown-deep: #0b1711;
+  --color-on-dark: #f8f3e8; /* Text auf Tannengrün */
+  --color-mist: #e9ede6; /* helles Grüngrau der Markt-Seite für abgesetzte Abschnitte */
   --color-amber: #e8892b; /* Bernstein-Orange der Markthütten (Lounge-Illustration) */
   --color-haendler-red: #cd131c; /* Händler-Rot, gemessen aus dem Logo-Schriftzug */
   --color-fir: #1f3a2e;
@@ -73,6 +77,11 @@
 
   .on-dark :focus-visible {
     outline-color: var(--color-gold-light);
+  }
+
+  /* Helle Karten auf dunklem Grund: wieder die Farben für hellen Grund */
+  .on-dark .card :focus-visible {
+    outline-color: var(--color-gold-deep);
   }
 }
 
@@ -189,6 +198,9 @@
   }
   .on-dark .eyebrow {
     color: var(--color-gold-light);
+  }
+  .on-dark .card .eyebrow {
+    color: var(--color-gold-deep);
   }
 
   /* Formularfelder */

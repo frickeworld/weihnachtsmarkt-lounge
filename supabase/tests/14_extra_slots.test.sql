@@ -17,11 +17,16 @@ select is((select season_start || ' ' || season_end from public.settings), '2026
 -- Party-Abende
 select results_eq(
   $$select slot_date, to_char(start_time, 'HH24:MI'), total_cents, taler_count, share, special_title
-      from av where special_title = 'Party-Abend' order by 1, 2$$,
-  $$select d::date, t, 19800, 100, 14450, 'Party-Abend'::text
+      from av where slot_date in ('2026-12-22','2026-12-23','2026-12-29','2026-12-30')
+       and special_title is not null order by 1, 2$$,
+  $$select d::date, t, 19800, 100, 14450,
+       case d when '2026-12-22' then 'Jingle Beatz'
+              when '2026-12-23' then 'Coming Home for Christmas'
+              when '2026-12-29' then '80er- & 90er-Party mit DJ'
+              else 'Discofox zum Jahresausklang' end
       from unnest(array['2026-12-22','2026-12-23','2026-12-29','2026-12-30']) d,
            unnest(array['16:45','19:00']) t order by 1, 2$$,
-  'Party-Abende 22./23./29./30.12. je 16:45 und 19:00: 198 € (189 € + 5 %) inkl. 100 €, Händler 144,50 €');
+  'Party-Abende 22./23./29./30.12. je 16:45 und 19:00 mit Programm-Titel: 198 € (189 € + 5 %) inkl. 100 €, Händler 144,50 €');
 
 -- Heiligabend: nur 10:00–13:00
 select results_eq(

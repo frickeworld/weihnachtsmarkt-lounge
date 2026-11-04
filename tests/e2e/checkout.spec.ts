@@ -235,7 +235,11 @@ test.describe('Besondere Termine', () => {
     });
     await page.goto('/');
     const section = page.locator('#besondere-abende');
-    await expect(section.getByRole('heading', { name: 'Besondere Termine' })).toBeVisible();
+    await expect(
+      section.getByRole('heading', { name: 'Partys und besondere Abende' }),
+    ).toBeVisible();
+    await page.locator('#start').getByRole('link', { name: 'Party-Abende ansehen' }).click();
+    await expect(section).toBeInViewport();
     await expect(section).toContainText('Live: Weidmüller');
     // Beworben wird der Lounge-Preis ohne Gebühr: 249 € = 237 € + 12 € (5 %)
     await expect(section).toContainText('237 €');

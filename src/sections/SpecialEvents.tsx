@@ -77,30 +77,39 @@ export function SpecialEvents() {
   const groups = groupEvents(events);
 
   return (
-    <section id="besondere-abende" className="scroll-mt-20 bg-sand px-4 py-20 sm:px-6 sm:py-24">
+    <section
+      id="besondere-abende"
+      className="on-dark scroll-mt-20 bg-brown px-4 py-20 text-on-dark sm:px-6 sm:py-24"
+    >
       <div className="mx-auto max-w-5xl">
-        <SectionHeading eyebrow="Sonderveranstaltungen" title="Besondere Termine">
-          Party-Abende, Feiertage und besondere Anlässe – mit eigenem Preis und mehr Freiverzehr.
+        <SectionHeading eyebrow="Sonderveranstaltungen" title="Partys und besondere Abende" dark>
+          Feiern mit STUDIO/F und der Tanzschule Fricke – und du hast deine eigene Lounge
+          mittendrin.
         </SectionHeading>
         <div className={`grid gap-5 ${groups.length > 1 ? 'md:grid-cols-2' : ''}`}>
           {groups.map(({ key, first: e, days }) => {
             const all = days.flatMap((d) => d.slots);
             const soldOut = all.every((s) => s.status !== 'free');
             const someTaken = all.some((s) => s.status !== 'free');
+            const singleDay = days.length === 1;
             return (
-              <Reveal key={key} className="card relative flex flex-col overflow-hidden p-6 sm:p-7">
+              <Reveal
+                key={key}
+                className="card relative flex flex-col overflow-hidden p-6 text-ink sm:p-7"
+              >
                 <div className="glitter absolute inset-x-0 top-0 h-1.5" aria-hidden="true" />
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="rounded-full bg-haendler-red px-3 py-1 text-sm font-bold text-white">
-                    {e.title}
-                  </h3>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="eyebrow">
+                    {singleDay ? formatLongDate(days[0]!.date) : 'Sonderveranstaltung'}
+                  </p>
                   {soldOut && (
                     <span className="rounded-full bg-ink px-3 py-1 text-xs font-bold text-paper">
                       Ausgebucht
                     </span>
                   )}
                 </div>
-                {e.act && <p className="mt-3 font-semibold text-gold-deep">{e.act}</p>}
+                <h3 className="mt-2 text-2xl leading-tight font-medium sm:text-3xl">{e.title}</h3>
+                {e.act && <p className="mt-1 font-semibold text-gold-deep">{e.act}</p>}
                 {e.description && (
                   <p className="mt-3 leading-relaxed text-ink-soft">{e.description}</p>
                 )}
@@ -117,15 +126,26 @@ export function SpecialEvents() {
                     ? `Termin: ${formatTime(e.startTime)}–${formatTime(e.endTime)} Uhr`
                     : `Beginn wählen (je ${durationLabel(e)})`}
                 </p>
-                <ul className="mt-2 divide-y divide-line rounded-2xl border border-line bg-surface">
+                <ul
+                  className={
+                    singleDay
+                      ? 'mt-2'
+                      : 'mt-2 divide-y divide-line rounded-2xl border border-line bg-surface'
+                  }
+                >
                   {days.map((d) => (
-                    <li key={d.date} className="flex flex-wrap items-center gap-x-3 gap-y-2 p-3">
-                      <span
-                        className="w-[4.5rem] shrink-0 font-semibold"
-                        title={formatLongDate(d.date)}
-                      >
-                        {shortDate(d.date)}
-                      </span>
+                    <li
+                      key={d.date}
+                      className={`flex flex-wrap items-center gap-x-3 gap-y-2 ${singleDay ? '' : 'p-3'}`}
+                    >
+                      {!singleDay && (
+                        <span
+                          className="w-[4.5rem] shrink-0 font-semibold"
+                          title={formatLongDate(d.date)}
+                        >
+                          {shortDate(d.date)}
+                        </span>
+                      )}
                       <span className="flex flex-1 flex-wrap gap-2">
                         {d.slots.map((s) => {
                           const free = s.status === 'free';

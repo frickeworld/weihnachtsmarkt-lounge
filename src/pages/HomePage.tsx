@@ -45,12 +45,12 @@ export function HomePage() {
       <main>
         <Hero />
         <Highlights />
+        <SpecialEvents />
         <GiveawayBand />
         <Experience />
         <Gallery />
         <Occasions />
         <Pricing />
-        <SpecialEvents />
         <HowItWorks />
         <Booking />
         <Market />

@@ -51,7 +51,8 @@ test.describe('One-Pager', () => {
     await expect(page).toHaveURL(/#buchen$/);
     await expect(page.locator('#buchen')).toBeInViewport();
     await page.goto('/');
-    await page.getByRole('link', { name: 'Was dich erwartet' }).click();
+    // Ohne Sondertermine führt „Party-Abende ansehen“ zum Erlebnis-Abschnitt
+    await page.getByRole('link', { name: 'Party-Abende ansehen' }).click();
     await expect(page.locator('#erlebnis')).toBeInViewport();
     await page.locator('#preis').getByRole('link', { name: 'Lounge buchen' }).click();
     await expect(page.locator('#buchen')).toBeInViewport();

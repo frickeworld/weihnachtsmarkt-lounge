@@ -61,16 +61,16 @@ Mobile-first One-Page-Website, über die eine überdachte Lounge auf dem Weihnac
 
 ## Design (Stand Design-Runde 2, 04.10.2026)
 
-- Look: **hell & festlich** im Stil von weihnachtsmarkt-detmold.de. Creme-Papier als Grundfläche, dunkle Schrift, Gold-Glitzer als Akzent (Bänder, Preis-Karte, Schritt-Nummern). Dunkelbraun nur für Header, Hero-Foto und Footer. **Keine dunklen Elemente auf dunklem Grund.**
-- Tokens (nur in `src/styles/index.css` pflegen): Papier `#FBF7EF`, Fläche `#FFFFFF`, Sand `#F3EBDC`, Linie `#E4D8C2`, Tinte `#23201B`, Tinte weich `#5F574B`, Gold `#C6A45C` (Flächen), Gold tief `#7A5A1E` (Text auf hell), Gold hell `#E8D6A8` (auf dunkel), Braun `#24221E`, Text auf dunkel `#F8F3E8`, Händler-Rot `#CD131C` (sparsam).
+- Look: **hell & festlich** im Stil von weihnachtsmarkt-detmold.de. Creme-Papier als Grundfläche, dunkle Schrift, Gold-Glitzer als Akzent (Bänder, Preis-Karte, Schritt-Nummern). **Tannengrün** (CI der Markt-Seite, Entscheidung Louis 04.11.2026; vorher Dunkelbraun) für Header, Hero-Foto, Footer und den Abschnitt „Partys und besondere Abende“. **Keine dunklen Elemente auf dunklem Grund.**
+- Tokens (nur in `src/styles/index.css` pflegen): Papier `#FBF7EF`, Fläche `#FFFFFF`, Sand `#F3EBDC`, Linie `#E4D8C2`, Tinte `#23201B`, Tinte weich `#5F574B`, Gold `#C6A45C` (Flächen), Gold tief `#7A5A1E` (Text auf hell), Gold hell `#E8D6A8` (auf dunkel), Tannengrün `#13251C` (Token `brown`), Grüngrau `#E9EDE6` (Token `mist`), Text auf dunkel `#F8F3E8`, Händler-Rot `#CD131C` (sparsam).
 - Gold-Glitzer-Textur und Markt-Schriftzug stammen von weihnachtsmarkt-detmold.de (Platzhalter, Nutzung vor Livegang klären).
-- **Händler-Logo überall komplett weiß** (Signet-Quadrate als Weißtöne). Auf hellem Grund nur mit dunkelbrauner Unterlage (`plate`).
+- **Händler-Logo überall komplett weiß** (Signet-Quadrate als Weißtöne). Auf hellem Grund nur mit tannengrüner Unterlage (`plate`).
 - Schriften: Jost (Überschriften, geometrisch wie die Markt-Seite), Manrope (Text). Selbst gehostet.
 - Hero: Glitzer-Band mit Markt-Schriftzug, darunter großes Foto (Platzhalter „Symbolbild · Bildquelle: Stadt Detmold“) mit Schnee (Canvas nur im Hero).
 - Keine Lichterkette mehr.
 - Mobil: Header zeigt nur das Händler-Logo zentriert; „Lounge buchen“ steht mobil im Hero und in der festen Leiste unten. Karten mobil kompakt (Icon links, Text rechts).
 - Footer: Sponsoren & Partner (weiße Logos), Instagram @diehaendlerdetmold, Link weihnachtsmarkt-detmold.de, Kontakt-Link, großes „Powered by STUDIO/F“.
-- Kontaktbereich „Fragen? Wir helfen dir gern.“ (nach FAQ): STUDIO/F-Karte (Logo auf Dunkelbraun) + Formular (Edge Function `contact`, Honigtopf, max. 5 Nachrichten/Stunde je Gerät, nichts wird gespeichert).
+- Kontaktbereich „Fragen? Wir helfen dir gern.“ (nach FAQ): STUDIO/F-Karte (Logo auf Tannengrün) + Formular (Edge Function `contact`, Honigtopf, max. 5 Nachrichten/Stunde je Gerät, nichts wird gespeichert).
 - Ansprache „Du“, warm, hochwertig, erwachsen (30–65). Keine Jugendsprache, keine Emojis. Alle Texte Deutsch.
 - `prefers-reduced-motion`: Schnee, Glanz und Funkeln aus, nur weiche Einblendungen.
 - Mobile-first, große Touch-Flächen (≥ 44 px), WCAG AA, Lighthouse mobil ≥ 85.

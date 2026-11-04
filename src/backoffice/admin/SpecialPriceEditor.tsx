@@ -136,7 +136,9 @@ export function SpecialPriceEditor({
             />
           </label>
           <label className="block text-sm">
-            <span className="field-label">Infotext für „Besondere Termine“ (optional)</span>
+            <span className="field-label">
+              Infotext für „Partys und besondere Abende“ (optional)
+            </span>
             <textarea
               className="field-input min-h-24"
               maxLength={600}

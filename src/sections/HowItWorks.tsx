@@ -4,7 +4,7 @@ import { howItWorks } from '@/content/home';
 
 export function HowItWorks() {
   return (
-    <section id="ablauf" className="scroll-mt-20 bg-sand px-4 py-20 sm:px-6 sm:py-24">
+    <section id="ablauf" className="scroll-mt-20 bg-mist px-4 py-20 sm:px-6 sm:py-24">
       <div className="mx-auto max-w-6xl">
         <SectionHeading eyebrow="Ablauf" title="So funktioniert's" />
         <ol className="relative grid gap-10 md:grid-cols-4 md:gap-6">

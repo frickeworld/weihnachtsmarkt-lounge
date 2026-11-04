@@ -23,13 +23,35 @@ interface DemoSpecial {
  * Sondertermine der Vorschau – wie live (Migrationen 20261013091000_christmas_specials und
  * 20261104120000_fee_percent: Preise inkl. 5 % Gebühr).
  */
-const PARTY: DemoSpecial = {
-  title: 'Party-Abend',
-  act: null,
-  description:
-    'An diesem Abend wird auf dem Weihnachtsmarkt gefeiert. Du erlebst die Party aus deiner eigenen überdachten Lounge – mit 100 € Freiverzehr und Tischservice.',
+const party = (title: string, act: string, description: string): DemoSpecial => ({
+  title,
+  act,
+  description,
   totalCents: 19800,
   talerCount: 100,
+});
+/** Programm wie Migration 20261104150000_party_program. */
+const PARTIES: Record<IsoDate, DemoSpecial> = {
+  '2026-12-22': party(
+    'Jingle Beatz',
+    'Disco Classics open air · powered by STUDIO/F',
+    'STUDIO/F holt den Club auf den Weihnachtsmarkt: die größten Disco-Hits zum Mitfeiern und Mittanzen auf Frickes Tanzfläche (17:30–21:45 Uhr, Eintritt frei). Du feierst aus deiner eigenen überdachten Lounge – mit 100 € Freiverzehr und Tischservice.',
+  ),
+  '2026-12-23': party(
+    'Coming Home for Christmas',
+    'All Time Classics – die größten Hits aller Zeiten',
+    'Die Party vor Heiligabend auf Frickes Tanzfläche (18:00–21:45 Uhr): All Time Classics zum Mitsingen und Tanzen. Du feierst aus deiner eigenen überdachten Lounge – mit 100 € Freiverzehr und Tischservice.',
+  ),
+  '2026-12-29': party(
+    '80er- & 90er-Party mit DJ',
+    'präsentiert von der Tanzschule Fricke',
+    'Zum Aufwärmen um 17:00 Uhr ein kostenloser Discofox-Workshop der Tanzschule Fricke für Einsteiger und Fortgeschrittene, danach die Hits der 80er und 90er auf Frickes Tanzfläche (17:30–21:45 Uhr). Du feierst aus deiner eigenen überdachten Lounge – mit 100 € Freiverzehr und Tischservice.',
+  ),
+  '2026-12-30': party(
+    'Discofox zum Jahresausklang',
+    'Discofox-Workshop der Tanzschule Fricke',
+    'Um 17:00 Uhr zeigt dir die Tanzschule Fricke auf Frickes Tanzfläche die Discofox-Schritte – kostenlos, für Einsteiger und Fortgeschrittene. Danach genießt du den letzten Marktabend des Jahres in deiner eigenen überdachten Lounge – mit 100 € Freiverzehr und Tischservice.',
+  ),
 };
 const HEILIGABEND: DemoSpecial = {
   title: 'Heiligabend exklusiv',
@@ -39,7 +61,6 @@ const HEILIGABEND: DemoSpecial = {
   totalCents: 31400,
   talerCount: 150,
 };
-const PARTY_DAYS = ['2026-12-22', '2026-12-23', '2026-12-29', '2026-12-30'];
 /** Party nur abends; der Nachmittag bleibt ein normales Zeitfenster. */
 const PARTY_TIMES = ['16:45', '19:00'];
 const CLOSED_DAYS = ['2026-12-25', '2026-12-26'];
@@ -49,7 +70,7 @@ const EXTRA_SLOTS: Record<IsoDate, { startTime: string; endTime: string; label: 
 };
 
 function demoSpecial(date: IsoDate, startTime: string): DemoSpecial | undefined {
-  if (PARTY_DAYS.includes(date) && PARTY_TIMES.includes(startTime)) return PARTY;
+  if (PARTIES[date] && PARTY_TIMES.includes(startTime)) return PARTIES[date];
   if (date === '2026-12-24') return HEILIGABEND;
   return undefined;
 }
