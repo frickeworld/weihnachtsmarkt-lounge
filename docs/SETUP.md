@@ -76,7 +76,7 @@ Supabase → **Edge Functions → Secrets** (oder Project Settings → Edge Func
 | `STRIPE_SECRET_KEY`     | Stripe Testmodus → Entwickler → API-Schlüssel → Geheimschlüssel (`sk_test_…`)  |
 | `STRIPE_WEBHOOK_SECRET` | kommt in Phase 3 (`whsec_…`)                                                   |
 | `BREVO_API_KEY`         | Brevo → SMTP & API → API-Schlüssel (v3)                                        |
-| `BREVO_SENDER_EMAIL`    | z. B. `info@studio-f.club`                                                  |
+| `BREVO_SENDER_EMAIL`    | z. B. `info@studio-f.club`                                                     |
 | `BREVO_SENDER_NAME`     | `Weihnachtsmarkt-Lounge der Händler`                                           |
 | `BREVO_LIST_BOOKINGS`   | ID der Liste „Lounge-Buchungen 2026“                                           |
 | `BREVO_LIST_NEWSLETTER` | ID der Newsletter-Liste                                                        |
