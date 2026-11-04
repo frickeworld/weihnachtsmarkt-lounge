@@ -2,13 +2,20 @@ import { IconCheck } from '@/components/Icons';
 import { Reveal } from '@/components/Reveal';
 import { SectionHeading } from '@/components/SectionHeading';
 import { formatCents } from '@/lib/money';
-import { feeLabel, maxTalerCount, minPriceCents, priceGroups } from '@/lib/settings';
+import {
+  feeLabel,
+  feeNote,
+  loungeCents,
+  maxTalerCount,
+  minLoungeCents,
+  priceGroups,
+} from '@/lib/settings';
 import { useSettings } from '@/lib/settingsContext';
 import { trackBookClick } from '@/lib/track';
 
 const euro = (cents: number) => formatCents(cents).replace(/,00\s?€$/, ' €');
 
-/** Preisstaffel nach Wochentag und Tageszeit (Endpreise inkl. Vorverkaufsgebühr). */
+/** Preisstaffel nach Wochentag und Tageszeit (Lounge-Preise, Vorverkaufsgebühr kommt dazu). */
 export function Pricing() {
   const s = useSettings();
   const groups = priceGroups(s.priceList);
@@ -25,7 +32,7 @@ export function Pricing() {
       <div className="mx-auto max-w-5xl">
         <SectionHeading
           eyebrow="Preise und Zeiten"
-          title={`Deine Lounge ab ${euro(minPriceCents(s))}`}
+          title={`Deine Lounge ab ${euro(minLoungeCents(s))}`}
         >
           Jeder Preis enthält Freiverzehr in Residenztalern – je später der Abend, desto mehr.
         </SectionHeading>
@@ -36,9 +43,9 @@ export function Pricing() {
             </p>
             <p className="mt-3 text-2xl font-medium">ab</p>
             <p className="font-display text-7xl leading-none font-medium sm:text-8xl">
-              {euro(minPriceCents(s))}
+              {euro(minLoungeCents(s))}
             </p>
-            <p className="mt-3 font-medium">inkl. {feeLabel(s)} Vorverkaufsgebühr</p>
+            <p className="mt-3 font-medium">{feeNote(s)}</p>
             <ul className="mt-8 space-y-2 text-left text-sm">
               {included.map((item) => (
                 <li key={item} className="flex gap-2">
@@ -76,7 +83,7 @@ export function Pricing() {
                         </div>
                         <div className="text-right">
                           <p className="font-display text-2xl font-medium whitespace-nowrap">
-                            {euro(r.totalCents)}
+                            {euro(loungeCents(r.totalCents, s))}
                           </p>
                           <p className="text-xs whitespace-nowrap text-gold-deep">
                             inkl. {r.talerCount} € Freiverzehr
@@ -89,9 +96,10 @@ export function Pricing() {
               ))}
             </div>
             <p className="mt-6 text-sm text-ink-soft">
-              Alle Preise inklusive {feeLabel(s)} Vorverkaufsgebühr. An besonderen Abenden (z. B.
-              Partys oder Live-Auftritte) gelten eigene Preise – du siehst sie bei der Auswahl im
-              Kalender.
+              Alle Preise zzgl. {feeLabel(s)} Vorverkaufsgebühr (auf volle Euro gerundet). Den
+              Gesamtpreis siehst du vor dem Bezahlen in der Buchungsübersicht. An besonderen Abenden
+              (z. B. Partys oder Live-Auftritte) gelten eigene Preise – du siehst sie bei der
+              Auswahl im Kalender.
             </p>
           </div>
         </Reveal>

@@ -8,6 +8,13 @@ import { ScarcityNote } from '@/components/ScarcityNote';
 import { Snowfall } from '@/components/Snowfall';
 import { WeihnachtsmarktLogo } from '@/components/WeihnachtsmarktLogo';
 import { maxTalerCount } from '@/lib/settings';
+
+/** „30.11.–30.12.2026“ aus den Saisondaten (Admin-Einstellungen). */
+function seasonRange(start: string, end: string): string {
+  const [, sm, sd] = start.split('-');
+  const [ey, em, ed] = end.split('-');
+  return `${Number(sd)}.${Number(sm)}.–${Number(ed)}.${Number(em)}.${ey}`;
+}
 import { useSettings } from '@/lib/settingsContext';
 import { trackBookClick } from '@/lib/track';
 import { useSpecialDay } from '@/lib/useSpecialDay';
@@ -80,7 +87,9 @@ export function Hero() {
                 </span>
               </div>
             )}
-            <p className="eyebrow mb-4">Schlosspark Detmold · Dezember 2026</p>
+            <p className="eyebrow mb-4">
+              Schlosspark Detmold · {seasonRange(s.seasonStart, s.seasonEnd)}
+            </p>
             <h1 id="hero-title" className="text-[2.6rem] leading-[1.05] font-medium sm:text-6xl">
               Deine Lounge mitten im Weihnachtsmarkt
             </h1>

@@ -420,9 +420,9 @@ Alle Admin-Aktionen serverseitig mit `is_admin_aal2()` geprüft.
 
 Texte wie im Projektplan, mit diesen Änderungen:
 
-- **Preis-Abschnitt:** groß „ab 104 €“ (günstigster Preis, dynamisch), „inkl. 5 % Vorverkaufsgebühr“, Preisübersicht nach Tagen und Zeitfenstern (seit 05.10.2026).
+- **Preis-Abschnitt:** groß „ab 99 €“ (günstigster Lounge-Preis ohne Gebühr, dynamisch), „zzgl. 5 % Vorverkaufsgebühr“, Preisübersicht mit Lounge-Preisen nach Tagen und Zeitfenstern (seit 04.11.2026, vorher Endpreise „ab 104 €“).
 - **Erlebnis-Karte 2:** „Holzhütte mit Fellen, Lichterketten und leiser Musik.“ (ohne Kaminfeuer).
-- **Mobile Leiste:** „Lounge buchen · ab 104 €“.
+- **Mobile Leiste:** „Lounge buchen · ab 99 €“.
 - Alle Preise, Personenzahl, Taler und Kontakt-E-Mail dynamisch aus `get_public_settings` (mit statischem Fallback nur für den ersten Render).
 - Formular zusätzlich: Feld „USt-ID (optional)“, sichtbar bei Firma/Rechnungswunsch.
 - Checkout-Hinweis zum fehlenden Widerrufsrecht direkt über dem Buchen-Button.

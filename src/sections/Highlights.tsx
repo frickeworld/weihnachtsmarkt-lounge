@@ -1,6 +1,6 @@
 import { Reveal } from '@/components/Reveal';
 import { formatCents } from '@/lib/money';
-import { feeLabel, maxTalerCount, minPriceCents } from '@/lib/settings';
+import { feeNote, maxTalerCount, minLoungeCents } from '@/lib/settings';
 import { useSettings } from '@/lib/settingsContext';
 
 /** Die Eckdaten in großen Zahlen – direkt unter dem Hero. */
@@ -9,9 +9,9 @@ export function Highlights() {
   const euro = (cents: number) => formatCents(cents).replace(/,00\s?€$/, ' €');
   const items = [
     {
-      value: `ab ${euro(minPriceCents(s))}`,
+      value: `ab ${euro(minLoungeCents(s))}`,
       label: 'pro Lounge',
-      note: `inkl. ${feeLabel(s)} Vorverkaufsgebühr`,
+      note: feeNote(s),
     },
     {
       value: `bis ${maxTalerCount(s)} €`,

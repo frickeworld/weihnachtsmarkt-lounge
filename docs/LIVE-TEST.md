@@ -14,7 +14,7 @@ Dauer: etwa 45 Minuten. Am besten zu zweit (eine Person bucht, eine scannt).
 
 ## 1. Website
 
-- [ ] Startseite auf dem Handy öffnen: „ab 104 €“, Preisübersicht, Freiverzehr, Galerie/Bild, Kontakt, Impressum, Datenschutz, AGB erreichbar.
+- [ ] Startseite auf dem Handy öffnen: „ab 99 €“ (zzgl. 5 % Gebühr), Preisübersicht, Freiverzehr, Galerie/Bild, Kontakt, Impressum, Datenschutz, AGB erreichbar.
 - [ ] Kalender: Preise je Zeitfenster sichtbar, Sondertermine mit rotem Schild.
 
 ## 2. Buchung mit echter Zahlung

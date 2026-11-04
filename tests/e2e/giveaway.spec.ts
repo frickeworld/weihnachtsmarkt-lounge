@@ -83,7 +83,7 @@ test.describe('Gewinnspiel', () => {
     await page.getByLabel('Nachname').fill('Muster');
     await page.locator('#buchen').getByLabel('E-Mail', { exact: true }).fill('anna@example.de');
     await page.getByLabel('Telefon').fill('05231 123456');
-    await page.getByLabel('Personenzahl').selectOption('6');
+    await page.getByRole('radio', { name: '6 Personen' }).check({ force: true });
     await page.getByLabel(/Ich akzeptiere die/).check();
     await page.getByRole('button', { name: /Zahlungspflichtig buchen – 104,30\s€/ }).click();
     await expect.poll(() => opts.checkoutRequests!.length).toBe(1);

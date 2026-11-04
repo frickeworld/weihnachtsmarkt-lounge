@@ -154,21 +154,37 @@ export function BookingForm({
             {...register('phone')}
           />
         </Field>
-        <Field id="persons" label="Personenzahl" error={errors.persons}>
-          <select
-            className="field-input"
-            {...a11y('persons', errors.persons)}
-            {...register('persons')}
-          >
-            <option value="">Bitte wählen</option>
-            {Array.from({ length: settings.maxPersons }, (_, i) => i + 1).map((n) => (
-              <option key={n} value={n}>
-                {n} {n === 1 ? 'Person' : 'Personen'}
-              </option>
-            ))}
-          </select>
-        </Field>
       </div>
+
+      <fieldset aria-describedby={errors.persons ? 'persons-error' : 'persons-hint'}>
+        <legend className="field-label">Wie viele Personen kommen?</legend>
+        <div className="grid grid-cols-5 gap-2 sm:grid-cols-10">
+          {Array.from({ length: settings.maxPersons }, (_, i) => i + 1).map((n) => (
+            <label key={n} className="cursor-pointer">
+              <input
+                type="radio"
+                value={String(n)}
+                className="peer sr-only"
+                aria-label={`${n} ${n === 1 ? 'Person' : 'Personen'}`}
+                aria-invalid={errors.persons ? true : undefined}
+                {...register('persons')}
+              />
+              <span className="flex h-12 items-center justify-center rounded-xl border-2 border-line bg-surface font-display text-xl font-medium transition-colors peer-checked:border-gold-deep peer-checked:bg-gold peer-checked:text-ink peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-gold-deep hover:border-gold">
+                {n}
+              </span>
+            </label>
+          ))}
+        </div>
+        {errors.persons?.message ? (
+          <p id="persons-error" className="field-error" role="alert">
+            {errors.persons.message}
+          </p>
+        ) : (
+          <p id="persons-hint" className="mt-1.5 text-sm text-ink-soft">
+            Bis zu {settings.maxPersons} Personen pro Lounge, der Preis bleibt gleich.
+          </p>
+        )}
+      </fieldset>
 
       <fieldset>
         <legend className="field-label">Anlass (optional)</legend>

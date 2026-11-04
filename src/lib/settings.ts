@@ -99,7 +99,30 @@ export function feeLabel(s: Pick<PublicSettings, 'feeCents' | 'feePercent'>): st
   return `${s.feePercent.toLocaleString('de-DE')} %`;
 }
 
-/** Günstigster Endpreis („ab 104 €“). */
+/**
+ * Lounge-Preis ohne Vorverkaufsgebühr (z. B. 104 € → 99 €). Beworben wird dieser Preis
+ * (Entscheidung Louis, 04.11.2026); die Gebühr kommt im Buchungsformular und im Checkout dazu.
+ */
+export function loungeCents(
+  total: number,
+  s: Pick<PublicSettings, 'feeCents' | 'feePercent'>,
+): number {
+  return total - feeFor(total, s);
+}
+
+/** Günstigster beworbener Lounge-Preis ohne Gebühr („ab 99 €“). */
+export function minLoungeCents(
+  s: Pick<PublicSettings, 'priceList' | 'priceCents' | 'feeCents' | 'feePercent'>,
+): number {
+  return loungeCents(minPriceCents(s), s);
+}
+
+/** „zzgl. 5 % Vorverkaufsgebühr“ */
+export function feeNote(s: Pick<PublicSettings, 'feeCents' | 'feePercent'>): string {
+  return `zzgl. ${feeLabel(s)} Vorverkaufsgebühr`;
+}
+
+/** Günstigster Endpreis inkl. Gebühr (104 €). */
 export function minPriceCents(
   s: Pick<PublicSettings, 'priceList' | 'priceCents' | 'feeCents'>,
 ): number {

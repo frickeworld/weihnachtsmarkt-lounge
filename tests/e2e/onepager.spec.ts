@@ -15,14 +15,15 @@ test.describe('One-Pager', () => {
     await mockSupabase(page);
   });
 
-  test('wirbt mit „ab 104 €“, Preisstaffel und Freiverzehr, ohne Kaminfeuer-Versprechen', async ({
+  test('wirbt mit „ab 99 €“ (Gebühr kommt dazu), Preisstaffel und Freiverzehr, ohne Kaminfeuer-Versprechen', async ({
     page,
   }) => {
     await page.goto('/');
     const preis = page.locator('#preis');
-    await expect(preis).toContainText('Deine Lounge ab 104 €');
-    await expect(preis).toContainText('inkl. 5 % Vorverkaufsgebühr');
-    for (const p of ['104 €', '156 €', '209 €']) await expect(preis).toContainText(p);
+    await expect(preis).toContainText('Deine Lounge ab 99 €');
+    await expect(preis).toContainText('zzgl. 5 % Vorverkaufsgebühr');
+    for (const p of ['99 €', '149 €', '199 €']) await expect(preis).toContainText(p);
+    await expect(preis).not.toContainText('104 €');
     await expect(preis).toContainText('inkl. 50 € Freiverzehr');
     await expect(preis).toContainText('inkl. 100 € Freiverzehr');
     await expect(preis).not.toContainText('175');
@@ -75,7 +76,7 @@ test.describe('One-Pager', () => {
     await page.getByLabel('Nachname').fill('Muster');
     await page.locator('#buchen').getByLabel('E-Mail').fill('anna@example.de');
     await page.getByLabel('Telefon').fill('05231 123456');
-    await page.getByLabel('Personenzahl').selectOption('8');
+    await page.getByRole('radio', { name: '8 Personen' }).check({ force: true });
     await expect(page.getByText('Anlass (optional)')).toBeVisible();
     await page.getByLabel('Straße und Hausnummer').fill('Schloßplatz 1');
     await page.getByLabel('PLZ').fill('32756');
@@ -243,7 +244,7 @@ test.describe('Mobile Buchungsleiste', () => {
     test.skip(!isMobile, 'nur mobil');
     await mockSupabase(page);
     await page.goto('/');
-    const bar = page.getByRole('link', { name: 'Lounge buchen · ab 104 €' });
+    const bar = page.getByRole('link', { name: 'Lounge buchen · ab 99 €' });
     await expect(bar).toHaveCount(0);
     await page.locator('#anlaesse').scrollIntoViewIfNeeded();
     await expect(bar).toBeVisible();

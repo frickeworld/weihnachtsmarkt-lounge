@@ -2,7 +2,10 @@ import { describe, expect, it } from 'vitest';
 import {
   feeFor,
   feeLabel,
+  feeNote,
+  loungeCents,
   maxTalerCount,
+  minLoungeCents,
   minPriceCents,
   priceGroups,
   PUBLIC_SETTINGS_FALLBACK,
@@ -13,8 +16,12 @@ import {
 describe('Preisstaffel', () => {
   const s = PUBLIC_SETTINGS_FALLBACK;
 
-  it('ab 104 €, bis zu 100 € Freiverzehr, Stufen 50/75/100', () => {
+  it('ab 104 € Endpreis = ab 99 € Lounge-Preis, bis zu 100 € Freiverzehr, Stufen 50/75/100', () => {
     expect(minPriceCents(s)).toBe(10400);
+    expect(minLoungeCents(s)).toBe(9900);
+    expect(loungeCents(20900, s)).toBe(19900);
+    expect(loungeCents(19800, s)).toBe(18900);
+    expect(feeNote(s)).toBe('zzgl. 5 % Vorverkaufsgebühr');
     expect(maxTalerCount(s)).toBe(100);
     expect(talerLevels(s)).toEqual([50, 75, 100]);
   });

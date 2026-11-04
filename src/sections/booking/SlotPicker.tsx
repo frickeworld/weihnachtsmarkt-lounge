@@ -1,6 +1,8 @@
 import type { SlotAvailability } from '@/lib/availability';
 import { formatTime } from '@/lib/dates';
 import { formatCents } from '@/lib/money';
+import { loungeCents } from '@/lib/settings';
+import { useSettings } from '@/lib/settingsContext';
 
 const statusLabel: Record<SlotAvailability['status'], string> = {
   free: 'frei',
@@ -20,6 +22,7 @@ export function SlotPicker({
   selected: string | null;
   onSelect: (startTime: string) => void;
 }) {
+  const settings = useSettings();
   return (
     <div className="grid gap-3 sm:grid-cols-3" role="group" aria-label="Zeitfenster">
       {slots.map((s) => {
@@ -51,7 +54,7 @@ export function SlotPicker({
             </span>
             {free && s.totalCents !== undefined && (
               <span className="mt-1 text-base font-semibold">
-                {formatCents(s.totalCents).replace(/,00\s?€$/, ' €')}
+                {formatCents(loungeCents(s.totalCents, settings)).replace(/,00\s?€$/, ' €')}
                 <span className="font-normal"> · inkl. {s.talerCount} € Freiverzehr</span>
               </span>
             )}

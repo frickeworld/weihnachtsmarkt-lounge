@@ -16,7 +16,7 @@ async function fillAndSubmit(page: Page, extra?: (p: Page) => Promise<void>) {
   await page.getByLabel('Nachname').fill('Muster');
   await page.locator('#buchen').getByLabel('E-Mail').fill('anna@example.de');
   await page.getByLabel('Telefon').fill('05231 123456');
-  await page.getByLabel('Personenzahl').selectOption('8');
+  await page.getByRole('radio', { name: '8 Personen' }).check({ force: true });
   if (extra) await extra(page);
   await page.getByLabel(/Ich akzeptiere die/).check();
   await page.getByRole('button', { name: /Zahlungspflichtig buchen – \d+,\d\d €/ }).click();
@@ -37,7 +37,7 @@ test.describe('Checkout (Phase 3)', () => {
   });
 
   test('Preis je Zeitfenster und Sonderveranstaltung in der Zusammenfassung', async ({ page }) => {
-    // Montag in der Saison: 14:30 104 €, 16:45 156 €, 19:00 als Sonderpreis
+    // Montag in der Saison: 14:30 99 € (+5 % = 104 €), 16:45 149 € (156 €), 19:00 als Sonderpreis
     let monday = MOCK_SETTINGS.season_start;
     while (new Date(`${monday}T00:00:00Z`).getUTCDay() !== 1) monday = addDays(monday, 1);
     await mockSupabase(page, {
@@ -50,10 +50,10 @@ test.describe('Checkout (Phase 3)', () => {
     const slots = page.getByRole('group', { name: 'Zeitfenster' }).locator('button');
     await expect(slots).toHaveCount(3);
     await expect(slots.nth(0)).toContainText('14:30–16:30 Uhr');
-    await expect(slots.nth(0)).toContainText('104 €');
+    await expect(slots.nth(0)).toContainText('99 €');
     await expect(slots.nth(0)).toContainText('50 € Freiverzehr');
     await expect(slots.nth(1)).toContainText('16:45–18:45 Uhr');
-    await expect(slots.nth(1)).toContainText('156 €');
+    await expect(slots.nth(1)).toContainText('149 €');
     await expect(slots.nth(1)).toContainText('75 € Freiverzehr');
     await expect(slots.nth(2)).toContainText('Party-Abend');
     await slots.nth(2).click();
@@ -237,14 +237,16 @@ test.describe('Besondere Termine', () => {
     const section = page.locator('#besondere-abende');
     await expect(section.getByRole('heading', { name: 'Besondere Termine' })).toBeVisible();
     await expect(section).toContainText('Live: Weidmüller');
-    await expect(section).toContainText('inkl. 125 € Freiverzehr');
+    // Beworben wird der Lounge-Preis ohne Gebühr: 249 € = 237 € + 12 € (5 %)
+    await expect(section).toContainText('237 €');
+    await expect(section).toContainText('inkl. 125 € Freiverzehr, zzgl. 5 % Vorverkaufsgebühr');
 
-    await section.getByRole('link', { name: 'Lounge buchen' }).click();
+    await section.getByRole('link', { name: /19:00 Uhr buchen$/ }).click();
     await expect(
       page.getByRole('button', { name: /Zahlungspflichtig buchen – 249,00\s€/ }),
     ).toBeVisible();
 
-    await section.getByRole('link', { name: 'Auf die Warteliste' }).click();
+    await section.getByRole('link', { name: /ausgebucht – auf die Warteliste$/ }).click();
     await expect(page.getByLabel('Wunschtag')).toHaveValue(tuesday);
   });
 });

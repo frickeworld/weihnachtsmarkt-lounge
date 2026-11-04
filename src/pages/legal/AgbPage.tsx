@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { formatCents } from '@/lib/money';
-import { priceGroups } from '@/lib/settings';
+import { loungeCents, priceGroups } from '@/lib/settings';
 import { useSettings } from '@/lib/settingsContext';
 import { LEGAL_SHORT as L } from '../../../supabase/functions/_shared/legal.ts';
 import { H2, LegalLayout } from './LegalLayout';
@@ -39,19 +39,21 @@ export function AgbPage() {
 
       <H2>{n(3)} Preise</H2>
       <p>
-        Preis und Freiverzehr hängen vom Wochentag und Zeitfenster ab. Alle Preise sind Endpreise je
-        Lounge und enthalten eine Vorverkaufsgebühr von{' '}
+        Preis und Freiverzehr hängen vom Wochentag und Zeitfenster ab. Zum Lounge-Preis kommt eine
+        Vorverkaufsgebühr von{' '}
         {s.feePercent == null
           ? formatCents(s.feeCents)
-          : `${s.feePercent.toLocaleString('de-DE')} % des Lounge-Preises (Endpreis auf volle Euro gerundet)`}
-        . [ANGABE ZUR UMSATZSTEUER PRÜFEN: „inkl. gesetzlicher MwSt.“]
+          : `${s.feePercent.toLocaleString('de-DE')} % des Lounge-Preises (Gesamtpreis auf volle Euro gerundet)`}{' '}
+        hinzu. Der Gesamtpreis wird vor der Buchung in der Buchungsübersicht angezeigt. [ANGABE ZUR
+        UMSATZSTEUER PRÜFEN: „inkl. gesetzlicher MwSt.“]
       </p>
       <ul className="list-disc space-y-1 pl-6">
         {priceGroups(s.priceList).flatMap((g) =>
           g.rows.map((r) => (
             <li key={g.days + r.label + r.totalCents}>
-              {g.days}, {r.label} ({r.times.join(' oder ')} Uhr): {formatCents(r.totalCents)} inkl.{' '}
-              {r.talerCount} € Freiverzehr
+              {g.days}, {r.label} ({r.times.join(' oder ')} Uhr): Lounge-Preis{' '}
+              {formatCents(loungeCents(r.totalCents, s))}, Gesamtpreis {formatCents(r.totalCents)}{' '}
+              inkl. Vorverkaufsgebühr und {r.talerCount} € Freiverzehr
             </li>
           )),
         )}

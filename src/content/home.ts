@@ -12,7 +12,7 @@ export const MAPS_URL =
 
 export const howItWorks = [
   { title: 'Termin wählen', text: 'Tag und Zeitfenster aussuchen.' },
-  { title: 'Sicher bezahlen', text: 'Bequem online über Stripe.' },
+  { title: 'Sicher bezahlen', text: 'Mit Karte, Apple Pay, Google Pay oder PayPal.' },
   { title: 'Ticket erhalten', text: 'Dein Ticket mit QR-Code kommt sofort per E-Mail.' },
   { title: 'Genießen', text: 'QR-Code am Einlass zeigen, Residenztaler erhalten, Platz nehmen.' },
 ] as const;
