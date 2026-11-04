@@ -7,11 +7,12 @@ import { centsToEuroInput, parseEuroToCents } from './format';
 import { DailyReportPanel } from './DailyReportPanel';
 import { InstagramPanel } from './InstagramPanel';
 import { SlotTemplatesPanel } from './SlotTemplatesPanel';
+import { feeRuleOf } from './pricing';
 import type { AdminSettings } from './types';
 import { unwrap, useLoad } from './useLoad';
 
 const SETTINGS_COLUMNS =
-  'season_start, season_end, price_cents, fee_cents, taler_count, taler_cents, haendler_share_cents, max_persons, booking_cutoff_minutes, hold_minutes, checkin_early_minutes, contact_email, lounge_location, updated_at';
+  'season_start, season_end, price_cents, fee_cents, fee_percent, taler_count, taler_cents, haendler_share_cents, max_persons, booking_cutoff_minutes, hold_minutes, checkin_early_minutes, contact_email, lounge_location, updated_at';
 
 export function SettingsPage() {
   const s = useLoad(
@@ -29,7 +30,7 @@ export function SettingsPage() {
       <div className="grid gap-6 xl:grid-cols-2">
         {s.data && <SettingsForm initial={s.data} onSaved={s.reload} />}
         <div className="space-y-6">
-          <SlotTemplatesPanel feeCents={s.data?.fee_cents ?? 350} />
+          {s.data && <SlotTemplatesPanel fee={feeRuleOf(s.data)} />}
           <ScannerPinPanel />
           <DailyReportPanel />
           <InstagramPanel />
@@ -44,6 +45,7 @@ type Draft = Record<
   | 'season_end'
   | 'price'
   | 'fee'
+  | 'fee_percent'
   | 'taler_count'
   | 'taler'
   | 'haendler'
@@ -62,6 +64,7 @@ function SettingsForm({ initial, onSaved }: { initial: AdminSettings; onSaved: (
     season_end: initial.season_end,
     price: centsToEuroInput(initial.price_cents),
     fee: centsToEuroInput(initial.fee_cents),
+    fee_percent: initial.fee_percent == null ? '' : String(initial.fee_percent).replace('.', ','),
     taler_count: String(initial.taler_count),
     taler: centsToEuroInput(initial.taler_cents),
     haendler: centsToEuroInput(initial.haendler_share_cents),
@@ -82,6 +85,8 @@ function SettingsForm({ initial, onSaved }: { initial: AdminSettings; onSaved: (
   const priceChanged =
     price !== initial.price_cents ||
     fee !== initial.fee_cents ||
+    v.fee_percent !==
+      (initial.fee_percent == null ? '' : String(initial.fee_percent).replace('.', ',')) ||
     parseEuroToCents(v.haendler) !== initial.haendler_share_cents;
 
   const validate = (): string | Record<string, unknown> => {
@@ -102,6 +107,9 @@ function SettingsForm({ initial, onSaved }: { initial: AdminSettings; onSaved: (
       checkin_early: int(v.checkin_early),
     };
     if (Object.values(n).some(Number.isNaN)) return 'Bitte ganze Zahlen ohne Komma angeben.';
+    const pct = v.fee_percent.trim() === '' ? null : Number(v.fee_percent.replace(',', '.'));
+    if (pct !== null && (Number.isNaN(pct) || pct < 0 || pct > 30))
+      return 'Verkaufsgebühr in Prozent: 0 bis 30 (leer = fester Betrag).';
     if (!v.season_start || !v.season_end || v.season_start > v.season_end)
       return 'Das Saisonende muss nach dem Saisonstart liegen.';
     if (cents.price! <= 0) return 'Der Preis muss größer als 0 sein.';
@@ -117,6 +125,7 @@ function SettingsForm({ initial, onSaved }: { initial: AdminSettings; onSaved: (
       season_end: v.season_end,
       price_cents: cents.price,
       fee_cents: cents.fee,
+      fee_percent: pct,
       taler_count: n.taler_count,
       taler_cents: cents.taler,
       haendler_share_cents: cents.haendler,
@@ -176,7 +185,11 @@ function SettingsForm({ initial, onSaved }: { initial: AdminSettings; onSaved: (
           {input('season_start', 'Saisonstart', { type: 'date' })}
           {input('season_end', 'Saisonende', { type: 'date' })}
           {input('price', 'Standard: Lounge-Preis ohne Gebühr', { suffix: '€' })}
-          {input('fee', 'Vorverkaufsgebühr (in jedem Preis enthalten)', { suffix: '€' })}
+          {input('fee_percent', 'Verkaufsgebühr in Prozent (im Endpreis enthalten)', {
+            suffix: '%',
+            hint: 'Endpreis = Lounge-Preis + Prozent, auf volle Euro gerundet. Leer = fester Betrag.',
+          })}
+          {input('fee', 'Feste Vorverkaufsgebühr (nur ohne Prozentsatz)', { suffix: '€' })}
           {input('haendler', 'Standard: Anteil Händler', { suffix: '€' })}
           {input('taler_count', 'Standard: Anzahl Residenztaler', { suffix: 'Stk.' })}
           {input('taler', 'Standard: Wert der Taler', { suffix: '€' })}

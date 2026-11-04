@@ -28,15 +28,15 @@ select is((select count(*)::int from d2), 1, 'Gewinner nimmt nicht mehr teil');
 select is((select count(*)::int from public.discount_codes where kind = 'trostpreis'), 1,
   'Trostpreis-Code wird wiederverwendet, kein zweiter');
 
--- Rabatt 30 % an einem Dienstag 16:45 (149 €): 104,30 €, Freiverzehr bleibt, Händler 87,90 €
+-- Rabatt 30 % an einem Dienstag 16:45 (156 € inkl. 7 € Gebühr): 109,20 €, Freiverzehr bleibt, Händler 88,60 €
 insert into public.discount_codes (code, kind, percent, weekdays, valid_until)
 values ('LOUNGE-TEST30', 'trostpreis', 30, array[1, 2, 3, 4]::smallint[], '2026-12-23'),
        ('GEWINN-TEST100', 'gewinn', 100, null, '2026-12-23');
 select results_eq(
   $$select reason, total_cents, discount_cents, fee_cents, price_cents, taler_cents, haendler_share_cents
       from public.discount_pricing('lounge-test30', '2026-12-01', '16:45')$$,
-  $$values (null::text, 10430, 4470, 350, 10080, 7500, 8790)$$,
-  '30 %: 104,30 €, Händler 87,90 €, Studio F 16,40 €');
+  $$values (null::text, 10920, 4680, 700, 10220, 7500, 8860)$$,
+  '30 %: 109,20 €, Händler 88,60 €, Studio F 20,60 €');
 select is((select reason from public.discount_pricing('LOUNGE-TEST30', '2026-12-04', '20:00')), 'weekday',
   'Trostpreis-Code nicht am Freitag');
 select results_eq(

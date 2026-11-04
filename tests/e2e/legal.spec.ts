@@ -34,16 +34,18 @@ test('AGB nennen die Preisstaffel aus der Datenbank', async ({ page }) => {
   await mockSupabase(page);
   await page.goto('/agb');
   await expect(
-    page.getByText(/Endpreise je Lounge und enthalten eine Vorverkaufsgebühr von 3,50\s€/),
-  ).toBeVisible();
-  await expect(
     page.getByText(
-      /Montag bis Donnerstag, Früher Abend \(16:45–18:45 Uhr\): 149,00\s€ inkl\. 75 € Freiverzehr/,
+      /Endpreise je Lounge und enthalten eine Vorverkaufsgebühr von 5 % des Lounge-Preises/,
     ),
   ).toBeVisible();
   await expect(
     page.getByText(
-      /Freitag und Samstag, Später Abend \(20:00–22:00 Uhr\): 199,00\s€ inkl\. 100 € Freiverzehr/,
+      /Montag bis Donnerstag, Früher Abend \(16:45–18:45 Uhr\): 156,00\s€ inkl\. 75 € Freiverzehr/,
+    ),
+  ).toBeVisible();
+  await expect(
+    page.getByText(
+      /Freitag und Samstag, Später Abend \(20:00–22:00 Uhr\): 209,00\s€ inkl\. 100 € Freiverzehr/,
     ),
   ).toBeVisible();
 });
@@ -64,8 +66,8 @@ test('Startseite: strukturierte Daten mit Preisspanne', async ({ page }) => {
   );
   expect(json.offers).toMatchObject({
     '@type': 'AggregateOffer',
-    lowPrice: '99.00',
-    highPrice: '199.00',
+    lowPrice: '104.00',
+    highPrice: '209.00',
     priceCurrency: 'EUR',
   });
 });

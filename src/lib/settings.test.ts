@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
+  feeFor,
+  feeLabel,
   maxTalerCount,
   minPriceCents,
   priceGroups,
@@ -11,8 +13,8 @@ import {
 describe('Preisstaffel', () => {
   const s = PUBLIC_SETTINGS_FALLBACK;
 
-  it('ab 99 €, bis zu 100 € Freiverzehr, Stufen 50/75/100', () => {
-    expect(minPriceCents(s)).toBe(9900);
+  it('ab 104 €, bis zu 100 € Freiverzehr, Stufen 50/75/100', () => {
+    expect(minPriceCents(s)).toBe(10400);
     expect(maxTalerCount(s)).toBe(100);
     expect(talerLevels(s)).toEqual([50, 75, 100]);
   });
@@ -31,17 +33,34 @@ describe('Preisstaffel', () => {
       'Freitag und Samstag',
       'Sonntag',
     ]);
-    // Mo–Do: Nachmittag 99 € (wieder seit 27.10.2026), abends 149 €
+    // Mo–Do: Nachmittag 104 €, abends 156 € (Lounge-Preis + 5 %)
     expect(g[0]!.rows).toEqual([
-      { label: 'Nachmittag', times: ['14:30–16:30'], totalCents: 9900, talerCount: 50 },
-      { label: 'Früher Abend', times: ['16:45–18:45'], totalCents: 14900, talerCount: 75 },
-      { label: 'Später Abend', times: ['19:00–21:00'], totalCents: 14900, talerCount: 75 },
+      { label: 'Nachmittag', times: ['14:30–16:30'], totalCents: 10400, talerCount: 50 },
+      { label: 'Früher Abend', times: ['16:45–18:45'], totalCents: 15600, talerCount: 75 },
+      { label: 'Später Abend', times: ['19:00–21:00'], totalCents: 15600, talerCount: 75 },
     ]);
     expect(g[1]!.rows.map((r) => [r.label, r.totalCents, r.talerCount])).toEqual([
-      ['Nachmittag', 14900, 75],
-      ['Früher Abend', 19900, 100],
-      ['Später Abend', 19900, 100],
+      ['Nachmittag', 15600, 75],
+      ['Früher Abend', 20900, 100],
+      ['Später Abend', 20900, 100],
     ]);
     expect(g[2]!.rows.map((r) => r.label)).toEqual(['Nachmittag', 'Früher Abend', 'Später Abend']);
+  });
+});
+
+describe('Verkaufsgebühr 5 %', () => {
+  it.each([
+    [10400, 500],
+    [15600, 700],
+    [20900, 1000],
+    [19800, 900],
+    [31400, 1500],
+  ])('%i Cent enthalten %i Cent Gebühr', (total, fee) => {
+    expect(feeFor(total, { feeCents: 350, feePercent: 5 })).toBe(fee);
+  });
+  it('ohne Prozentsatz gilt der feste Betrag', () => {
+    expect(feeFor(14900, { feeCents: 350, feePercent: null })).toBe(350);
+    expect(feeLabel({ feeCents: 350, feePercent: null })).toMatch(/^3,50\s€$/);
+    expect(feeLabel({ feeCents: 350, feePercent: 5 })).toBe('5 %');
   });
 });

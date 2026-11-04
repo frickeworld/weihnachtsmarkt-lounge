@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { formatCents } from '@/lib/money';
 import { requireClient } from '../authClient';
 import { errorText } from '../errors';
 import { ErrorBox, Loading, Panel, SuccessBox, smallBtn } from '../ui';
 import { centsToEuroInput, hhmm, parseEuroToCents } from './format';
-import { autoHaendlerShare } from './pricing';
+import { feeLabel } from '@/lib/settings';
+import { autoHaendlerShare, type FeeRule } from './pricing';
 import type { SlotTemplate } from './types';
 import { unwrap, useLoad } from './useLoad';
 
@@ -65,7 +65,7 @@ function toUpdate(
 }
 
 /** Zeitfenster je Wochentag mit Preis, Freiverzehr und Händler-Anteil (Preisstaffel). */
-export function SlotTemplatesPanel({ feeCents }: { feeCents: number }) {
+export function SlotTemplatesPanel({ fee }: { fee: FeeRule }) {
   const t = useLoad(
     async () =>
       unwrap(
@@ -102,10 +102,10 @@ export function SlotTemplatesPanel({ feeCents }: { feeCents: number }) {
   return (
     <Panel title="Zeitfenster und Preise">
       <p className="mb-4 text-sm text-ink-soft">
-        Preis = Endpreis für den Gast inkl. {formatCents(feeCents)} Vorverkaufsgebühr. Der
-        Händler-Anteil ergibt sich automatisch (Freiverzehr + Hälfte des Rests), kann aber fest
-        eingetragen werden. Änderungen gelten nur für neue Buchungen. Sonderpreise für einzelne
-        Termine legst du im Kalender fest.
+        Preis = Endpreis für den Gast inkl. {feeLabel(fee)} Vorverkaufsgebühr. Der Händler-Anteil
+        ergibt sich automatisch (Freiverzehr + Hälfte des Rests), kann aber fest eingetragen werden.
+        Änderungen gelten nur für neue Buchungen. Sonderpreise für einzelne Termine legst du im
+        Kalender fest.
       </p>
       <label className="mb-3 flex min-h-11 items-center gap-3 text-sm">
         <input
@@ -126,7 +126,7 @@ export function SlotTemplatesPanel({ feeCents }: { feeCents: number }) {
           const price = parseEuroToCents(d.price);
           const auto =
             price !== null && /^\d+$/.test(d.taler.trim())
-              ? autoHaendlerShare(price, feeCents, Number(d.taler))
+              ? autoHaendlerShare(price, fee, Number(d.taler))
               : null;
           const id = `tpl-${s.id}`;
           return (

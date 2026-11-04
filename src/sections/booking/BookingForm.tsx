@@ -13,7 +13,7 @@ import {
 } from '@/lib/bookingSchema';
 import { formatLongDate, formatTime, type IsoDate } from '@/lib/dates';
 import { formatCents } from '@/lib/money';
-import { totalCents } from '@/lib/settings';
+import { feeFor, totalCents } from '@/lib/settings';
 import { useSettings } from '@/lib/settingsContext';
 import { a11y } from './a11y';
 import { DiscountCodeField } from './DiscountCodeField';
@@ -307,11 +307,11 @@ export function BookingForm({
           )}
           <div className="flex justify-between gap-4">
             <dt>Lounge inkl. {taler} € Freiverzehr</dt>
-            <dd>{formatCents(baseValue - settings.feeCents)}</dd>
+            <dd>{formatCents(baseValue - feeFor(baseValue, settings))}</dd>
           </div>
           <div className="flex justify-between gap-4">
             <dt>Vorverkaufsgebühr</dt>
-            <dd>{formatCents(settings.feeCents)}</dd>
+            <dd>{formatCents(feeFor(baseValue, settings))}</dd>
           </div>
           {discount && (
             <div className="flex justify-between gap-4 font-semibold text-emerald-800">

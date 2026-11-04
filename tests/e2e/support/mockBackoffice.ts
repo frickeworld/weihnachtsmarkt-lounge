@@ -168,6 +168,7 @@ export async function mockBackoffice(page: Page, opts: BackofficeOptions = {}) {
       season_end: addDays(today(), 30),
       price_cents: 17500,
       fee_cents: 350,
+      fee_percent: 5,
       taler_count: 100,
       taler_cents: 10000,
       haendler_share_cents: 13750,

@@ -240,7 +240,7 @@ Deno.test({
         assertEquals(r.body.fields.discountCode, 'Dieser Code gilt nur montags bis donnerstags.');
       });
 
-      await t.step('Trostpreis-Code Dienstag 16:45 → Stripe mit 104,30 €', async () => {
+      await t.step('Trostpreis-Code Dienstag 16:45 → Stripe mit 109,20 €', async () => {
         const r = await post(FN.checkout, {
           date: tuesday,
           startTime: '16:45',
@@ -258,10 +258,10 @@ Deno.test({
           .single();
         assertEquals(b, {
           status: 'pending',
-          amount_total_cents: 10430,
-          discount_cents: 4470,
+          amount_total_cents: 10920,
+          discount_cents: 4680,
           taler_cents: 7500,
-          haendler_share_cents: 8790,
+          haendler_share_cents: 8860,
           discount_code: loserCode,
         });
         const again = await post(FN.checkout, {

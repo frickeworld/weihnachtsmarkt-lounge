@@ -50,10 +50,10 @@ select throws_ok($$select public.admin_cancel_booking('bbbbbbbb-0000-0000-0000-0
 -- Kennzahlen (Woche 1.–7.12.)
 create temp table k as select public.admin_dashboard('2026-12-01', '2026-12-07') as j;
 select is((select (j ->> 'paid_bookings')::int from k), 3, '3 bezahlte Buchungen (Storno zählt nicht)');
--- Di 14:30 = 99 € (Händler 50 € + ½ × 45,50 € = 72,75 €), Di 16:45 = 149 € (75 € + ½ × 70,50 € = 110,25 €)
-select is((select (j ->> 'revenue_cents')::int from k), 9900 + 14900, 'Umsatz brutto 99 € + 149 € (kostenlose = 0)');
-select is((select (j ->> 'haendler_cents')::int from k), 7275 + 11025, 'Händler: 72,75 € + 110,25 € = 183,00 € (kostenlose nicht in Abrechnung)');
-select is((select (j ->> 'studio_cents')::int from k), 9900 + 14900 - 18300, 'Studio-F-Anteil = Umsatz − Händler');
+-- Di 14:30 = 104 € inkl. 5 € Gebühr (Händler 50 € + ½ × 49 € = 74,50 €), Di 16:45 = 156 € inkl. 7 € (75 € + ½ × 74 € = 112 €)
+select is((select (j ->> 'revenue_cents')::int from k), 10400 + 15600, 'Umsatz brutto 104 € + 156 € (kostenlose = 0)');
+select is((select (j ->> 'haendler_cents')::int from k), 7450 + 11200, 'Händler: 74,50 € + 112 € = 186,50 € (kostenlose nicht in Abrechnung)');
+select is((select (j ->> 'studio_cents')::int from k), 10400 + 15600 - 18650, 'Studio-F-Anteil = Umsatz − Händler');
 select is((select (j ->> 'available_slots')::int from k), 21, 'je 3 Zeitfenster pro Tag verfügbar');
 select is((select (j ->> 'page_views')::int from k), 2, '2 Seitenaufrufe');
 select is((select (j ->> 'book_clicks')::int from k), 1, '1 Klick');

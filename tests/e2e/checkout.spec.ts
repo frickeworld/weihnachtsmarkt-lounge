@@ -37,7 +37,7 @@ test.describe('Checkout (Phase 3)', () => {
   });
 
   test('Preis je Zeitfenster und Sonderveranstaltung in der Zusammenfassung', async ({ page }) => {
-    // Montag in der Saison: 14:30 99 €, 16:45 149 €, 19:00 als Sonderpreis
+    // Montag in der Saison: 14:30 104 €, 16:45 156 €, 19:00 als Sonderpreis
     let monday = MOCK_SETTINGS.season_start;
     while (new Date(`${monday}T00:00:00Z`).getUTCDay() !== 1) monday = addDays(monday, 1);
     await mockSupabase(page, {
@@ -50,10 +50,10 @@ test.describe('Checkout (Phase 3)', () => {
     const slots = page.getByRole('group', { name: 'Zeitfenster' }).locator('button');
     await expect(slots).toHaveCount(3);
     await expect(slots.nth(0)).toContainText('14:30–16:30 Uhr');
-    await expect(slots.nth(0)).toContainText('99 €');
+    await expect(slots.nth(0)).toContainText('104 €');
     await expect(slots.nth(0)).toContainText('50 € Freiverzehr');
     await expect(slots.nth(1)).toContainText('16:45–18:45 Uhr');
-    await expect(slots.nth(1)).toContainText('149 €');
+    await expect(slots.nth(1)).toContainText('156 €');
     await expect(slots.nth(1)).toContainText('75 € Freiverzehr');
     await expect(slots.nth(2)).toContainText('Party-Abend');
     await slots.nth(2).click();
@@ -63,11 +63,15 @@ test.describe('Checkout (Phase 3)', () => {
     ).toBeVisible();
     await slots.nth(1).click();
     await expect(
-      page.getByRole('button', { name: /Zahlungspflichtig buchen – 149,00\s€/ }),
+      page.getByRole('button', { name: /Zahlungspflichtig buchen – 156,00\s€/ }),
     ).toBeVisible();
+    // Zusammenfassung: 156 € = Lounge 149 € + 7 € Vorverkaufsgebühr (5 %)
+    const summary = page.locator('#buchen dl').filter({ hasText: 'Vorverkaufsgebühr' });
+    await expect(summary).toContainText(/Lounge inkl\. 75 € Freiverzehr\s*149,00\s€/);
+    await expect(summary).toContainText(/Vorverkaufsgebühr\s*7,00\s€/);
     await slots.nth(0).click();
     await expect(
-      page.getByRole('button', { name: /Zahlungspflichtig buchen – 99,00\s€/ }),
+      page.getByRole('button', { name: /Zahlungspflichtig buchen – 104,00\s€/ }),
     ).toBeVisible();
   });
 

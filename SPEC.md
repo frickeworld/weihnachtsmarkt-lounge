@@ -9,7 +9,7 @@ Stand: 3. Okt. 2026 · Verantwortlich: Louis Fricke · Projektregeln: `CLAUDE.md
 | Thema                    | Festlegung                                                                                               |
 | ------------------------ | -------------------------------------------------------------------------------------------------------- |
 | Produkt                  | Überdachte Lounge, Weihnachtsmarkt im Schlosspark Detmold, bis 10 Personen, 2 h exklusiv                 |
-| Preis                    | Preisstaffel je Wochentag/Zeitfenster, Endpreise inkl. 3,50 € Gebühr: 99 € / 149 € / 199 € (siehe 1a)    |
+| Preis                    | Preisstaffel je Wochentag/Zeitfenster, Endpreise inkl. 5 % Gebühr: 104 € / 156 € / 209 € (siehe 1a)      |
 | Zeitfenster              | Mo–Do und So 14:30, 16:45, 19:00 · Fr–Sa 15:30, 17:45, 20:00, je 2 h (Europe/Berlin)                     |
 | Buchungsschluss online   | 60 min vor Beginn (`settings.booking_cutoff_minutes`)                                                    |
 | Reservierung im Checkout | 30 min (`settings.hold_minutes`)                                                                         |
@@ -29,17 +29,19 @@ Stand: 3. Okt. 2026 · Verantwortlich: Louis Fricke · Projektregeln: `CLAUDE.md
 
 ### 1a. Preisstaffel (Änderung 05.10.2026, Vorschlag Oliver, freigegeben von Louis)
 
-Endpreise inkl. 3,50 € Vorverkaufsgebühr (die Gebühr geht an Studio F). Gepflegt in `slot_templates`
-(`price_cents`, `taler_count`, optional `haendler_share_cents`, `label`), im Admin unter
-Einstellungen → „Zeitfenster und Preise“.
+**Seit 04.11.2026 (Entscheidung Louis): Verkaufsgebühr 5 % statt 3,50 € fest.** Endpreis =
+Lounge-Preis + 5 %, auf volle Euro gerundet; die Gebühr geht an Studio F (`settings.fee_percent`,
+Datenbankfunktion `slot_fee()`: Lounge-Preis = Endpreis ÷ 1,05 auf volle Euro gerundet, Gebühr =
+Rest). In `slot_templates`/`slot_specials` steht der Endpreis. Gepflegt im Admin unter
+Einstellungen → „Zeitfenster und Preise“ (Prozentsatz unter „Saison, Preise und Regeln“).
 
-| Tage         | Zeitfenster              | Preis | Freiverzehr | Händler-Anteil |
-| ------------ | ------------------------ | ----- | ----------- | -------------- |
-| Mo–Do        | 14:30–16:30              | 99 €  | 50 €        | 72,75 €        |
-| Mo–Do und So | 16:45–18:45, 19:00–21:00 | 149 € | 75 €        | 110,25 €       |
-| So           | 14:30–16:30              | 149 € | 75 €        | 110,25 €       |
-| Fr–Sa        | 15:30–17:30              | 149 € | 75 €        | 110,25 €       |
-| Fr–Sa        | 17:45–19:45, 20:00–22:00 | 199 € | 100 €       | 147,75 €       |
+| Tage         | Zeitfenster              | Lounge-Preis | Gebühr | Endpreis | Freiverzehr | Händler-Anteil |
+| ------------ | ------------------------ | ------------ | ------ | -------- | ----------- | -------------- |
+| Mo–Do        | 14:30–16:30              | 99 €         | 5 €    | 104 €    | 50 €        | 74,50 €        |
+| Mo–Do und So | 16:45–18:45, 19:00–21:00 | 149 €        | 7 €    | 156 €    | 75 €        | 112,00 €       |
+| So           | 14:30–16:30              | 149 €        | 7 €    | 156 €    | 75 €        | 112,00 €       |
+| Fr–Sa        | 15:30–17:30              | 149 €        | 7 €    | 156 €    | 75 €        | 112,00 €       |
+| Fr–Sa        | 17:45–19:45, 20:00–22:00 | 199 €        | 10 €   | 209 €    | 100 €       | 149,50 €       |
 
 - **Händler-Anteil** = Freiverzehr + Hälfte des Rests (Endpreis − Gebühr − Freiverzehr), abgerundet
   auf ganze Cent. Je Zeitfenster oder Sondertermin überschreibbar.
@@ -50,8 +52,8 @@ Einstellungen → „Zeitfenster und Preise“.
 
   | Termin                         | Zeit                     | Endpreis | Freiverzehr | Händler-Anteil |
   | ------------------------------ | ------------------------ | -------- | ----------- | -------------- |
-  | Party-Abend 22./23./29./30.12. | 16:45–18:45, 19:00–21:00 | 189 €    | 100 €       | 142,75 €       |
-  | Heiligabend exklusiv 24.12.    | 10:00–13:00 (nur dieser) | 299 €    | 150 €       | 222,75 €       |
+  | Party-Abend 22./23./29./30.12. | 16:45–18:45, 19:00–21:00 | 198 €    | 100 €       | 144,50 €       |
+  | Heiligabend exklusiv 24.12.    | 10:00–13:00 (nur dieser) | 314 €    | 150 €       | 224,50 €       |
 
   Saison 30.11.–30.12.2026. Geschlossen 25. und 26.12. (die früher geplanten Vermietungen am
   26.12. entfallen) sowie 31.12. Der 27. und 28.12. sind normal geöffnet. Einmalige Zeitfenster
@@ -61,18 +63,18 @@ Einstellungen → „Zeitfenster und Preise“.
   `settings`. Die Beträge werden beim Anlegen in die Buchung kopiert.
 - **Änderung 07.10.2026 (Louis):** Mo–Do kein Nachmittag mehr (14:30/99 € gestrichen, Vorlage deaktiviert).
 - **Änderung 27.10.2026 (Louis):** Mo–Do-Nachmittag 14:30–16:30 wieder im Angebot, 99 € inkl. 50 € Freiverzehr (Migration `20261027090000_weekday_afternoon_again`). Der günstigste Preis ist damit wieder 99 €.
-- Website: „ab“ günstigstem Preis (derzeit 99 €) plus Preisübersicht; im Kalender steht der genaue Preis je Zeitfenster.
+- Website: „ab“ günstigstem Preis (derzeit 104 €) plus Preisübersicht; im Kalender steht der genaue Preis je Zeitfenster.
 
-### Geldverteilung pro Buchung (Beispiel 199 €)
+### Geldverteilung pro Buchung (Beispiel 209 €)
 
 | Posten                      | Betrag       | Geht an                            |
 | --------------------------- | ------------ | ---------------------------------- |
-| Gast zahlt gesamt           | 199,00 €     | –                                  |
-| Vorverkaufsgebühr           | 3,50 €       | Studio F                           |
+| Gast zahlt gesamt           | 209,00 €     | –                                  |
+| Vorverkaufsgebühr (5 %)     | 10,00 €      | Studio F                           |
 | Residenztaler (Freiverzehr) | 100,00 €     | Händler                            |
-| Hälfte Rest (95,50 €)       | 47,75 €      | Händler                            |
-| Andere Hälfte Rest          | 47,75 €      | Studio F                           |
-| **Händler gesamt**          | **147,75 €** | auch bei No-Show, nicht bei Storno |
+| Hälfte Rest (99,00 €)       | 49,50 €      | Händler                            |
+| Andere Hälfte Rest          | 49,50 €      | Studio F                           |
+| **Händler gesamt**          | **149,50 €** | auch bei No-Show, nicht bei Storno |
 
 ---
 
@@ -408,8 +410,8 @@ Alle Admin-Aktionen serverseitig mit `is_admin_aal2()` geprüft.
   - Alle anderen (nach jeder Ziehung): persönlicher Code `LOUNGE-…`, `giveaway_discount_percent`
     (Standard 30 %), nur Mo–Do, einmal einlösbar, bis Saisonende; Hinweis auf die nächste Ziehung.
 - **Einlösen**: Feld „Gewinnspiel-Code“ im Buchungsformular (oder Link `/?code=…#buchen`).
-  `discount_pricing()` rechnet: Freiverzehr bleibt voll, Rest halbiert (149 € → 104,30 €, Händler
-  87,90 €, Studio F 16,40 €). 100 %: Buchung ohne Stripe sofort bezahlt (`payment_method =
+  `discount_pricing()` rechnet: Freiverzehr bleibt voll, Rest halbiert (156 € → 109,20 €, Händler
+  88,60 €, Studio F 20,60 €). 100 %: Buchung ohne Stripe sofort bezahlt (`payment_method =
 'kostenlos'`, `include_in_settlement = true`, Betrag 0 €, Händler-Anteil = halber Freiverzehr).
   Ein Code ist nur einmal gültig (partieller Unique-Index wie beim Zeitfenster).
 - **Datenpflege** nach der Saison anonymisiert auch alle Teilnahmen.
@@ -418,9 +420,9 @@ Alle Admin-Aktionen serverseitig mit `is_admin_aal2()` geprüft.
 
 Texte wie im Projektplan, mit diesen Änderungen:
 
-- **Preis-Abschnitt:** groß „ab 99 €“ (günstigster Preis, dynamisch), „inkl. 3,50 € Vorverkaufsgebühr“, Preisübersicht nach Tagen und Zeitfenstern (seit 05.10.2026).
+- **Preis-Abschnitt:** groß „ab 104 €“ (günstigster Preis, dynamisch), „inkl. 5 % Vorverkaufsgebühr“, Preisübersicht nach Tagen und Zeitfenstern (seit 05.10.2026).
 - **Erlebnis-Karte 2:** „Holzhütte mit Fellen, Lichterketten und leiser Musik.“ (ohne Kaminfeuer).
-- **Mobile Leiste:** „Lounge buchen · ab 99 €“.
+- **Mobile Leiste:** „Lounge buchen · ab 104 €“.
 - Alle Preise, Personenzahl, Taler und Kontakt-E-Mail dynamisch aus `get_public_settings` (mit statischem Fallback nur für den ersten Render).
 - Formular zusätzlich: Feld „USt-ID (optional)“, sichtbar bei Firma/Rechnungswunsch.
 - Checkout-Hinweis zum fehlenden Widerrufsrecht direkt über dem Buchen-Button.

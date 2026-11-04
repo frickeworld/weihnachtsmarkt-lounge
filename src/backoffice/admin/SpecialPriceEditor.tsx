@@ -4,7 +4,8 @@ import { requireClient } from '../authClient';
 import { errorText } from '../errors';
 import { ErrorBox, smallBtn } from '../ui';
 import { centsToEuroInput, parseEuroToCents } from './format';
-import { autoHaendlerShare } from './pricing';
+import { feeFor, feeLabel } from '@/lib/settings';
+import { autoHaendlerShare, type FeeRule } from './pricing';
 import type { SlotSpecial } from './types';
 
 /**
@@ -15,14 +16,14 @@ export function SpecialPriceEditor({
   date,
   startTime,
   special,
-  feeCents,
+  fee,
   booked,
   onChanged,
 }: {
   date: string;
   startTime: string;
   special: SlotSpecial | undefined;
-  feeCents: number;
+  fee: FeeRule;
   booked: boolean;
   onChanged: () => void;
 }) {
@@ -44,7 +45,7 @@ export function SpecialPriceEditor({
   const save = async () => {
     setError(null);
     if (!title.trim()) return setError('Bitte einen Titel angeben, z. B. „Party-Abend“.');
-    if (priceCents === null || priceCents <= feeCents)
+    if (priceCents === null || priceCents <= feeFor(priceCents, fee))
       return setError('Bitte einen Preis angeben (inkl. Vorverkaufsgebühr), z. B. 249,00.');
     if (!talerOk || Number(taler) * 100 > priceCents)
       return setError('Freiverzehr bitte als ganze Euro, höchstens der Preis.');
@@ -94,7 +95,7 @@ export function SpecialPriceEditor({
           {special.taler_count} € Freiverzehr · Händler{' '}
           {formatCents(
             special.haendler_share_cents ??
-              autoHaendlerShare(special.price_cents, feeCents, special.taler_count),
+              autoHaendlerShare(special.price_cents, fee, special.taler_count),
           )}
         </p>
       )}
@@ -171,15 +172,15 @@ export function SpecialPriceEditor({
                 onChange={(e) => setShare(e.target.value)}
                 placeholder={
                   priceCents !== null && talerOk
-                    ? `auto ${centsToEuroInput(autoHaendlerShare(priceCents, feeCents, Number(taler)))}`
+                    ? `auto ${centsToEuroInput(autoHaendlerShare(priceCents, fee, Number(taler)))}`
                     : 'auto'
                 }
               />
             </label>
           </div>
           <p className="text-xs text-ink-soft">
-            Preis inkl. {formatCents(feeCents)} Vorverkaufsgebühr. Händler-Anteil leer lassen =
-            Freiverzehr + Hälfte des Rests.
+            Preis inkl. {feeLabel(fee)} Vorverkaufsgebühr. Händler-Anteil leer lassen = Freiverzehr
+            + Hälfte des Rests.
             {booked && ' Die bestehende Buchung behält ihren Preis.'}
           </p>
           <div className="flex flex-wrap gap-2">

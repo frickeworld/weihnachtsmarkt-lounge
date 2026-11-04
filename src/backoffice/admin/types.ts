@@ -92,6 +92,8 @@ export interface AdminSettings {
   season_end: string;
   price_cents: number;
   fee_cents: number;
+  /** Verkaufsgebühr in Prozent (null = fee_cents fest) */
+  fee_percent: number | string | null;
   taler_count: number;
   taler_cents: number;
   haendler_share_cents: number;

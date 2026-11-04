@@ -31,10 +31,12 @@ interface SettingsRow {
 export async function fetchPublicSettings(): Promise<PublicSettings> {
   if (DEMO) return demoSettings();
   ensureConfigured();
-  const [data, prices] = await Promise.all([
+  const [data, prices, fee] = await Promise.all([
     rpc<SettingsRow>('get_public_settings', {}, 'single').then((d) => d!),
     rpc<PriceRow[]>('get_price_list').catch(() => null),
+    rpc<{ fee_percent: number | string | null }[]>('get_fee_info').catch(() => null),
   ]);
+  const feePercent = fee?.[0]?.fee_percent;
   // Unvollständige Antworten nie übernehmen – dann bleiben die Startwerte stehen.
   const ints = [
     data.price_cents,
@@ -49,6 +51,7 @@ export async function fetchPublicSettings(): Promise<PublicSettings> {
   return {
     priceCents: data.price_cents,
     feeCents: data.fee_cents,
+    feePercent: feePercent == null || Number.isNaN(Number(feePercent)) ? null : Number(feePercent),
     talerCount: data.taler_count,
     maxPersons: data.max_persons,
     seasonStart: data.season_start,

@@ -40,8 +40,11 @@ export function AgbPage() {
       <H2>{n(3)} Preise</H2>
       <p>
         Preis und Freiverzehr hängen vom Wochentag und Zeitfenster ab. Alle Preise sind Endpreise je
-        Lounge und enthalten eine Vorverkaufsgebühr von {formatCents(s.feeCents)}. [ANGABE ZUR
-        UMSATZSTEUER PRÜFEN: „inkl. gesetzlicher MwSt.“]
+        Lounge und enthalten eine Vorverkaufsgebühr von{' '}
+        {s.feePercent == null
+          ? formatCents(s.feeCents)
+          : `${s.feePercent.toLocaleString('de-DE')} % des Lounge-Preises (Endpreis auf volle Euro gerundet)`}
+        . [ANGABE ZUR UMSATZSTEUER PRÜFEN: „inkl. gesetzlicher MwSt.“]
       </p>
       <ul className="list-disc space-y-1 pl-6">
         {priceGroups(s.priceList).flatMap((g) =>

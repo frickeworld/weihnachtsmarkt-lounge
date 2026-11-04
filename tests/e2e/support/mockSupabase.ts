@@ -40,21 +40,21 @@ const tier = (
   label,
 });
 
-/** Preisstaffel wie in der Migration slot_pricing (Endpreise inkl. 3,50 € Gebühr). */
+/** Preisstaffel wie in der Datenbank (Endpreise = Lounge-Preis + 5 % Gebühr, gerundet). */
 export const MOCK_PRICE_LIST = [
   ...[1, 2, 3, 4].flatMap((d) => [
-    tier(d, '14:30', '16:30', 99, 50, 'Nachmittag'),
-    tier(d, '16:45', '18:45', 149, 75, 'Früher Abend'),
-    tier(d, '19:00', '21:00', 149, 75, 'Später Abend'),
+    tier(d, '14:30', '16:30', 104, 50, 'Nachmittag'),
+    tier(d, '16:45', '18:45', 156, 75, 'Früher Abend'),
+    tier(d, '19:00', '21:00', 156, 75, 'Später Abend'),
   ]),
   ...[5, 6].flatMap((d) => [
-    tier(d, '15:30', '17:30', 149, 75, 'Nachmittag'),
-    tier(d, '17:45', '19:45', 199, 100, 'Früher Abend'),
-    tier(d, '20:00', '22:00', 199, 100, 'Später Abend'),
+    tier(d, '15:30', '17:30', 156, 75, 'Nachmittag'),
+    tier(d, '17:45', '19:45', 209, 100, 'Früher Abend'),
+    tier(d, '20:00', '22:00', 209, 100, 'Später Abend'),
   ]),
-  tier(7, '14:30', '16:30', 149, 75, 'Nachmittag'),
-  tier(7, '16:45', '18:45', 149, 75, 'Früher Abend'),
-  tier(7, '19:00', '21:00', 149, 75, 'Später Abend'),
+  tier(7, '14:30', '16:30', 156, 75, 'Nachmittag'),
+  tier(7, '16:45', '18:45', 156, 75, 'Früher Abend'),
+  tier(7, '19:00', '21:00', 156, 75, 'Später Abend'),
 ];
 
 /** Alle Startzeiten der Staffel (für Status-Überschreibungen ganzer Tage). */
@@ -122,6 +122,9 @@ export async function mockSupabase(page: Page, opts: MockOptions = {}) {
       : MOCK_SETTINGS;
     return route.fulfill({ json: single ? s : [s] });
   });
+  await page.route('**/rest/v1/rpc/get_fee_info*', (route) =>
+    route.fulfill({ json: [{ fee_percent: 5, fee_cents: 350 }] }),
+  );
   await page.route('**/rest/v1/rpc/track_event*', async (route) => {
     opts.tracked?.push(route.request().postDataJSON());
     await route.fulfill({ status: 204, body: '' });

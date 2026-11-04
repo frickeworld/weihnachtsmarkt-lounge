@@ -16,7 +16,10 @@ export interface PriceTier {
 export interface PublicSettings {
   /** Standardpreis (nur noch Rückfall für Zeitfenster ohne eigenen Preis) */
   priceCents: number;
+  /** Feste Gebühr (nur wenn kein Prozentsatz gesetzt ist) */
   feeCents: number;
+  /** Verkaufsgebühr in Prozent auf den Lounge-Preis (z. B. 5), Endpreis auf volle Euro gerundet */
+  feePercent: number | null;
   talerCount: number;
   maxPersons: number;
   seasonStart: string; // YYYY-MM-DD
@@ -43,26 +46,27 @@ const tier = (
   label,
 });
 
-/** Startwerte bis zur Antwort der Datenbank (Preisstaffel Stand 27.10.2026). */
+/** Startwerte bis zur Antwort der Datenbank (Preisstaffel Stand 04.11.2026: Lounge-Preis + 5 %). */
 const FALLBACK_PRICE_LIST: PriceTier[] = [
   ...[1, 2, 3, 4].flatMap((d) => [
-    tier(d, '14:30', '16:30', 99, 50, 'Nachmittag'),
-    tier(d, '16:45', '18:45', 149, 75, 'Früher Abend'),
-    tier(d, '19:00', '21:00', 149, 75, 'Später Abend'),
+    tier(d, '14:30', '16:30', 104, 50, 'Nachmittag'),
+    tier(d, '16:45', '18:45', 156, 75, 'Früher Abend'),
+    tier(d, '19:00', '21:00', 156, 75, 'Später Abend'),
   ]),
   ...[5, 6].flatMap((d) => [
-    tier(d, '15:30', '17:30', 149, 75, 'Nachmittag'),
-    tier(d, '17:45', '19:45', 199, 100, 'Früher Abend'),
-    tier(d, '20:00', '22:00', 199, 100, 'Später Abend'),
+    tier(d, '15:30', '17:30', 156, 75, 'Nachmittag'),
+    tier(d, '17:45', '19:45', 209, 100, 'Früher Abend'),
+    tier(d, '20:00', '22:00', 209, 100, 'Später Abend'),
   ]),
-  tier(7, '14:30', '16:30', 149, 75, 'Nachmittag'),
-  tier(7, '16:45', '18:45', 149, 75, 'Früher Abend'),
-  tier(7, '19:00', '21:00', 149, 75, 'Später Abend'),
+  tier(7, '14:30', '16:30', 156, 75, 'Nachmittag'),
+  tier(7, '16:45', '18:45', 156, 75, 'Früher Abend'),
+  tier(7, '19:00', '21:00', 156, 75, 'Später Abend'),
 ];
 
 export const PUBLIC_SETTINGS_FALLBACK: PublicSettings = {
   priceCents: 17500,
   feeCents: 350,
+  feePercent: 5,
   talerCount: 100,
   maxPersons: 10,
   seasonStart: '2026-11-30',
@@ -76,7 +80,26 @@ export function totalCents(s: Pick<PublicSettings, 'priceCents' | 'feeCents'>): 
   return s.priceCents + s.feeCents;
 }
 
-/** Günstigster Endpreis („ab 99 €“). */
+/**
+ * Gebühr, die in einem Endpreis steckt – gleiche Regel wie slot_fee() in der Datenbank:
+ * Lounge-Preis = Endpreis ÷ (1 + Prozent), auf volle Euro gerundet; Gebühr = Rest.
+ * Nur zur Anzeige; abgerechnet wird ausschließlich auf dem Server.
+ */
+export function feeFor(total: number, s: Pick<PublicSettings, 'feeCents' | 'feePercent'>): number {
+  if (s.feePercent == null) return s.feeCents;
+  return total - Math.round(total / (1 + s.feePercent / 100) / 100) * 100;
+}
+
+/** „5 %“ bzw. „3,50 €“ für Texte wie „inkl. … Vorverkaufsgebühr“. */
+export function feeLabel(s: Pick<PublicSettings, 'feeCents' | 'feePercent'>): string {
+  if (s.feePercent == null)
+    return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(
+      s.feeCents / 100,
+    );
+  return `${s.feePercent.toLocaleString('de-DE')} %`;
+}
+
+/** Günstigster Endpreis („ab 104 €“). */
 export function minPriceCents(
   s: Pick<PublicSettings, 'priceList' | 'priceCents' | 'feeCents'>,
 ): number {

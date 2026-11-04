@@ -8,7 +8,7 @@ import { hhmm } from './format';
 import { formatCents } from '@/lib/money';
 import { daySlots } from './daySlots';
 import { ExtraSlotForm } from './ExtraSlotForm';
-import { autoHaendlerShare } from './pricing';
+import { autoHaendlerShare, feeRuleOf } from './pricing';
 import { SpecialPriceEditor } from './SpecialPriceEditor';
 import type { ExtraSlot, SlotSpecial, SlotTemplate } from './types';
 import { unwrap, useLoad } from './useLoad';
@@ -19,6 +19,7 @@ interface MonthData {
     season_end: string;
     price_cents: number;
     fee_cents: number;
+    fee_percent: number | string | null;
     taler_count: number;
   };
   specials: SlotSpecial[];
@@ -59,7 +60,7 @@ export function CalendarPage() {
     const [season, templates, closed, blocked, bookings, specials, extras] = await Promise.all([
       c
         .from('settings')
-        .select('season_start, season_end, price_cents, fee_cents, taler_count')
+        .select('season_start, season_end, price_cents, fee_cents, fee_percent, taler_count')
         .eq('id', 1)
         .single(),
       c
@@ -293,7 +294,7 @@ export function CalendarPage() {
                             {formatCents(stdTotal)} · {stdTaler} € Freiverzehr · Händler{' '}
                             {formatCents(
                               s.haendler_share_cents ??
-                                autoHaendlerShare(stdTotal, d.season.fee_cents, stdTaler),
+                                autoHaendlerShare(stdTotal, feeRuleOf(d.season), stdTaler),
                             )}
                           </p>
                         )}
@@ -357,7 +358,7 @@ export function CalendarPage() {
                           date={selected}
                           startTime={s.start_time}
                           special={special}
-                          feeCents={d.season.fee_cents}
+                          fee={feeRuleOf(d.season)}
                           booked={!!booking}
                           onChanged={data.reload}
                         />

@@ -2,7 +2,7 @@ import { IconCheck } from '@/components/Icons';
 import { Reveal } from '@/components/Reveal';
 import { SectionHeading } from '@/components/SectionHeading';
 import { formatCents } from '@/lib/money';
-import { maxTalerCount, minPriceCents, priceGroups } from '@/lib/settings';
+import { feeLabel, maxTalerCount, minPriceCents, priceGroups } from '@/lib/settings';
 import { useSettings } from '@/lib/settingsContext';
 import { trackBookClick } from '@/lib/track';
 
@@ -38,7 +38,7 @@ export function Pricing() {
             <p className="font-display text-7xl leading-none font-medium sm:text-8xl">
               {euro(minPriceCents(s))}
             </p>
-            <p className="mt-3 font-medium">inkl. {formatCents(s.feeCents)} Vorverkaufsgebühr</p>
+            <p className="mt-3 font-medium">inkl. {feeLabel(s)} Vorverkaufsgebühr</p>
             <ul className="mt-8 space-y-2 text-left text-sm">
               {included.map((item) => (
                 <li key={item} className="flex gap-2">
@@ -89,9 +89,9 @@ export function Pricing() {
               ))}
             </div>
             <p className="mt-6 text-sm text-ink-soft">
-              Alle Preise inklusive {formatCents(s.feeCents)} Vorverkaufsgebühr. An besonderen
-              Abenden (z. B. Partys oder Live-Auftritte) gelten eigene Preise – du siehst sie bei
-              der Auswahl im Kalender.
+              Alle Preise inklusive {feeLabel(s)} Vorverkaufsgebühr. An besonderen Abenden (z. B.
+              Partys oder Live-Auftritte) gelten eigene Preise – du siehst sie bei der Auswahl im
+              Kalender.
             </p>
           </div>
         </Reveal>
