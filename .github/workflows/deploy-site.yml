@@ -1,8 +1,9 @@
-name: Deploy Website (Strato)
+name: Deploy Website (Mittwald)
 
-# main = live. Baut die Website und lädt sie per SFTP in den Ordner der Subdomain
-# (z. B. buchen.weihnachtsmarkt-detmold.de). Einrichtung: docs/STRATO.md.
-# Es wird nichts gelöscht; liegt im Zielordner WordPress, bricht der Upload ab.
+# main = live. Baut die Website und lädt sie per SFTP in den Ordner der mStudio-App
+# (z. B. /html/weihnachtslounge für weihnachtslounge.studio-f.club). Einrichtung: docs/MITTWALD.md.
+# Es wird nichts gelöscht; liegt im Zielordner eine andere Website, bricht der Upload ab.
+# Solange der SFTP-Zugang nicht hinterlegt ist, wird der Upload übersprungen (kein Fehler).
 on:
   push:
     branches: [main]
@@ -20,45 +21,60 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      # Öffentliche Werte als Repository-Variablen (Settings → Secrets and variables → Variables);
-      # alle vier dürfen auch als Secrets angelegt sein
+      # Öffentliche Werte als Variables oder Secrets (Settings → Secrets and variables → Actions)
       VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL || secrets.VITE_SUPABASE_URL }}
       VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY || secrets.VITE_SUPABASE_ANON_KEY }}
       VITE_PUBLIC_SITE_URL: ${{ vars.VITE_PUBLIC_SITE_URL || secrets.VITE_PUBLIC_SITE_URL }}
       VITE_NOINDEX: ${{ vars.VITE_NOINDEX || secrets.VITE_NOINDEX }}
-      # Zugang zu Strato als Secrets
-      STRATO_SFTP_HOST: ${{ secrets.STRATO_SFTP_HOST }}
-      STRATO_SFTP_USER: ${{ secrets.STRATO_SFTP_USER }}
-      STRATO_SFTP_PASSWORD: ${{ secrets.STRATO_SFTP_PASSWORD }}
-      STRATO_TARGET_DIR: ${{ secrets.STRATO_TARGET_DIR }}
-      STRATO_SSH_KNOWN_HOSTS: ${{ secrets.STRATO_SSH_KNOWN_HOSTS }}
+      # SFTP-Zugang zur mStudio-App als Secrets (alte STRATO_*-Namen werden auch gelesen)
+      DEPLOY_SFTP_HOST: ${{ secrets.DEPLOY_SFTP_HOST || secrets.STRATO_SFTP_HOST }}
+      DEPLOY_SFTP_PORT: ${{ secrets.DEPLOY_SFTP_PORT }}
+      DEPLOY_SFTP_USER: ${{ secrets.DEPLOY_SFTP_USER || secrets.STRATO_SFTP_USER }}
+      DEPLOY_SFTP_PASSWORD: ${{ secrets.DEPLOY_SFTP_PASSWORD || secrets.STRATO_SFTP_PASSWORD }}
+      DEPLOY_TARGET_DIR: ${{ secrets.DEPLOY_TARGET_DIR || secrets.STRATO_TARGET_DIR }}
+      DEPLOY_SSH_KNOWN_HOSTS: ${{ secrets.DEPLOY_SSH_KNOWN_HOSTS || secrets.STRATO_SSH_KNOWN_HOSTS }}
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Variablen und Secrets vorhanden?
+      - name: Zugang hinterlegt?
+        id: check
         run: |
-          for v in VITE_SUPABASE_URL VITE_SUPABASE_ANON_KEY VITE_PUBLIC_SITE_URL STRATO_SFTP_HOST STRATO_SFTP_USER STRATO_SFTP_PASSWORD STRATO_TARGET_DIR; do
-            if [ -z "${!v}" ]; then echo "::error::$v fehlt (siehe docs/STRATO.md)"; exit 1; fi
+          missing=""
+          for v in VITE_SUPABASE_URL VITE_SUPABASE_ANON_KEY VITE_PUBLIC_SITE_URL DEPLOY_SFTP_HOST DEPLOY_SFTP_USER DEPLOY_SFTP_PASSWORD DEPLOY_TARGET_DIR; do
+            [ -z "${!v}" ] && missing="$missing $v"
           done
+          if [ -n "$missing" ]; then
+            echo "::notice::Upload übersprungen – es fehlt:$missing (siehe docs/MITTWALD.md)"
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
 
+      - uses: actions/checkout@v4
+        if: steps.check.outputs.ready == 'true'
       - uses: actions/setup-node@v4
+        if: steps.check.outputs.ready == 'true'
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
-      - run: npm run lint
-      - run: npm run typecheck
-      - run: npm test
-      - run: npm run build
+      - name: Prüfen und bauen
+        if: steps.check.outputs.ready == 'true'
+        run: |
+          npm ci
+          npm run lint
+          npm run typecheck
+          npm test
+          npm run build
 
       - name: lftp installieren
+        if: steps.check.outputs.ready == 'true'
         run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
 
       # Prüft Zielordner und Build, lädt dann hoch (zuletzt .htaccess und index.html)
       - name: Hochladen
-        run: bash scripts/deploy-strato.sh
+        if: steps.check.outputs.ready == 'true'
+        run: bash scripts/deploy-sftp.sh
 
       - name: Live-Seite erreichbar?
+        if: steps.check.outputs.ready == 'true'
         run: |
           url="${VITE_PUBLIC_SITE_URL%/}/"
           for i in 1 2 3; do

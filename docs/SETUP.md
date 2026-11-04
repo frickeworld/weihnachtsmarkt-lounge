@@ -62,8 +62,8 @@ Ab Phase 3 kommt `STRIPE_TEST_SECRET_KEY` für den automatischen Klicktest dazu.
 1. **Authentication → Sign In / Providers:** Unter „User Signups“ den Schalter **„Allow new users to sign up“ aus**. Den Anbieter **„Email“ selbst eingeschaltet lassen** – sonst funktioniert auch die Anmeldung nicht.
 2. **Authentication → Multi-Factor:** TOTP (Authenticator App) **aktiviert**.
 3. **Authentication → URL Configuration:**
-   - Site URL: die Cloudflare-URL (live: `https://buchen.weihnachtsmarkt-detmold.de`, siehe docs/STRATO.md)
-   - Redirect URLs: `http://localhost:5173/**`, `https://*.weihnachtsmarkt-lounge.pages.dev/**`, die Cloudflare-URL mit `/**`, live zusätzlich `https://weihnachtsmarkt-detmold.de/lounge/**`
+   - Site URL: die Cloudflare-URL (live: `https://weihnachtslounge.studio-f.club`, siehe docs/MITTWALD.md)
+   - Redirect URLs: `http://localhost:5173/**`, `https://*.weihnachtsmarkt-lounge.pages.dev/**`, die Cloudflare-URL mit `/**`, live zusätzlich `https://weihnachtslounge.studio-f.club/**`
    - Einladungen und „Passwort vergessen“ führen auf `/login/neues-passwort` – das deckt `/**` ab.
 4. **Database → Extensions:** `pg_cron` und `pg_net` aktivieren (brauchen wir ab Phase 2 für Reservierungs-Ablauf und Erinnerungsmails). Falls es nicht klappt: Ich mache es per Migration.
 
@@ -71,19 +71,19 @@ Ab Phase 3 kommt `STRIPE_TEST_SECRET_KEY` für den automatischen Klicktest dazu.
 
 Supabase → **Edge Functions → Secrets** (oder Project Settings → Edge Functions):
 
-| Name                    | Wert                                                                          |
-| ----------------------- | ----------------------------------------------------------------------------- |
-| `STRIPE_SECRET_KEY`     | Stripe Testmodus → Entwickler → API-Schlüssel → Geheimschlüssel (`sk_test_…`) |
-| `STRIPE_WEBHOOK_SECRET` | kommt in Phase 3 (`whsec_…`)                                                  |
-| `BREVO_API_KEY`         | Brevo → SMTP & API → API-Schlüssel (v3)                                       |
-| `BREVO_SENDER_EMAIL`    | z. B. `tickets@studio-f.club`                                                 |
-| `BREVO_SENDER_NAME`     | `Weihnachtsmarkt-Lounge der Händler`                                          |
-| `BREVO_LIST_BOOKINGS`   | ID der Liste „Lounge-Buchungen 2026“                                          |
-| `BREVO_LIST_NEWSLETTER` | ID der Newsletter-Liste                                                       |
-| `BREVO_DOI_TEMPLATE_ID` | ID der Double-Opt-in-Vorlage                                                  |
-| `PUBLIC_SITE_URL`       | die Cloudflare-URL (live: Subdomain, siehe docs/STRATO.md), ohne `/` am Ende  |
-| `SCANNER_TOKEN_SECRET`  | lange Zufallszeichenkette – ich sage dir in Phase 6, wie du sie erzeugst      |
-| `CRON_SECRET`           | lange Zufallszeichenkette für die Erinnerungsmails, siehe Abschnitt 8         |
+| Name                    | Wert                                                                           |
+| ----------------------- | ------------------------------------------------------------------------------ |
+| `STRIPE_SECRET_KEY`     | Stripe Testmodus → Entwickler → API-Schlüssel → Geheimschlüssel (`sk_test_…`)  |
+| `STRIPE_WEBHOOK_SECRET` | kommt in Phase 3 (`whsec_…`)                                                   |
+| `BREVO_API_KEY`         | Brevo → SMTP & API → API-Schlüssel (v3)                                        |
+| `BREVO_SENDER_EMAIL`    | z. B. `tickets@studio-f.club`                                                  |
+| `BREVO_SENDER_NAME`     | `Weihnachtsmarkt-Lounge der Händler`                                           |
+| `BREVO_LIST_BOOKINGS`   | ID der Liste „Lounge-Buchungen 2026“                                           |
+| `BREVO_LIST_NEWSLETTER` | ID der Newsletter-Liste                                                        |
+| `BREVO_DOI_TEMPLATE_ID` | ID der Double-Opt-in-Vorlage                                                   |
+| `PUBLIC_SITE_URL`       | die Cloudflare-URL (live: Subdomain, siehe docs/MITTWALD.md), ohne `/` am Ende |
+| `SCANNER_TOKEN_SECRET`  | lange Zufallszeichenkette – ich sage dir in Phase 6, wie du sie erzeugst       |
+| `CRON_SECRET`           | lange Zufallszeichenkette für die Erinnerungsmails, siehe Abschnitt 8          |
 
 ## 6. Stripe (Konto MF Coaching & Promotion GmbH)
 

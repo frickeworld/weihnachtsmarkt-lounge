@@ -6,26 +6,26 @@ Stand: 3. Okt. 2026 · Verantwortlich: Louis Fricke · Projektregeln: `CLAUDE.md
 
 ## 1. Überblick
 
-| Thema                    | Festlegung                                                                                               |
-| ------------------------ | -------------------------------------------------------------------------------------------------------- |
-| Produkt                  | Überdachte Lounge, Weihnachtsmarkt im Schlosspark Detmold, bis 10 Personen, 2 h exklusiv                 |
-| Preis                    | Preisstaffel je Wochentag/Zeitfenster, Endpreise inkl. 5 % Gebühr: 104 € / 156 € / 209 € (siehe 1a)      |
-| Zeitfenster              | Mo–Do und So 14:30, 16:45, 19:00 · Fr–Sa 15:30, 17:45, 20:00, je 2 h (Europe/Berlin)                     |
-| Buchungsschluss online   | 60 min vor Beginn (`settings.booking_cutoff_minutes`)                                                    |
-| Reservierung im Checkout | 30 min (`settings.hold_minutes`)                                                                         |
-| Stornierung              | Keine durch Gäste. Admin kann stornieren, Erstattung manuell in Stripe                                   |
-| Zahlung                  | Stripe Checkout (MF Coaching & Promotion GmbH): Karte, Apple Pay, Google Pay, PayPal                     |
-| Rabattcodes              | Keine                                                                                                    |
-| Rechnung                 | Automatisch über Stripe bei Firmenname oder Rechnungswunsch, optional USt-ID                             |
-| Ticket                   | Ein QR-Code pro Buchung, Mail mit PDF-Anhang direkt nach Zahlung, Erinnerung am Buchungstag 10:00 Uhr    |
-| Übertragbarkeit          | Ja, ohne Namensprüfung                                                                                   |
-| Team-Benachrichtigung    | Keine Mail (Admin + Scanner-Liste „Heute“)                                                               |
-| Newsletter               | Freiwillige Checkbox + Brevo-Double-Opt-in                                                               |
-| Tracking                 | Cookielos: page_view, book_click, Buchungen                                                              |
-| Zugänge                  | studio_admin (2FA Pflicht), haendler (2FA optional), Scanner (PIN)                                       |
-| Backend                  | Ein Supabase-Projekt (Frankfurt) für Test und Live                                                       |
-| Hosting                  | Vorschau Cloudflare Pages · Live Strato, Subdomain z. B. `buchen.weihnachtsmarkt-detmold.de` (STRATO.md) |
-| Datenhaltung             | Anonymisierung der Kontaktdaten zum 31. März nach der Saison                                             |
+| Thema                    | Festlegung                                                                                                        |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| Produkt                  | Überdachte Lounge, Weihnachtsmarkt im Schlosspark Detmold, bis 10 Personen, 2 h exklusiv                          |
+| Preis                    | Preisstaffel je Wochentag/Zeitfenster, Endpreise inkl. 5 % Gebühr: 104 € / 156 € / 209 € (siehe 1a)               |
+| Zeitfenster              | Mo–Do und So 14:30, 16:45, 19:00 · Fr–Sa 15:30, 17:45, 20:00, je 2 h (Europe/Berlin)                              |
+| Buchungsschluss online   | 60 min vor Beginn (`settings.booking_cutoff_minutes`)                                                             |
+| Reservierung im Checkout | 30 min (`settings.hold_minutes`)                                                                                  |
+| Stornierung              | Keine durch Gäste. Admin kann stornieren, Erstattung manuell in Stripe                                            |
+| Zahlung                  | Stripe Checkout (MF Coaching & Promotion GmbH): Karte, Apple Pay, Google Pay, PayPal                              |
+| Rabattcodes              | Keine                                                                                                             |
+| Rechnung                 | Automatisch über Stripe bei Firmenname oder Rechnungswunsch, optional USt-ID                                      |
+| Ticket                   | Ein QR-Code pro Buchung, Mail mit PDF-Anhang direkt nach Zahlung, Erinnerung am Buchungstag 10:00 Uhr             |
+| Übertragbarkeit          | Ja, ohne Namensprüfung                                                                                            |
+| Team-Benachrichtigung    | Keine Mail (Admin + Scanner-Liste „Heute“)                                                                        |
+| Newsletter               | Freiwillige Checkbox + Brevo-Double-Opt-in                                                                        |
+| Tracking                 | Cookielos: page_view, book_click, Buchungen                                                                       |
+| Zugänge                  | studio_admin (2FA Pflicht), haendler (2FA optional), Scanner (PIN)                                                |
+| Backend                  | Ein Supabase-Projekt (Frankfurt) für Test und Live                                                                |
+| Hosting                  | Vorschau Cloudflare Pages · Live Mittwald mStudio, Subdomain z. B. `weihnachtslounge.studio-f.club` (MITTWALD.md) |
+| Datenhaltung             | Anonymisierung der Kontaktdaten zum 31. März nach der Saison                                                      |
 
 ### 1a. Preisstaffel (Änderung 05.10.2026, Vorschlag Oliver, freigegeben von Louis)
 
@@ -114,7 +114,7 @@ pg_cron (alle 5 min) ──▶ expire_stale_holds()
 
 ### Umgebungsvariablen
 
-Frontend (`.env.local`, Cloudflare Pages, GitHub-Variablen für den Strato-Build):
+Frontend (`.env.local`, Cloudflare Pages, GitHub-Variablen für den Mittwald-Build):
 `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_PUBLIC_SITE_URL`, `VITE_NOINDEX` (true in Vorschau)
 
 GitHub-Secrets: `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_REF`, `SUPABASE_DB_PASSWORD`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `STRIPE_TEST_SECRET_KEY` (nur für E2E)
@@ -544,7 +544,7 @@ Login, MFA, alle Admin-Seiten (4.7), Tagesliste-PDF, Anonymisierung.
 **Umsetzungsdetails (Phase 8):**
 
 - Rechtstexte als Entwürfe (`src/pages/legal/`), gemeinsame Firmendaten in `supabase/functions/_shared/legal.ts` (auch für Mail und PDF). Deutlicher Vermerk „Entwurf – noch nicht freigegeben“.
-- `robots.txt`, `sitemap.xml`, `.htaccess` (Strato-Unterordner: `RewriteBase`, SPA-Fallback, HTTPS, CSP und weitere Sicherheits-Header, Caching, `X-Robots-Tag` für interne Bereiche) und `_headers` (Cloudflare) entstehen beim Build (`scripts/siteFiles.ts`). Ohne `VITE_NOINDEX=false` sperrt `robots.txt` alles.
+- `robots.txt`, `sitemap.xml`, `.htaccess` (Mittwald/Apache, ggf. Unterordner: `RewriteBase`, SPA-Fallback, HTTPS, CSP und weitere Sicherheits-Header, Caching, `X-Robots-Tag` für interne Bereiche) und `_headers` (Cloudflare) entstehen beim Build (`scripts/siteFiles.ts`). Ohne `VITE_NOINDEX=false` sperrt `robots.txt` alles.
 - schema.org Product/Offer zur Laufzeit aus den Einstellungen (Gesamtpreis, kein fester Betrag).
 - Öffentliche Seite ohne supabase-js (schlanker `fetch`-Helfer `src/lib/rest.ts`), Kontaktformular nachgeladen: Haupt-Bundle 637 → 433 KB (gzip 197 → 146 KB). Hero-Foto als AVIF mit WebP-Rückfall.
 - Fehlerseite für unerwartete Fehler und veraltete Bundles nach einem Update („Seite neu laden“).
@@ -567,7 +567,7 @@ Login, MFA, alle Admin-Seiten (4.7), Tagesliste-PDF, Anonymisierung.
 ## 7. Datenschutz-Eckpunkte (für Entwurf)
 
 - Verantwortlicher: MF Coaching & Promotion GmbH (betreibt auch STUDIO/F).
-- Auftragsverarbeiter: Supabase (EU, Frankfurt), Stripe, Brevo, Hosting [Strato – Vertragspartner klären], Vorschau Cloudflare (nur Test).
+- Auftragsverarbeiter: Supabase (EU, Frankfurt), Stripe, Brevo, Hosting [Mittwald – Vertragspartner und AV-Vertrag klären], Vorschau Cloudflare (nur Test).
 - Weitergabe an Werbegemeinschaft Detmold e. V.: Name, Firma, Personenzahl, Check-in-Status zur Durchführung und Abrechnung.
 - Tracking ohne Cookies und ohne personenbezogene Daten.
 - Speicherdauer: Kontaktdaten bis 31. März nach der Saison, danach anonymisiert. Rechnungsdaten in Stripe gemäß gesetzlicher Aufbewahrung.

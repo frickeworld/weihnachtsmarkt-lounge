@@ -32,7 +32,7 @@ export function basePath(siteUrl: string): string {
 /**
  * robots.txt. Suchmaschinen lesen sie nur im Hauptverzeichnis der Domain – liegt die Seite in
  * einem Unterordner (z. B. /lounge neben WordPress), müssen diese Zeilen in die robots.txt der
- * Hauptseite übernommen werden (docs/STRATO.md). noindex-Header und -Meta wirken trotzdem.
+ * Hauptseite übernommen werden (docs/MITTWALD.md). noindex-Header und -Meta wirken trotzdem.
  */
 export function robotsTxt(siteUrl: string, noindex: boolean): string {
   const prefix = basePath(siteUrl).replace(/\/$/, '');
@@ -76,7 +76,7 @@ export function contentSecurityPolicy(supabaseUrl: string): string {
 }
 
 /**
- * Apache (Strato, Unterordner neben WordPress): SPA-Fallback, Caching, Sicherheits-Header,
+ * Apache (Mittwald, Subdomain oder Unterordner neben einer anderen Seite): SPA-Fallback, Caching, Sicherheits-Header,
  * noindex für interne Bereiche. Liegt im Ordner der Seite und gilt nur dort – die Regeln von
  * WordPress im Hauptverzeichnis greifen für diesen Ordner nicht.
  * HSTS nur, wenn die Seite die ganze Domain hat (im Unterordner entscheidet die Hauptseite).

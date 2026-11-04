@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { mockSupabase } from './support/mockSupabase';
 
 // Live liegt die Seite im Unterordner /lounge neben der WordPress-Seite des Weihnachtsmarkts.
-// LOUNGE_BASE_URL erlaubt denselben Test gegen einen echten Apache (docs/STRATO.md).
+// LOUNGE_BASE_URL erlaubt denselben Test gegen einen echten Apache (docs/MITTWALD.md).
 const BASE = (process.env.LOUNGE_BASE_URL ?? 'http://127.0.0.1:4174/lounge').replace(/\/$/, '');
 const PATH = new URL(BASE).pathname;
 

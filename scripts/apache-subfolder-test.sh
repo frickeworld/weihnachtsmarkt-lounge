@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Prüft den Live-Aufbau bei Strato: WordPress im Hauptverzeichnis, die Lounge im Unterordner
+# Prüft den Aufbau mit Unterordner neben einer anderen Seite (Apache wie bei Mittwald/Strato): WordPress im Hauptverzeichnis, die Lounge im Unterordner
 # /lounge mit eigener .htaccess. Startet einen echten Apache (Docker) und fragt Adressen ab.
 # Aufruf: bash scripts/apache-subfolder-test.sh
 set -euo pipefail
