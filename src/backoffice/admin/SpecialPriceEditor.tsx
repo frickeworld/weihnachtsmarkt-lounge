@@ -181,8 +181,8 @@ export function SpecialPriceEditor({
             </label>
           </div>
           <p className="text-xs text-ink-soft">
-            Preis inkl. {feeLabel(fee)} Verarbeitungsgebühr. Händler-Anteil leer lassen =
-            Freiverzehr + Hälfte des Rests.
+            Preis inkl. {feeLabel(fee)} Verarbeitungsgebühr. Händler-Anteil leer lassen = 72 % vom
+            Lounge-Preis (mindestens der Freiverzehr).
             {booked && ' Die bestehende Buchung behält ihren Preis.'}
           </p>
           <div className="flex flex-wrap gap-2">

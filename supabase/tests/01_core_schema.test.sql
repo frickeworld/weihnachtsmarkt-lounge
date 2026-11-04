@@ -43,8 +43,8 @@ select '11111111-1111-1111-1111-111111111111', d, '16:45', '18:45', 'paid', 'Ann
 select results_eq(
   $$select price_cents, fee_cents, taler_cents, haendler_share_cents, amount_total_cents
       from public.bookings where id = '11111111-1111-1111-1111-111111111111'$$,
-  $$values (14900, 745, 7500, 11200, 15645)$$,
-  'Montag 16:45: 156,45 € inkl. 7,45 € Gebühr (5 %), 75 € Freiverzehr, Händler 75 € + ½ × 74 € = 112 €'
+  $$values (14900, 745, 7500, 10728, 15645)$$,
+  'Montag 16:45: 156,45 € inkl. 7,45 € Gebühr (5 %), 75 € Freiverzehr, Händler 72 % von 149 € = 107,28 €'
 );
 select matches(
   (select booking_code from public.bookings where id = '11111111-1111-1111-1111-111111111111'),

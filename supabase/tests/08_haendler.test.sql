@@ -14,7 +14,7 @@ insert into public.user_roles (user_id, role) values
 insert into auth.mfa_factors (id, user_id, friendly_name, factor_type, status, created_at, updated_at)
 values (gen_random_uuid(), '00000000-0000-0000-0000-0000000000c7', 'App', 'totp', 'verified', now(), now());
 
--- Rechenprobe (Freitag 05.12.2025, Abend = 208,95 € inkl. 9,95 € Gebühr, Händler 100 € + ½ × 99 € = 149,50 €):
+-- Rechenprobe (Freitag 05.12.2025, Abend = 208,95 € inkl. 9,95 € Gebühr, Händler 72 % von 199 € = 143,28 €):
 -- erschienen, nicht erschienen, storniert + kostenlose
 insert into public.bookings (id, date, start_time, end_time, status, first_name, last_name, email, phone, persons, notes, vat_id, billing_street, paid_at, checked_in_at)
 values
@@ -43,7 +43,7 @@ select lives_ok($$select public.haendler_dashboard('2025-12-01', '2025-12-07')$$
 set local request.jwt.claims = '{"sub":"00000000-0000-0000-0000-0000000000b7","role":"authenticated","aal":"aal1"}';
 create temp table s as select public.settlement('2025-12-01', '2025-12-07') as j;
 select is((select (j ->> 'count')::int from s), 2, 'zwei Buchungen in der Abrechnung (erschienen + nicht erschienen)');
-select is((select (j ->> 'haendler_cents')::int from s), 29900, 'Rechenprobe: 2 × 149,50 € = 299,00 €');
+select is((select (j ->> 'haendler_cents')::int from s), 28656, 'Rechenprobe: 2 × 143,28 € = 286,56 €');
 select is((select j ->> 'revenue_cents' from s), null, 'Händler sieht keinen Gesamtumsatz');
 select is((select j ->> 'studio_cents' from s), null, 'Händler sieht keinen Studio-F-Anteil');
 select is((select (j ->> 'no_shows')::int from s), 1, '1 × nicht erschienen (zählt trotzdem)');
@@ -61,7 +61,7 @@ select is((select count(*)::int from public.bookings), 0, 'Händler liest die Ta
 select throws_ok($$select public.admin_dashboard('2025-12-01', '2025-12-07')$$, '42501', null, 'Händler kommt nicht an Admin-Funktionen');
 
 create temp table d as select public.haendler_dashboard('2025-12-01', '2025-12-07') as j;
-select is((select (j ->> 'haendler_cents')::int from d), 29900, 'Kennzahl „Euer Anteil“ = 299,00 €');
+select is((select (j ->> 'haendler_cents')::int from d), 28656, 'Kennzahl „Euer Anteil“ = 286,56 €');
 select ok((select not (j ? 'studio_cents') and not (j ? 'revenue_cents') from d), 'Kennzahlen ohne Umsatz/Studio-F-Anteil');
 select results_eq($$select weekday, start_time, booked, revenue_cents from public.occupancy_heatmap('2025-12-01', '2025-12-07') where booked > 0$$,
   $$values (5::smallint, '17:45'::time, 1, null::bigint), (5::smallint, '20:00'::time, 1, null::bigint), (7::smallint, '14:30'::time, 1, null::bigint)$$,
@@ -69,7 +69,7 @@ select results_eq($$select weekday, start_time, booked, revenue_cents from publi
 
 -- ---------- Admin ----------
 set local request.jwt.claims = '{"sub":"00000000-0000-0000-0000-0000000000a7","role":"authenticated","aal":"aal2"}';
-select is((public.settlement('2025-12-01', '2025-12-07') ->> 'studio_cents')::int, 2 * 20895 - 29900, 'Admin sieht Studio-F-Anteil (2 × 59,45 €)');
+select is((public.settlement('2025-12-01', '2025-12-07') ->> 'studio_cents')::int, 2 * 20895 - 28656, 'Admin sieht Studio-F-Anteil (2 × 65,67 €)');
 select is((select sum(revenue_cents)::int from public.occupancy_heatmap('2025-12-01', '2025-12-07')), 2 * 20895, 'Admin sieht Umsatz je Zeitfenster');
 
 reset role;

@@ -47,8 +47,8 @@ values ('LOUNGE-TEST30', 'trostpreis', 30, array[1, 2, 3, 4]::smallint[], '2026-
 select results_eq(
   $$select reason, total_cents, discount_cents, fee_cents, price_cents, taler_cents, haendler_share_cents
       from public.discount_pricing('lounge-test30', '2026-12-01', '16:45')$$,
-  $$values (null::text, 10951, 4694, 745, 10206, 7500, 8853)$$,
-  '30 %: 109,51 €, Händler 88,53 €, Studio F 20,98 €');
+  $$values (null::text, 10951, 4694, 745, 10206, 7500, 7500)$$,
+  '30 %: 109,51 €, Händler mindestens Freiverzehr 75 € (72 % von 102,06 € = 73,48 €)');
 select is((select reason from public.discount_pricing('LOUNGE-TEST30', '2026-12-04', '20:00')), 'weekday',
   'Trostpreis-Code nicht am Freitag');
 select results_eq(

@@ -303,7 +303,7 @@ Deno.test({
           amount_total_cents: 11734, // 156,45 € − 25 % (39,11 €)
           discount_cents: 3911,
           taler_cents: 7500,
-          haendler_share_cents: 9244, // 75 € + (117,34 € − 7,45 € − 75 €) / 2
+          haendler_share_cents: 7912, // 72 % von 109,89 € (117,34 € − 7,45 € Gebühr)
           discount_code: loserCode,
         });
         const again = await post(FN.checkout, {

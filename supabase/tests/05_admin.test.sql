@@ -52,8 +52,8 @@ create temp table k as select public.admin_dashboard('2026-12-01', '2026-12-07')
 select is((select (j ->> 'paid_bookings')::int from k), 3, '3 bezahlte Buchungen (Storno zählt nicht)');
 -- Di 14:30 = 103,95 € inkl. 4,95 € Gebühr (Händler 50 € + ½ × 49 € = 74,50 €), Di 16:45 = 156,45 € inkl. 7,45 € (75 € + ½ × 74 € = 112 €)
 select is((select (j ->> 'revenue_cents')::int from k), 10395 + 15645, 'Umsatz brutto 103,95 € + 156,45 € (kostenlose = 0)');
-select is((select (j ->> 'haendler_cents')::int from k), 7450 + 11200, 'Händler: 74,50 € + 112 € = 186,50 € (kostenlose nicht in Abrechnung)');
-select is((select (j ->> 'studio_cents')::int from k), 10395 + 15645 - 18650, 'Studio-F-Anteil = Umsatz − Händler');
+select is((select (j ->> 'haendler_cents')::int from k), 7128 + 10728, 'Händler: 71,28 € + 107,28 € = 178,56 € (72 % vom Lounge-Preis, kostenlose nicht in Abrechnung)');
+select is((select (j ->> 'studio_cents')::int from k), 10395 + 15645 - 17856, 'Studio-F-Anteil = Umsatz − Händler');
 select is((select (j ->> 'available_slots')::int from k), 21, 'je 3 Zeitfenster pro Tag verfügbar');
 select is((select (j ->> 'page_views')::int from k), 2, '2 Seitenaufrufe');
 select is((select (j ->> 'book_clicks')::int from k), 1, '1 Klick');

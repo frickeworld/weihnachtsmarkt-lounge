@@ -103,9 +103,9 @@ export function SlotTemplatesPanel({ fee }: { fee: FeeRule }) {
     <Panel title="Zeitfenster und Preise">
       <p className="mb-4 text-sm text-ink-soft">
         Preis = Endpreis für den Gast inkl. {feeLabel(fee)} Verarbeitungsgebühr. Der Händler-Anteil
-        ergibt sich automatisch (Freiverzehr + Hälfte des Rests), kann aber fest eingetragen werden.
-        Änderungen gelten nur für neue Buchungen. Sonderpreise für einzelne Termine legst du im
-        Kalender fest.
+        ergibt sich automatisch (72 % vom Lounge-Preis, mindestens der Freiverzehr), kann aber fest
+        eingetragen werden. Änderungen gelten nur für neue Buchungen. Sonderpreise für einzelne
+        Termine legst du im Kalender fest.
       </p>
       <label className="mb-3 flex min-h-11 items-center gap-3 text-sm">
         <input

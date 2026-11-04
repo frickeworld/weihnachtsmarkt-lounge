@@ -65,16 +65,21 @@ Einstellungen → „Zeitfenster und Preise“ (Prozentsatz unter „Saison, Pre
 - **Änderung 27.10.2026 (Louis):** Mo–Do-Nachmittag 14:30–16:30 wieder im Angebot, 99 € inkl. 50 € Freiverzehr (Migration `20261027090000_weekday_afternoon_again`). Der günstigste Preis ist damit wieder 99 €.
 - Website: „ab“ günstigstem Lounge-Preis (derzeit 99 € zzgl. 5 %) plus Preisübersicht; im Kalender steht der genaue Preis je Zeitfenster.
 
-### Geldverteilung pro Buchung (Beispiel 208,95 €, Gebühr genau 5 % seit 04.11.2026)
+### Geldverteilung pro Buchung (Beispiel 208,95 €; Aufteilung 72/28 seit 04.11.2026)
 
-| Posten                      | Betrag       | Geht an                            |
-| --------------------------- | ------------ | ---------------------------------- |
-| Gast zahlt gesamt           | 208,95 €     | –                                  |
-| Verarbeitungsgebühr (5 %)   | 9,95 €       | Studio F                           |
-| Residenztaler (Freiverzehr) | 100,00 €     | Händler                            |
-| Hälfte Rest (99,00 €)       | 49,50 €      | Händler                            |
-| Andere Hälfte Rest          | 49,50 €      | Studio F                           |
-| **Händler gesamt**          | **149,50 €** | auch bei No-Show, nicht bei Storno |
+| Posten                    | Betrag       | Geht an                                         |
+| ------------------------- | ------------ | ----------------------------------------------- |
+| Gast zahlt gesamt         | 208,95 €     | –                                               |
+| Verarbeitungsgebühr (5 %) | 9,95 €       | Studio F                                        |
+| Lounge-Preis              | 199,00 €     | –                                               |
+| 28 % vom Lounge-Preis     | 55,72 €      | Studio F (`settings.studio_share_percent`)      |
+| 72 % vom Lounge-Preis     | 143,28 €     | Händler – darin der volle Freiverzehr von 100 € |
+| **Händler gesamt**        | **143,28 €** | auch bei No-Show, nicht bei Storno              |
+| **Studio F gesamt**       | **65,67 €**  | 28 % + Gebühr                                   |
+
+Händler-Anteile je Preisstufe: 71,28 € (99 €) · 107,28 € (149 €) · 143,28 € (199 €) · 136,08 € (Party
+189 €) · 215,28 € (Heiligabend 299 €). Nie weniger als der Freiverzehr. Die Händler rechnen im Januar
+per Rechnung ab; ihr Bereich zeigt den Anteil live.
 
 ---
 
@@ -417,8 +422,8 @@ Alle Admin-Aktionen serverseitig mit `is_admin_aal2()` geprüft.
   Gewinnspiel-Band mit Countdown, laufende Gold-Leiste „Lounge gewinnen“ ganz oben, Geschenk-Symbol in
   der Kopfzeile (bei reduzierter Bewegung ohne Animation).
 - **Einlösen**: Feld „Gewinnspiel-Code“ im Buchungsformular (oder Link `/?code=…#buchen`).
-  `discount_pricing()` rechnet: Freiverzehr bleibt voll, Rest halbiert (156,45 € → 109,51 €, Händler
-  88,53 €, Studio F 20,98 €). 100 %: Buchung ohne Stripe sofort bezahlt (`payment_method =
+  `discount_pricing()` rechnet: Freiverzehr bleibt voll, Händler bekommen 72 % vom rabattierten
+  Lounge-Preis, mindestens den Freiverzehr (25 %: 156,45 € → 117,34 €, Händler 79,12 €). 100 %: Buchung ohne Stripe sofort bezahlt (`payment_method =
 'kostenlos'`, `include_in_settlement = true`, Betrag 0 €, Händler-Anteil = halber Freiverzehr).
   Ein Code ist nur einmal gültig (partieller Unique-Index wie beim Zeitfenster).
 - **Datenpflege** nach der Saison anonymisiert auch alle Teilnahmen.

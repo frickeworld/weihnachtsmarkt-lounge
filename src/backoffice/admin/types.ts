@@ -94,6 +94,7 @@ export interface AdminSettings {
   fee_cents: number;
   /** Verkaufsgebühr in Prozent (null = fee_cents fest) */
   fee_percent: number | string | null;
+  studio_share_percent?: number | string | null;
   taler_count: number;
   taler_cents: number;
   haendler_share_cents: number;
@@ -115,7 +116,7 @@ export interface SlotTemplate {
   /** Endpreis inkl. Verarbeitungsgebühr; null = Standardpreis aus den Einstellungen */
   price_cents: number | null;
   taler_count: number | null;
-  /** null = automatisch (Freiverzehr + Hälfte des Rests) */
+  /** null = automatisch (72 % vom Lounge-Preis, mindestens der Freiverzehr) */
   haendler_share_cents: number | null;
   label: string | null;
 }

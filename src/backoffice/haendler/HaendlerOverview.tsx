@@ -75,7 +75,7 @@ export function HaendlerOverview() {
             <Kpi
               label="Euer Anteil"
               value={formatCents(d.haendler_cents)}
-              sub="Freiverzehr + Hälfte des Rests je bezahlter Buchung"
+              sub="72 % vom Lounge-Preis je bezahlter Buchung, darin der volle Freiverzehr"
             />
             <Kpi label="Residenztaler übergeben" value={d.taler_handed_out} />
             <Kpi label="Seitenaufrufe" value={d.page_views} />

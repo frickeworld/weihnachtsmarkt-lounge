@@ -10,13 +10,13 @@ select extract(isodow from d)::int wd, to_char(p_start, 'HH24:MI') st, p.*
        lateral public.slot_pricing(v.d, v.p_start) p;
 
 select results_eq($$select total_cents, taler_count, haendler_share_cents from pr where wd = 1 and st = '14:30'$$,
-  $$values (10395, 50, 7450)$$, 'Mo–Do Nachmittag: 103,95 € (99 € + 5 %) inkl. 50 €, Händler 74,50 €');
+  $$values (10395, 50, 7128)$$, 'Mo–Do Nachmittag: 103,95 € (99 € + 5 %) inkl. 50 €, Händler 72 % = 71,28 €');
 select results_eq($$select total_cents, taler_count, haendler_share_cents from pr where wd = 1 and st = '19:00'$$,
-  $$values (15645, 75, 11200)$$, 'Mo–Do Abend: 156,45 € (149 € + 5 %) inkl. 75 €, Händler 112 €');
+  $$values (15645, 75, 10728)$$, 'Mo–Do Abend: 156,45 € (149 € + 5 %) inkl. 75 €, Händler 107,28 €');
 select results_eq($$select total_cents, taler_count from pr where wd = 5 and st = '15:30'$$,
   $$values (15645, 75)$$, 'Fr Nachmittag: 156,45 € inkl. 75 €');
 select results_eq($$select total_cents, taler_count, haendler_share_cents from pr where wd = 5 and st = '20:00'$$,
-  $$values (20895, 100, 14950)$$, 'Fr/Sa Abend: 208,95 € (199 € + 5 %) inkl. 100 €, Händler 149,50 €');
+  $$values (20895, 100, 14328)$$, 'Fr/Sa Abend: 208,95 € (199 € + 5 %) inkl. 100 €, Händler 143,28 €');
 select results_eq($$select total_cents, taler_count from pr where wd = 7 and st = '14:30'$$,
   $$values (15645, 75)$$, 'So Nachmittag: 156,45 € inkl. 75 €');
 select results_eq($$select total_cents, taler_count from pr where wd = 7 and st = '16:45'$$,
@@ -27,7 +27,7 @@ select results_eq($$select total_cents, taler_count from pr where wd = 7 and st 
 insert into public.slot_specials (date, start_time, title, price_cents, taler_count)
 values ('2026-12-05', '20:00', 'Party-Abend', 24900, 125);
 select results_eq($$select total_cents, taler_count, haendler_share_cents, special_title from public.slot_pricing('2026-12-05', '20:00')$$,
-  $$values (24900, 125, 12500 + (24900 - 1200 - 12500) / 2, 'Party-Abend'::text)$$, 'Sondertermin überschreibt die Vorlage');
+  $$values (24900, 125, (24900 - 1200) * 72 / 100, 'Party-Abend'::text)$$, 'Sondertermin überschreibt die Vorlage');
 -- Händler-Anteil fest vorgegeben
 update public.slot_specials set haendler_share_cents = 15000 where date = '2026-12-05';
 select is((select haendler_share_cents from public.slot_pricing('2026-12-05', '20:00')), 15000, 'Händler-Anteil am Sondertermin überschreibbar');

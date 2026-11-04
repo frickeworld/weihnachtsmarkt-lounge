@@ -12,7 +12,7 @@ import type { AdminSettings } from './types';
 import { unwrap, useLoad } from './useLoad';
 
 const SETTINGS_COLUMNS =
-  'season_start, season_end, price_cents, fee_cents, fee_percent, taler_count, taler_cents, haendler_share_cents, max_persons, booking_cutoff_minutes, hold_minutes, checkin_early_minutes, contact_email, lounge_location, updated_at';
+  'season_start, season_end, price_cents, fee_cents, fee_percent, studio_share_percent, taler_count, taler_cents, haendler_share_cents, max_persons, booking_cutoff_minutes, hold_minutes, checkin_early_minutes, contact_email, lounge_location, updated_at';
 
 export function SettingsPage() {
   const s = useLoad(
@@ -46,6 +46,7 @@ type Draft = Record<
   | 'price'
   | 'fee'
   | 'fee_percent'
+  | 'studio_percent'
   | 'taler_count'
   | 'taler'
   | 'haendler'
@@ -65,6 +66,7 @@ function SettingsForm({ initial, onSaved }: { initial: AdminSettings; onSaved: (
     price: centsToEuroInput(initial.price_cents),
     fee: centsToEuroInput(initial.fee_cents),
     fee_percent: initial.fee_percent == null ? '' : String(initial.fee_percent).replace('.', ','),
+    studio_percent: String(initial.studio_share_percent ?? 28).replace('.', ','),
     taler_count: String(initial.taler_count),
     taler: centsToEuroInput(initial.taler_cents),
     haendler: centsToEuroInput(initial.haendler_share_cents),
@@ -87,6 +89,7 @@ function SettingsForm({ initial, onSaved }: { initial: AdminSettings; onSaved: (
     fee !== initial.fee_cents ||
     v.fee_percent !==
       (initial.fee_percent == null ? '' : String(initial.fee_percent).replace('.', ',')) ||
+    v.studio_percent !== String(initial.studio_share_percent ?? 28).replace('.', ',') ||
     parseEuroToCents(v.haendler) !== initial.haendler_share_cents;
 
   const validate = (): string | Record<string, unknown> => {
@@ -110,6 +113,14 @@ function SettingsForm({ initial, onSaved }: { initial: AdminSettings; onSaved: (
     const pct = v.fee_percent.trim() === '' ? null : Number(v.fee_percent.replace(',', '.'));
     if (pct !== null && (Number.isNaN(pct) || pct < 0 || pct > 30))
       return 'Verkaufsgebühr in Prozent: 0 bis 30 (leer = fester Betrag).';
+    const studioPct = Number(v.studio_percent.replace(',', '.'));
+    if (
+      v.studio_percent.trim() === '' ||
+      Number.isNaN(studioPct) ||
+      studioPct < 0 ||
+      studioPct > 100
+    )
+      return 'Anteil STUDIO/F in Prozent: 0 bis 100.';
     if (!v.season_start || !v.season_end || v.season_start > v.season_end)
       return 'Das Saisonende muss nach dem Saisonstart liegen.';
     if (cents.price! <= 0) return 'Der Preis muss größer als 0 sein.';
@@ -126,6 +137,7 @@ function SettingsForm({ initial, onSaved }: { initial: AdminSettings; onSaved: (
       price_cents: cents.price,
       fee_cents: cents.fee,
       fee_percent: pct,
+      studio_share_percent: studioPct,
       taler_count: n.taler_count,
       taler_cents: cents.taler,
       haendler_share_cents: cents.haendler,
@@ -190,6 +202,10 @@ function SettingsForm({ initial, onSaved }: { initial: AdminSettings; onSaved: (
             hint: 'Endpreis = Lounge-Preis + Prozent, genau auf den Cent. Leer = fester Betrag.',
           })}
           {input('fee', 'Feste Verarbeitungsgebühr (nur ohne Prozentsatz)', { suffix: '€' })}
+          {input('studio_percent', 'Anteil STUDIO/F am Lounge-Preis', {
+            suffix: '%',
+            hint: 'Händler bekommen den Rest (mindestens den Freiverzehr), STUDIO/F zusätzlich die Gebühr. Gilt für neue Buchungen.',
+          })}
           {input('haendler', 'Standard: Anteil Händler', { suffix: '€' })}
           {input('taler_count', 'Standard: Anzahl Residenztaler', { suffix: 'Stk.' })}
           {input('taler', 'Standard: Wert der Taler', { suffix: '€' })}
