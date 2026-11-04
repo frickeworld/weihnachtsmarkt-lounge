@@ -88,6 +88,8 @@ export interface MockOptions {
   successToken?: string | null;
   /** Eingerichtete Wallets (ticket-files?format=info). */
   wallet?: { apple: boolean; google: boolean };
+  /** Antwort von get_market_program (Wochenend-Programm). */
+  marketProgram?: Record<string, unknown>[];
   /** Antwort von get_special_events („Besondere Termine“). */
   specialEvents?: Record<string, unknown>[];
   /** Antwort von get_scarcity (Standard: viel frei, kein Hinweis). */
@@ -187,6 +189,9 @@ export async function mockSupabase(page: Page, opts: MockOptions = {}) {
         discount_percent: 25,
       },
     }),
+  );
+  await page.route('**/rest/v1/rpc/get_market_program*', (route) =>
+    route.fulfill({ json: opts.marketProgram ?? [] }),
   );
   await page.route('**/rest/v1/rpc/next_giveaway_draw*', (route) =>
     route.fulfill({

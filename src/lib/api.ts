@@ -3,7 +3,13 @@ import { isoWeekday, type IsoDate } from './dates';
 import type { Scarcity } from './scarcity';
 import type { PublicSettings } from './settings';
 import { DEMO } from './demo';
-import { DEMO_TICKET_TOKEN, demoAvailability, demoSettings, demoSpecialEvents } from './demoApi';
+import {
+  DEMO_TICKET_TOKEN,
+  demoAvailability,
+  demoMarketProgram,
+  demoSettings,
+  demoSpecialEvents,
+} from './demoApi';
 import { env } from './env';
 import { restConfigured, rpc } from './rest';
 
@@ -431,6 +437,40 @@ export async function fetchSpecialEvents(): Promise<SpecialEvent[]> {
     totalCents: r.total_cents,
     talerCount: r.taler_count,
     status: r.status,
+  }));
+}
+
+export interface ProgramItem {
+  date: IsoDate;
+  startTime: string;
+  endTime: string | null;
+  title: string;
+  description: string | null;
+  location: string | null;
+}
+
+/** Kommendes Programm des Weihnachtsmarkts (Fr/Sa-Acts) – reine Anzeige, ohne Preise. */
+export async function fetchMarketProgram(): Promise<ProgramItem[]> {
+  if (DEMO) return demoMarketProgram();
+  if (!restConfigured()) return [];
+  const rows =
+    (await rpc<
+      {
+        date: string;
+        start_time: string;
+        end_time: string | null;
+        title: string;
+        description: string | null;
+        location: string | null;
+      }[]
+    >('get_market_program').catch(() => null)) ?? [];
+  return rows.map((r) => ({
+    date: r.date,
+    startTime: r.start_time.slice(0, 5),
+    endTime: r.end_time ? r.end_time.slice(0, 5) : null,
+    title: r.title,
+    description: r.description,
+    location: r.location,
   }));
 }
 

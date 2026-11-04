@@ -256,6 +256,40 @@ test.describe('Besondere Termine', () => {
   });
 });
 
+test('Wochenend-Programm: Acts mit Lounge-Zeitfenstern und Lounge-Preisen des Abends', async ({
+  page,
+}) => {
+  let friday = addDays(MOCK_SETTINGS.season_start, 7);
+  while (new Date(`${friday}T00:00:00Z`).getUTCDay() !== 5) friday = addDays(friday, 1);
+  await mockSupabase(page, {
+    overrides: { [`${friday} 15:30`]: 'taken' },
+    marketProgram: [
+      {
+        date: friday,
+        start_time: '19:00:00',
+        end_time: null,
+        title: '4 Souls',
+        description: 'Soul, Pop, Rock & Schlager',
+        location: 'Winterbühne',
+      },
+    ],
+  });
+  await page.goto('/');
+  const section = page.locator('#besondere-abende');
+  await expect(section.getByRole('heading', { name: 'Live am Wochenende' })).toBeVisible();
+  await expect(section).toContainText('19:00 Uhr · 4 Souls');
+  await expect(section).toContainText('Soul, Pop, Rock & Schlager · Winterbühne');
+  // Fr: 15:30 (149 €, vergeben), 17:45 und 20:00 (199 €) – nur Lounge-Preise
+  await expect(section.getByRole('link', { name: /17:45 Uhr buchen$/ })).toHaveText(
+    '17:45 · 199 €',
+  );
+  await expect(
+    section.getByRole('link', { name: /15:30 Uhr ausgebucht – auf die Warteliste$/ }),
+  ).toHaveText('15:30 · 149 €');
+  await section.getByRole('link', { name: /20:00 Uhr buchen$/ }).click();
+  await expect(page.getByLabel('Zusammenfassung')).toContainText(/Lounge-Preis\s*199,00\s€/);
+});
+
 test('Saison ab Montag, 30.11.: Kalender startet im Dezember und zeigt den 30.11.', async ({
   page,
 }) => {
