@@ -35,7 +35,7 @@ jobs:
         with:
           version: 2.119.0
       - name: Lokale Datenbank starten und Migrations einspielen
-        run: supabase db start
+        run: scripts/ci-supabase-start.sh supabase db start
       - name: pgTAP-Tests
         run: supabase test db
 
@@ -57,7 +57,7 @@ jobs:
             deno check --config "$dir/deno.json" "$f"
           done
       - name: Lokales Supabase starten
-        run: supabase start -x studio,imgproxy,realtime,postgres-meta,edge-runtime,logflare,vector,supavisor
+        run: scripts/ci-supabase-start.sh supabase start -x studio,imgproxy,realtime,postgres-meta,edge-runtime,logflare,vector,supavisor
       - name: Integrationstest Checkout/Webhook/Ticket
         run: scripts/functions-integration.sh
 
