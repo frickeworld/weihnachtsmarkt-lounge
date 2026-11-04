@@ -19,13 +19,16 @@ interface DemoSpecial {
   talerCount: number;
 }
 
-/** Sondertermine der Vorschau – wie in der Migration 20261013091000_christmas_specials. */
+/**
+ * Sondertermine der Vorschau – wie live (Migrationen 20261013091000_christmas_specials und
+ * 20261104120000_fee_percent: Preise inkl. 5 % Gebühr).
+ */
 const PARTY: DemoSpecial = {
   title: 'Party-Abend',
   act: null,
   description:
     'An diesem Abend wird auf dem Weihnachtsmarkt gefeiert. Du erlebst die Party aus deiner eigenen überdachten Lounge – mit 100 € Freiverzehr und Tischservice.',
-  totalCents: 18900,
+  totalCents: 19800,
   talerCount: 100,
 };
 const HEILIGABEND: DemoSpecial = {
@@ -33,18 +36,20 @@ const HEILIGABEND: DemoSpecial = {
   act: null,
   description:
     'Nur einmal im Jahr: drei Stunden Lounge am Heiligabend-Vormittag, exklusiv für dich und deine Gäste – mit 150 € Freiverzehr und Tischservice. Der schönste Start in den Heiligabend.',
-  totalCents: 29900,
+  totalCents: 31400,
   talerCount: 150,
 };
 const PARTY_DAYS = ['2026-12-22', '2026-12-23', '2026-12-29', '2026-12-30'];
+/** Party nur abends; der Nachmittag bleibt ein normales Zeitfenster. */
+const PARTY_TIMES = ['16:45', '19:00'];
 const CLOSED_DAYS = ['2026-12-25', '2026-12-26'];
 /** Einmalige Zeitfenster, die die Vorlagen des Tages ersetzen. */
 const EXTRA_SLOTS: Record<IsoDate, { startTime: string; endTime: string; label: string }[]> = {
   '2026-12-24': [{ startTime: '10:00', endTime: '13:00', label: 'Vormittag' }],
 };
 
-function demoSpecial(date: IsoDate): DemoSpecial | undefined {
-  if (PARTY_DAYS.includes(date)) return PARTY;
+function demoSpecial(date: IsoDate, startTime: string): DemoSpecial | undefined {
+  if (PARTY_DAYS.includes(date) && PARTY_TIMES.includes(startTime)) return PARTY;
   if (date === '2026-12-24') return HEILIGABEND;
   return undefined;
 }
@@ -62,8 +67,8 @@ export async function demoAvailability(from: IsoDate, to: IsoDate): Promise<Slot
       totalCents?: number;
       talerCount?: number;
     }[] = EXTRA_SLOTS[d] ?? s.priceList.filter((t) => t.weekday === isoWeekday(d));
-    const special = demoSpecial(d);
     tiers.forEach(({ startTime, endTime, label, totalCents, talerCount }) => {
+      const special = demoSpecial(d, startTime);
       let status: SlotStatus = 'free';
       if (d < s.seasonStart || d > s.seasonEnd) status = 'out_of_season';
       else if (d < today) status = 'past';
@@ -91,7 +96,7 @@ export async function demoSpecialEvents(): Promise<SpecialEvent[]> {
   return slots
     .filter((x) => x.specialTitle && (x.status === 'free' || x.status === 'taken'))
     .map((x) => {
-      const d = demoSpecial(x.date)!;
+      const d = demoSpecial(x.date, x.startTime)!;
       return {
         date: x.date,
         startTime: x.startTime,
