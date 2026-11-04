@@ -127,23 +127,23 @@ Alle Tabellen im Schema `public`, **RLS aktiv**. Zeitstempel `timestamptz`, Date
 
 ### settings (genau eine Zeile, `id = 1`)
 
-| Spalte                 | Typ         | Start                    |
-| ---------------------- | ----------- | ------------------------ |
-| season_start           | date        | 2026-11-30               |
-| season_end             | date        | 2026-12-30               |
-| price_cents            | int         | 17500                    |
-| fee_cents              | int         | 350                      |
-| taler_count            | int         | 100                      |
-| taler_cents            | int         | 10000                    |
-| haendler_share_cents   | int         | 13750                    |
-| max_persons            | int         | 10                       |
-| booking_cutoff_minutes | int         | 60                       |
-| hold_minutes           | int         | 30                       |
-| checkin_early_minutes  | int         | 30                       |
-| contact_email          | text        | info@studio-f.club       |
-| scanner_pin_hash       | text        | null                     |
-| scanner_token_version  | int         | 1                        |
-| updated_at             | timestamptz | now()                    |
+| Spalte                 | Typ         | Start              |
+| ---------------------- | ----------- | ------------------ |
+| season_start           | date        | 2026-11-30         |
+| season_end             | date        | 2026-12-30         |
+| price_cents            | int         | 17500              |
+| fee_cents              | int         | 350                |
+| taler_count            | int         | 100                |
+| taler_cents            | int         | 10000              |
+| haendler_share_cents   | int         | 13750              |
+| max_persons            | int         | 10                 |
+| booking_cutoff_minutes | int         | 60                 |
+| hold_minutes           | int         | 30                 |
+| checkin_early_minutes  | int         | 30                 |
+| contact_email          | text        | info@studio-f.club |
+| scanner_pin_hash       | text        | null               |
+| scanner_token_version  | int         | 1                  |
+| updated_at             | timestamptz | now()              |
 
 Constraint: `haendler_share_cents <= price_cents`, `taler_cents <= price_cents`.
 
