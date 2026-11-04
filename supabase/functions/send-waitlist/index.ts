@@ -29,14 +29,21 @@ Deno.serve(async (req) => {
   const site = requireEnv('PUBLIC_SITE_URL').replace(/\/$/, '');
   const { data: s } = await db
     .from('settings')
-    .select('contact_email')
+    .select('contact_email, fee_percent, fee_cents')
     .eq('id', 1)
-    .single<{ contact_email: string }>();
+    .single<{ contact_email: string; fee_percent: number | string | null; fee_cents: number }>();
+  // Wie auf der Website nur den Lounge-Preis nennen; die Verarbeitungsgebühr kommt beim Bezahlen
+  // dazu (gleiche Regel wie slot_fee(): Lounge-Preis = Endpreis ÷ (1 + Prozent), volle Euro).
+  const feePercent = s?.fee_percent == null ? null : Number(s.fee_percent);
+  const loungeOf = (total: number) =>
+    feePercent == null
+      ? total - (s?.fee_cents ?? 0)
+      : Math.round(total / (1 + feePercent / 100) / 100) * 100;
 
   // Freie Zeitfenster je Tag einmal laden
   const freeByDate = new Map<
     string,
-    { startTime: string; endTime: string; totalCents: number }[]
+    { startTime: string; endTime: string; loungeCents: number }[]
   >();
   for (const date of new Set(entries.map((e) => e.date))) {
     const { data } = await db.rpc('get_availability_priced', { from_date: date, to_date: date });
@@ -54,7 +61,7 @@ Deno.serve(async (req) => {
         .map((r) => ({
           startTime: r.start_time.slice(0, 5),
           endTime: r.end_time.slice(0, 5),
-          totalCents: r.total_cents,
+          loungeCents: loungeOf(r.total_cents),
         })),
     );
   }
@@ -73,6 +80,7 @@ Deno.serve(async (req) => {
       slots,
       bookUrl: `${site}/?datum=${e.date}#buchen`,
       contactEmail: s?.contact_email ?? 'info@studio-f.club',
+      feeLabel: feePercent == null ? undefined : `${feePercent.toLocaleString('de-DE')} %`,
     });
     try {
       await sendTransactionalEmail({

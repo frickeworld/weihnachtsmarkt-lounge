@@ -121,7 +121,9 @@ Deno.test({
         const m = mails[0] as { to: { email: string }[]; subject: string; textContent: string };
         assertEquals(m.to[0]!.email, 'gast@example.de');
         assertMatch(m.subject, /^Wieder frei: Lounge am /);
-        assertMatch(m.textContent, /16:45–18:45 Uhr · 156 €/);
+        // Wie auf der Website nur der Lounge-Preis (156,45 € = 149 € + 5 %)
+        assertMatch(m.textContent, /16:45–18:45 Uhr · 149 €/);
+        assertMatch(m.textContent, /zzgl\. 5 % Verarbeitungsgebühr/);
         assertMatch(m.textContent, new RegExp(`/\\?datum=${day}#buchen`));
         const { count } = await db
           .from('waitlist')
