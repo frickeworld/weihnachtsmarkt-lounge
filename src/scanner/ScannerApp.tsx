@@ -1,3 +1,4 @@
+import { registerScannerShell } from './offlineShell';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { HaendlerLogo } from '@/components/HaendlerLogo';
 import { useNoindex } from '@/lib/useNoindex';
@@ -18,6 +19,7 @@ export default function ScannerApp() {
 
   useEffect(() => {
     document.title = 'Einlass – Weihnachtsmarkt-Lounge';
+    registerScannerShell();
   }, []);
 
   const logout = useCallback((message?: string) => {

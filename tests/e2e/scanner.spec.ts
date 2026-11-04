@@ -87,4 +87,39 @@ test.describe('Scanner', () => {
     expect(synced).toMatchObject({ code: 'HL-ABCD-EFGH', offline: true });
     expect(typeof synced?.scannedAt).toBe('string');
   });
+
+  test('ohne Netz neu geladen: Seite öffnet aus dem Speicher, Liste und Anmeldung bleiben', async ({
+    page,
+    context,
+  }) => {
+    const mock = newMock();
+    await mockScanner(page, mock);
+    await login(page);
+    await page.getByRole('button', { name: /Heute \(0\/1\)/ }).waitFor();
+    // Warten, bis der Scanner-Service-Worker die Seite und ihre Dateien gespeichert hat
+    await page.evaluate(() => navigator.serviceWorker.ready.then(() => undefined));
+    await expect
+      .poll(() =>
+        page.evaluate(async () => (await (await caches.open('scanner-v1')).keys()).length),
+      )
+      .toBeGreaterThan(3);
+
+    mock.offline = true;
+    await context.setOffline(true);
+    await page.reload();
+    await expect(page.getByRole('button', { name: /Heute \(0\/1\)/ })).toBeVisible();
+    await page.getByLabel('Buchungscode von Hand eingeben').fill('HL-ABCD-EFGH');
+    await page.getByRole('button', { name: 'Prüfen' }).click();
+    await expect(
+      page.getByRole('alertdialog').getByText('Offline geprüft – wird nachgetragen'),
+    ).toBeVisible();
+    await page.getByRole('button', { name: 'Weiter scannen' }).click();
+
+    await context.setOffline(false);
+    mock.offline = false;
+    await page.evaluate(() => window.dispatchEvent(new Event('online')));
+    await expect
+      .poll(() => mock.requests.filter((r) => r.action === 'scan' && r.offline === true).length)
+      .toBe(1);
+  });
 });

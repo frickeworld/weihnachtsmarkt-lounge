@@ -114,7 +114,7 @@ ${noindex ? '  Header always set X-Robots-Tag "noindex, nofollow"\n' : ''}  <If 
   <FilesMatch "\\.(js|css|woff2|webp|avif|png|jpg|svg)$">
     Header set Cache-Control "public, max-age=31536000, immutable"
   </FilesMatch>
-  <FilesMatch "^(index\\.html|robots\\.txt|sitemap\\.xml)$">
+  <FilesMatch "^(index\\.html|robots\\.txt|sitemap\\.xml|scan-sw\\.js)$">
     Header set Cache-Control "no-cache"
   </FilesMatch>
 </IfModule>
