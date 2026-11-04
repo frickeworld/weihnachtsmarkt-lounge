@@ -75,6 +75,8 @@ export function Market() {
                 <p className="mt-3 flex items-baseline justify-center gap-2 md:justify-start">
                   <span className="font-display text-5xl leading-none font-medium sm:text-6xl">
                     <CountUp value={followers} />
+                    {/* Runde, von Hand gepflegte Zahl (z. B. 4800) als „4.800+“ */}
+                    {followers % 100 === 0 && '+'}
                   </span>
                   <span className="text-sm font-bold tracking-wide uppercase">
                     folgen schon – sei dabei

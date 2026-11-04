@@ -311,5 +311,14 @@ test.describe('Instagram', () => {
     await band.scrollIntoViewIfNeeded();
     await expect(band.getByLabel('2.480')).toBeVisible();
     await expect(band).toContainText('2.480', { timeout: 5000 });
+    await expect(band).not.toContainText('2.480+');
+  });
+
+  test('runde, von Hand gepflegte Zahl mit Plus: „4.800+“', async ({ page }) => {
+    await mockSupabase(page, { instagramFollowers: 4800 });
+    await page.goto('/#weihnachtsmarkt');
+    const band = page.getByText('folgen schon – sei dabei').locator('..');
+    await band.scrollIntoViewIfNeeded();
+    await expect(band).toContainText('4.800+', { timeout: 5000 });
   });
 });
