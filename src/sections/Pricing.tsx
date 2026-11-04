@@ -96,9 +96,9 @@ export function Pricing() {
               ))}
             </div>
             <p className="mt-6 text-sm text-ink-soft">
-              Alle Preise zzgl. {feeLabel(s)} Verarbeitungsgebühr. Den Gesamtpreis siehst du vor dem
-              Bezahlen in der Buchungsübersicht. An besonderen Abenden (z. B. Partys oder
-              Live-Auftritte) gelten eigene Preise – du siehst sie bei der Auswahl im Kalender.
+              Alle Preise zzgl. {feeLabel(s)} Verarbeitungsgebühr. Die Gebühr wird beim Bezahlen
+              hinzugerechnet. An besonderen Abenden (z. B. Partys oder Live-Auftritte) gelten eigene
+              Preise – du siehst sie bei der Auswahl im Kalender.
             </p>
           </div>
         </Reveal>

@@ -63,7 +63,7 @@ test.describe('One-Pager', () => {
     await firstFreeDay(page).click();
     await slots(page).first().click();
 
-    const submit = page.getByRole('button', { name: /Zahlungspflichtig buchen – \d+,\d\d €/ });
+    const submit = page.getByRole('button', { name: 'Zahlungspflichtig buchen', exact: true });
     await submit.click();
     await expect(page.getByText('Bitte gib deinen Vornamen an.')).toBeVisible();
     await expect(page.getByText('Bitte bestätige die AGB und die Verbindlichkeit.')).toBeVisible();

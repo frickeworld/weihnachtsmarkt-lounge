@@ -23,7 +23,7 @@ async function fillAndSubmit(page: Page, extra?: (p: Page) => Promise<void>) {
   await expect(page.getByRole('radio', { name: '8 Personen' })).toBeChecked();
   if (extra) await extra(page);
   await page.getByLabel(/Ich akzeptiere die/).check();
-  await page.getByRole('button', { name: /Zahlungspflichtig buchen – \d+,\d\d €/ }).click();
+  await page.getByRole('button', { name: 'Zahlungspflichtig buchen', exact: true }).click();
 }
 
 test.describe('Checkout (Phase 3)', () => {
@@ -62,21 +62,20 @@ test.describe('Checkout (Phase 3)', () => {
     await expect(slots.nth(2)).toContainText('Party-Abend');
     await slots.nth(2).click();
     await expect(page.locator('#buchen')).toContainText('Sonderveranstaltung');
+    // Auf unserer Seite nur der Lounge-Preis; die 5 % rechnet erst Stripe dazu
+    const summary = page.getByLabel('Zusammenfassung');
+    await expect(summary).toContainText(/Lounge-Preis\s*237,00\s€/); // 249 € Endpreis
     await expect(
-      page.getByRole('button', { name: /Zahlungspflichtig buchen – 249,00\s€/ }),
+      page.getByRole('button', { name: 'Zahlungspflichtig buchen', exact: true }),
     ).toBeVisible();
     await slots.nth(1).click();
-    await expect(
-      page.getByRole('button', { name: /Zahlungspflichtig buchen – 156,45\s€/ }),
-    ).toBeVisible();
-    // Zusammenfassung: 156,45 € = Lounge 149 € + 7,45 € Verarbeitungsgebühr (genau 5 %)
-    const summary = page.locator('#buchen dl').filter({ hasText: 'Verarbeitungsgebühr' });
     await expect(summary).toContainText(/Lounge inkl\. 75 € Freiverzehr\s*149,00\s€/);
-    await expect(summary).toContainText(/Verarbeitungsgebühr\s*7,45\s€/);
+    await expect(summary).toContainText(/Lounge-Preis\s*149,00\s€/);
+    await expect(summary).toContainText('zzgl. 5 % Verarbeitungsgebühr, die beim Bezahlen');
+    await expect(summary).not.toContainText('156,45');
+    await expect(summary).not.toContainText('7,45');
     await slots.nth(0).click();
-    await expect(
-      page.getByRole('button', { name: /Zahlungspflichtig buchen – 103,95\s€/ }),
-    ).toBeVisible();
+    await expect(summary).toContainText(/Lounge-Preis\s*99,00\s€/);
   });
 
   test('Zeitfenster gerade vergeben (409): Hinweis, Formular weg', async ({ page }) => {
@@ -250,9 +249,7 @@ test.describe('Besondere Termine', () => {
     await expect(section).toContainText('inkl. 125 € Freiverzehr, zzgl. 5 % Verarbeitungsgebühr');
 
     await section.getByRole('link', { name: /19:00 Uhr buchen$/ }).click();
-    await expect(
-      page.getByRole('button', { name: /Zahlungspflichtig buchen – 249,00\s€/ }),
-    ).toBeVisible();
+    await expect(page.getByLabel('Zusammenfassung')).toContainText(/Lounge-Preis\s*237,00\s€/);
 
     await section.getByRole('link', { name: /ausgebucht – auf die Warteliste$/ }).click();
     await expect(page.getByLabel('Wunschtag')).toHaveValue(tuesday);

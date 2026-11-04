@@ -13,7 +13,7 @@ import {
 } from '@/lib/bookingSchema';
 import { formatLongDate, formatTime, type IsoDate } from '@/lib/dates';
 import { formatCents } from '@/lib/money';
-import { feeFor, totalCents } from '@/lib/settings';
+import { feeFor, feeLabel, totalCents } from '@/lib/settings';
 import { useSettings } from '@/lib/settingsContext';
 import { a11y } from './a11y';
 import { DiscountCodeField } from './DiscountCodeField';
@@ -65,8 +65,11 @@ export function BookingForm({
   const showBilling = needsBillingAddress({ companyName, invoiceRequested });
   // Preis des gewählten Zeitfensters (Preisstaffel); Rückfall: Standardpreis
   const baseValue = slotTotal ?? totalCents(settings);
-  const totalValue = discount ? discount.preview.totalCents : baseValue;
-  const total = formatCents(totalValue);
+  // Auf unserer Seite steht nur der Lounge-Preis; die Verarbeitungsgebühr rechnet erst Stripe dazu
+  // (Entscheidung Louis, 04.11.2026). Rabatt-Vorschau: Endpreis nach Rabatt − Gebühr.
+  const fee = feeFor(baseValue, settings);
+  const loungeValue = baseValue - fee;
+  const loungeAfterDiscount = discount ? discount.preview.totalCents - fee : loungeValue;
   const won = discount?.preview.totalCents === 0;
   const taler = slotTaler ?? settings.talerCount;
 
@@ -282,11 +285,17 @@ export function BookingForm({
         )}
       </div>
 
-      <Field id="notes" label="Wünsche (optional)" error={errors.notes}>
+      <Field
+        id="notes"
+        label="Wünsche und Vorbestellungen (optional)"
+        error={errors.notes}
+        hint="Bestell schon jetzt deine Getränke vor – auch ganze Flaschen, z. B. Sekt, Wein oder Glühwein. Auch besondere Wünsche (Geburtstag, Überraschung, Deko) kannst du hier eintragen. Wir bereiten alles vor und melden uns, falls etwas nicht möglich ist."
+      >
         <textarea
-          rows={3}
+          rows={4}
           className="field-input"
-          {...a11y('notes', errors.notes)}
+          placeholder="z. B. 2 Flaschen Sekt zum Anstoßen, 6 Glühwein zur Ankunft, Geburtstagsüberraschung für Anna"
+          {...a11y('notes', errors.notes, true)}
           {...register('notes')}
         />
       </Field>
@@ -323,23 +332,31 @@ export function BookingForm({
           )}
           <div className="flex justify-between gap-4">
             <dt>Lounge inkl. {taler} € Freiverzehr</dt>
-            <dd>{formatCents(baseValue - feeFor(baseValue, settings))}</dd>
+            <dd>{formatCents(loungeValue)}</dd>
           </div>
-          <div className="flex justify-between gap-4">
-            <dt>Verarbeitungsgebühr</dt>
-            <dd>{formatCents(feeFor(baseValue, settings))}</dd>
-          </div>
-          {discount && (
+          {discount && !won && (
             <div className="flex justify-between gap-4 font-semibold text-emerald-800">
-              <dt>{won ? 'Gewinn' : `Gewinnspiel-Code −${discount.preview.percent} %`}</dt>
+              <dt>Gewinnspiel-Code −{discount.preview.percent} %</dt>
               <dd>−{formatCents(discount.preview.discountCents)}</dd>
             </div>
           )}
-          <div className="flex justify-between gap-4 pt-2 text-xl font-bold text-ink">
-            <dt>Gesamt</dt>
-            <dd>{total}</dd>
-          </div>
+          {won ? (
+            <div className="flex justify-between gap-4 pt-2 text-xl font-bold text-emerald-800">
+              <dt>Gewinn – du zahlst nichts</dt>
+              <dd>{formatCents(0)}</dd>
+            </div>
+          ) : (
+            <div className="flex justify-between gap-4 pt-2 text-xl font-bold text-ink">
+              <dt>Lounge-Preis</dt>
+              <dd>{formatCents(loungeAfterDiscount)}</dd>
+            </div>
+          )}
         </dl>
+        {!won && (
+          <p className="pt-1 text-sm text-ink-soft">
+            zzgl. {feeLabel(settings)} Verarbeitungsgebühr, die beim Bezahlen hinzugerechnet wird
+          </p>
+        )}
       </div>
 
       <DiscountCodeField
@@ -415,7 +432,7 @@ export function BookingForm({
             : 'Weiter zur Zahlung …'
           : won
             ? 'Gewinn einlösen – kostenlos buchen'
-            : `Zahlungspflichtig buchen – ${total}`}
+            : 'Zahlungspflichtig buchen'}
       </button>
       <p className="text-sm text-ink-soft">
         Sichere Zahlung über Stripe mit Karte, Apple Pay, Google Pay oder PayPal. Dein Termin ist

@@ -44,8 +44,8 @@ export function AgbPage() {
         {s.feePercent == null
           ? formatCents(s.feeCents)
           : `${s.feePercent.toLocaleString('de-DE')} % des Lounge-Preises`}{' '}
-        hinzu. Der Gesamtpreis wird vor der Buchung in der Buchungsübersicht angezeigt. [ANGABE ZUR
-        UMSATZSTEUER PRÜFEN: „inkl. gesetzlicher MwSt.“]
+        hinzu. Die Verarbeitungsgebühr und der Gesamtpreis werden auf der Zahlungsseite (Stripe) vor
+        dem Bezahlen angezeigt. [ANGABE ZUR UMSATZSTEUER PRÜFEN: „inkl. gesetzlicher MwSt.“]
       </p>
       <ul className="list-disc space-y-1 pl-6">
         {priceGroups(s.priceList).flatMap((g) =>

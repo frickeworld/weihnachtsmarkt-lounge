@@ -79,7 +79,8 @@ test.describe('Gewinnspiel', () => {
     const opts: MockOptions = {
       checkoutRequests: [],
       discounts: {
-        'LOUNGE-ABC234': { reason: null, percent: 30, discount_cents: 4470, total_cents: 10430 },
+        // Di 14:30: 103,95 € − 25 % (25,99 €) = 77,96 € → Lounge-Preis 73,01 € zzgl. 4,95 € Gebühr
+        'LOUNGE-ABC234': { reason: null, percent: 25, discount_cents: 2599, total_cents: 7796 },
       },
     };
     await mockSupabase(page, opts);
@@ -87,7 +88,8 @@ test.describe('Gewinnspiel', () => {
     await pickDay(page, tuesday);
     await page.getByRole('group', { name: 'Zeitfenster' }).locator('button').first().click();
     await expect(page.getByText('LOUNGE-ABC234')).toBeVisible();
-    await expect(page.getByText('Gewinnspiel-Code −30 %')).toBeVisible();
+    await expect(page.getByText('Gewinnspiel-Code −25 %')).toBeVisible();
+    await expect(page.getByLabel('Zusammenfassung')).toContainText(/Lounge-Preis\s*73,01\s€/);
     await page.getByLabel('Vorname').fill('Anna');
     await page.getByLabel('Nachname').fill('Muster');
     await page.locator('#buchen').getByLabel('E-Mail', { exact: true }).fill('anna@example.de');
@@ -98,7 +100,7 @@ test.describe('Gewinnspiel', () => {
       .click();
     await expect(page.getByRole('radio', { name: '6 Personen' })).toBeChecked();
     await page.getByLabel(/Ich akzeptiere die/).check();
-    await page.getByRole('button', { name: /Zahlungspflichtig buchen – 104,30\s€/ }).click();
+    await page.getByRole('button', { name: 'Zahlungspflichtig buchen', exact: true }).click();
     await expect.poll(() => opts.checkoutRequests!.length).toBe(1);
     expect(opts.checkoutRequests![0]).toMatchObject({ discountCode: 'LOUNGE-ABC234' });
   });
