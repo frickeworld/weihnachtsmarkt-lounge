@@ -76,7 +76,7 @@ Supabase → **Edge Functions → Secrets** (oder Project Settings → Edge Func
 | `STRIPE_SECRET_KEY`     | Stripe Testmodus → Entwickler → API-Schlüssel → Geheimschlüssel (`sk_test_…`)  |
 | `STRIPE_WEBHOOK_SECRET` | kommt in Phase 3 (`whsec_…`)                                                   |
 | `BREVO_API_KEY`         | Brevo → SMTP & API → API-Schlüssel (v3)                                        |
-| `BREVO_SENDER_EMAIL`    | z. B. `tickets@studio-f.club`                                                  |
+| `BREVO_SENDER_EMAIL`    | z. B. `info@studio-f.club`                                                  |
 | `BREVO_SENDER_NAME`     | `Weihnachtsmarkt-Lounge der Händler`                                           |
 | `BREVO_LIST_BOOKINGS`   | ID der Liste „Lounge-Buchungen 2026“                                           |
 | `BREVO_LIST_NEWSLETTER` | ID der Newsletter-Liste                                                        |
@@ -115,7 +115,7 @@ Optionale Supabase-Secrets für Stripe:
    `BREVO_ATTR_LASTNAME` bzw. `BREVO_ATTR_COMPANY` setzen (z. B. `FIRSTNAME`).
 5. Double-Opt-in-Vorlage: Als Ziel nach der Bestätigung trägt die Seite automatisch
    `[PUBLIC_SITE_URL]/newsletter/bestaetigt` ein.
-6. Absender `tickets@studio-f.club` (oder ähnlich) unter **Absender & IP** anlegen; die Domain studio-f.club muss
+6. Absender `info@studio-f.club` (Domain bei Brevo bestätigt) unter **Absender & IP** anlegen; die Domain studio-f.club muss
    mit SPF und DKIM verifiziert sein, sonst landen Tickets im Spam.
 
 ## 8. Erinnerungsmails (Zeitplan)
@@ -154,7 +154,7 @@ höchstens wenige Mails pro Stunde. Für Einladungen an die Händler deshalb Bre
 
 - Host `smtp-relay.brevo.com`, Port `587`
 - Benutzer und Passwort: aus **Brevo → SMTP & API → SMTP** (eigener SMTP-Schlüssel, nicht der API-Key)
-- Absender: `tickets@studio-f.club` (oder die verifizierte Absenderadresse), Name „Lounge der Händler“
+- Absender: `info@studio-f.club` (oder die verifizierte Absenderadresse), Name „Lounge der Händler“
 
 ### 10.2 Deutsche Texte für die Auth-Mails
 
