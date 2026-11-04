@@ -20,7 +20,7 @@ Stand: 3. Okt. 2026 · Verantwortlich: Louis Fricke · Projektregeln: `CLAUDE.md
 | Ticket                   | Ein QR-Code pro Buchung, Mail mit PDF-Anhang direkt nach Zahlung, Erinnerung am Buchungstag 10:00 Uhr             |
 | Übertragbarkeit          | Ja, ohne Namensprüfung                                                                                            |
 | Team-Benachrichtigung    | Keine Mail (Admin + Scanner-Liste „Heute“)                                                                        |
-| Newsletter               | Freiwillige Checkbox + Brevo-Double-Opt-in                                                                        |
+| Newsletter               | Freiwillige Checkbox, Single-Opt-in (Entscheidung Louis 04.11.2026)                                               |
 | Tracking                 | Cookielos: page_view, book_click, Buchungen                                                                       |
 | Zugänge                  | studio_admin (2FA Pflicht), haendler (2FA optional), Scanner (PIN)                                                |
 | Backend                  | Ein Supabase-Projekt (Frankfurt) für Test und Live                                                                |
@@ -119,7 +119,7 @@ Frontend (`.env.local`, Cloudflare Pages, GitHub-Variablen für den Mittwald-Bui
 
 GitHub-Secrets: `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_REF`, `SUPABASE_DB_PASSWORD`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `STRIPE_TEST_SECRET_KEY` (nur für E2E)
 
-Supabase-Secrets: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PAYMENT_METHOD_TYPES` (optional), `STRIPE_TAX_RATE_LOUNGE` (optional), `STRIPE_TAX_RATE_FEE` (optional), `BREVO_API_KEY`, `BREVO_SENDER_EMAIL`, `BREVO_SENDER_NAME`, `BREVO_LIST_BOOKINGS`, `BREVO_LIST_NEWSLETTER`, `BREVO_DOI_TEMPLATE_ID`, `PUBLIC_SITE_URL`, `SCANNER_TOKEN_SECRET`, `CRON_SECRET`
+Supabase-Secrets: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PAYMENT_METHOD_TYPES` (optional), `STRIPE_TAX_RATE_LOUNGE` (optional), `STRIPE_TAX_RATE_FEE` (optional), `BREVO_API_KEY`, `BREVO_SENDER_EMAIL`, `BREVO_SENDER_NAME`, `BREVO_LIST_BOOKINGS`, `BREVO_LIST_NEWSLETTER`, `PUBLIC_SITE_URL`, `SCANNER_TOKEN_SECRET`, `CRON_SECRET`
 
 ---
 
@@ -295,7 +295,7 @@ Spalten `scanner_pin_hash` sind nie über eine öffentliche Funktion erreichbar.
   - Brevo `POST /v3/smtp/email` mit HTML + Text + PDF-Anhang. Betreff: „Dein Ticket: Weihnachtsmarkt-Lounge am [Wochentag, Datum]“.
   - Inhalt: „Hallo [Vorname], deine Lounge ist gebucht!“, Datum/Zeitfenster, QR + Code, Personen, „Was dich erwartet“, Ort [GENAUE POSITION], „Bitte sei pünktlich – dein Zeitfenster endet um [Endzeit] Uhr.“, „Deine Buchung ist verbindlich. Du kannst dein Ticket aber an andere weitergeben.“, Button „Ticket online öffnen“, ggf. Rechnungslink, Footer Kurz-Impressum + „Powered by STUDIO/F“.
   - Brevo-Kontakt (`updateEnabled: true`) in `BREVO_LIST_BOOKINGS` mit Vorname, Nachname, Firma. Fehler nur loggen.
-  - `newsletter_opt_in` → `POST /v3/contacts/doubleOptinConfirmation` (Liste Newsletter, Template-ID, redirect `/newsletter/bestaetigt`). Fehler nur loggen.
+  - `newsletter_opt_in` → `POST /v3/contacts` direkt in die Liste Newsletter (Single-Opt-in, Entscheidung Louis 04.11.2026; vorher Double-Opt-in). Fehler nur loggen.
   - Jeder Versuch in `email_log`.
 - `send-reminders` (pg_cron stündlich, geschützt per `CRON_SECRET`): Buchungen `paid`, Datum = heute (Berlin), Berlin-Zeit ≥ 10:00, `reminder_sent_at IS NULL`, `created_at` vor heute 10:00 Uhr Berlin → Erinnerungsmail mit PDF, Betreff „Heute ist es so weit: deine Lounge um [Startzeit] Uhr“. `reminder_sent_at` setzen (genau einmal).
 - Login-Mails (Einladung, Passwort, MFA) zunächst über Supabase-Standard, vor Livegang über Brevo-SMTP mit studio-f.club-Absender.
@@ -307,7 +307,7 @@ Spalten `scanner_pin_hash` sind nie über eine öffentliche Funktion erreichbar.
 - Ort kommt aus `settings.lounge_location` (im Admin pflegbar).
 - Erinnerung: pg_cron alle 15 Minuten → `invoke_send_reminders()` → Function `send-reminders` (Header `x-cron-secret`); `claim_due_reminders()` reserviert atomar, bei Fehler `release_reminder_claim()`.
 - Brevo-Attributnamen per Secret (`BREVO_ATTR_FIRSTNAME`, `BREVO_ATTR_LASTNAME`, `BREVO_ATTR_COMPANY`), Standard `VORNAME`/`NACHNAME`/`FIRMA`.
-- Double-Opt-in wird pro Buchung höchstens einmal ausgelöst.
+- Der Newsletter-Eintrag wird pro Buchung höchstens einmal ausgelöst.
 
 ### 4.3 Manuelle Buchung (Admin)
 
@@ -496,7 +496,7 @@ Migrations (Tabellen, RLS, Funktionen, Seeds, pg_cron für Holds), Kalender an `
 - [ ] Mail in Gmail, Outlook, iPhone-Mail, nicht im Spam, PDF im Anhang, QR scanbar
 - [ ] „Ticket online öffnen“ funktioniert
 - [ ] Kontakt in „Lounge-Buchungen“, nicht im Newsletter
-- [ ] Mit Newsletter-Häkchen → DOI-Mail → nach Klick in Newsletter-Liste
+- [ ] Mit Newsletter-Häkchen → direkt in der Newsletter-Liste
 - [ ] Erinnerung um 10:00 Berlin genau einmal (Test mit Buchung für heute)
 - [ ] email_log zeigt alle Versuche
 

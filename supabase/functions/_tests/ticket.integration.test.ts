@@ -93,22 +93,21 @@ Deno.test({
         await res.body?.cancel();
       });
 
-      await t.step('Kontakt in „Lounge-Buchungen“, Newsletter nur per Double-Opt-in', () => {
-        const contact = captured.find((c) => c.path === '/contacts')!;
-        assertEquals(contact.body.listIds, [7]);
+      await t.step('Kontakt in „Lounge-Buchungen“, Newsletter direkt (Single-Opt-in)', () => {
+        const contacts = captured.filter((c) => c.path === '/contacts');
+        const contact = contacts.find((c) => String(c.body.listIds) === '7')!;
         assertEquals(contact.body.updateEnabled, true);
         assertEquals((contact.body.attributes as Record<string, string>).FIRMA, 'Muster GmbH');
-        const doi = captured.find((c) => c.path === '/contacts/doubleOptinConfirmation')!;
-        assertEquals(doi.body.includeListIds, [8]);
-        assertEquals(doi.body.templateId, 9);
-        assertMatch(doi.body.redirectionUrl as string, /\/newsletter\/bestaetigt$/);
+        const newsletter = contacts.find((c) => String(c.body.listIds) === '8')!;
+        assertEquals(newsletter.body.updateEnabled, true);
+        assert(!captured.some((c) => c.path === '/contacts/doubleOptinConfirmation'));
       });
 
-      await t.step('Erneut senden: Mail ja, Double-Opt-in nicht doppelt', async () => {
+      await t.step('Erneut senden: Mail ja, Newsletter-Eintrag nicht doppelt', async () => {
         captured.length = 0;
         assertEquals((await send()).status, 200);
         assert(captured.some((c) => c.path === '/smtp/email'));
-        assert(!captured.some((c) => c.path === '/contacts/doubleOptinConfirmation'));
+        assert(!captured.some((c) => String(c.body.listIds) === '8'));
       });
 
       await t.step('Brevo-Fehler: 502 und Eintrag im email_log', async () => {

@@ -3,7 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { buildIcs, googleCalendarUrl } from './ics.ts';
 import {
   contactAttributes,
-  requestNewsletterDoubleOptIn,
+  addNewsletterContact,
   sendTransactionalEmail,
   upsertBookingContact,
 } from './brevo.ts';
@@ -165,10 +165,11 @@ export async function deliverTicket(
         .eq('status', 'sent');
       if (!count) {
         try {
-          await requestNewsletterDoubleOptIn(b.email, attrs);
+          // Single-Opt-in: direkt in die Newsletter-Liste (Typ 'doi' bleibt als Protokoll-Name)
+          await addNewsletterContact(b.email, attrs);
           await log(db, b.id, 'doi', null);
         } catch (e) {
-          console.error('brevo doi', e);
+          console.error('brevo newsletter', e);
           await log(db, b.id, 'doi', e);
         }
       }

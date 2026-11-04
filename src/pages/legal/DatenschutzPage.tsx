@@ -79,9 +79,10 @@ export function DatenschutzPage() {
 
       <H2>5. Newsletter (freiwillig)</H2>
       <p>
-        Nur wenn du beim Buchen das Häkchen setzt und die Anmeldung per E-Mail bestätigst
-        (Double-Opt-in), erhältst du den STUDIO/F-Newsletter (Art. 6 Abs. 1 lit. a DSGVO). Du kannst
-        dich jederzeit über den Link in jeder Ausgabe abmelden.
+        Nur wenn du beim Buchen freiwillig das Häkchen setzt, erhältst du den STUDIO/F-Newsletter
+        (Art. 6 Abs. 1 lit. a DSGVO). Wir tragen deine E-Mail-Adresse und deinen Namen dafür in
+        unsere Newsletter-Liste bei Brevo ein. Du kannst dich jederzeit über den Link in jeder
+        Ausgabe abmelden.
       </p>
 
       <H2>6. Kontaktformular, Firmenanfrage und Warteliste</H2>

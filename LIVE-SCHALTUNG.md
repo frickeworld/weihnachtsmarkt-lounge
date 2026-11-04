@@ -37,8 +37,8 @@ geht die Seite unter der echten Domain online.
       neuen Live-Webhook anlegen (gleiche Ereignisse) und `STRIPE_WEBHOOK_SECRET` ersetzen.
       PayPal, Apple Pay und Google Pay im Live-Konto aktiv; (Apple-Pay-Domain-Verifizierung ist bei Stripe Checkout nicht nötig).
       Rechnungs-Mails in Stripe einschalten (SETUP 9).
-- [ ] **Brevo** (SETUP 7): Absender-Domain mit SPF/DKIM/DMARC verifiziert, Listen-IDs und
-      Double-Opt-in-Vorlage geprüft. SMTP für Auth-Mails eingetragen (SETUP 10.1).
+- [ ] **Brevo** (SETUP 7): Absender-Domain mit SPF/DKIM/DMARC verifiziert, Listen-IDs
+      geprüft. SMTP für Auth-Mails eingetragen (SETUP 10.1).
 - [ ] **Supabase-Secrets** vollständig (SETUP 5, 8, 11, 12): u. a. `PUBLIC_SITE_URL` = echte
       Adresse der Subdomain (`https://weihnachtslounge.studio-f.club`), `CRON_SECRET`, `SCANNER_TOKEN_SECRET`, Brevo, Stripe, ggf. Wallet.
 - [ ] **Supabase Auth** (SETUP 4): Site URL und Redirect URLs auf die Subdomain (MITTWALD.md, Abschnitt 4);
@@ -77,7 +77,7 @@ geht die Seite unter der echten Domain online.
       Erinnerung am Buchungstag. Danach im Stripe-Dashboard **erstatten** und im Admin
       **stornieren**.
 - [ ] Buchung mit Firmenname → Rechnung von Stripe kommt per Mail.
-- [ ] Newsletter-Häkchen → Double-Opt-in-Mail, Bestätigungsseite.
+- [ ] Newsletter-Häkchen → Kontakt steht direkt in der Newsletter-Liste (Single-Opt-in).
 - [ ] Kontaktformular → Mail kommt bei info@studio-f.club an, „Antworten“ geht an den Absender.
 - [ ] Scanner am Handy vor Ort: grün, gelb, orange, rot, Taler, Flugmodus-Test, Netzempfang
       am Lounge-Standort.

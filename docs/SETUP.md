@@ -12,7 +12,7 @@ Diese Anleitung brauchst du einmalig. Trage Secrets **nie** in den Chat, in Date
 | 4. Supabase-Grundeinstellungen | Login, Sicherheit                        | Phase 2         |
 | 5. Supabase-Secrets            | Stripe, Brevo, Scanner                   | Phase 3         |
 | 6. Stripe                      | Zahlarten, Webhook                       | Phase 3         |
-| 7. Brevo                       | Listen, Double-Opt-in                    | Phase 4         |
+| 7. Brevo                       | Listen                                   | Phase 4         |
 
 ---
 
@@ -80,7 +80,6 @@ Supabase → **Edge Functions → Secrets** (oder Project Settings → Edge Func
 | `BREVO_SENDER_NAME`     | `Weihnachtsmarkt-Lounge der Händler`                                           |
 | `BREVO_LIST_BOOKINGS`   | ID der Liste „Lounge-Buchungen 2026“                                           |
 | `BREVO_LIST_NEWSLETTER` | ID der Newsletter-Liste                                                        |
-| `BREVO_DOI_TEMPLATE_ID` | ID der Double-Opt-in-Vorlage                                                   |
 | `PUBLIC_SITE_URL`       | die Cloudflare-URL (live: Subdomain, siehe docs/MITTWALD.md), ohne `/` am Ende |
 | `SCANNER_TOKEN_SECRET`  | lange Zufallszeichenkette – ich sage dir in Phase 6, wie du sie erzeugst       |
 | `CRON_SECRET`           | lange Zufallszeichenkette für die Erinnerungsmails, siehe Abschnitt 8          |
@@ -109,13 +108,12 @@ Optionale Supabase-Secrets für Stripe:
 
 1. Liste „Lounge-Buchungen 2026“ anlegen, ID notieren.
 2. ID der Newsletter-Liste notieren.
-3. Double-Opt-in-Vorlage anlegen, Template-ID notieren.
+3. Keine Double-Opt-in-Vorlage nötig: Der Newsletter-Haken bei der Buchung trägt direkt in die
+   Newsletter-Liste ein (Single-Opt-in, Entscheidung Louis 04.11.2026).
 4. Kontakt-Attribute prüfen: heißen sie `VORNAME`/`NACHNAME` oder `FIRSTNAME`/`LASTNAME`? Attribut `FIRMA` ggf. anlegen.
    Standard ist `VORNAME`/`NACHNAME`/`FIRMA`. Weichen die Namen ab, die Secrets `BREVO_ATTR_FIRSTNAME`,
    `BREVO_ATTR_LASTNAME` bzw. `BREVO_ATTR_COMPANY` setzen (z. B. `FIRSTNAME`).
-5. Double-Opt-in-Vorlage: Als Ziel nach der Bestätigung trägt die Seite automatisch
-   `[PUBLIC_SITE_URL]/newsletter/bestaetigt` ein.
-6. Absender `info@studio-f.club` (Domain bei Brevo bestätigt) unter **Absender & IP** anlegen; die Domain studio-f.club muss
+5. Absender `info@studio-f.club` (Domain bei Brevo bestätigt) unter **Absender & IP** anlegen; die Domain studio-f.club muss
    mit SPF und DKIM verifiziert sein, sonst landen Tickets im Spam.
 
 ## 8. Erinnerungsmails (Zeitplan)

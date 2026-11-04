@@ -21,7 +21,7 @@ export BREVO_API_KEY=brevo_test_key
 export BREVO_SENDER_EMAIL=tickets@studio-f.club
 export BREVO_LIST_BOOKINGS=7
 export BREVO_LIST_NEWSLETTER=8
-export BREVO_DOI_TEMPLATE_ID=9
+export BREVO_DOI_TEMPLATE_ID=9 # ungenutzt seit Single-Opt-in
 # Instagram Graph API simuliert der Test (Port 8197)
 export INSTAGRAM_USER_ID=17841400000000000
 export INSTAGRAM_ACCESS_TOKEN=ig_test_token

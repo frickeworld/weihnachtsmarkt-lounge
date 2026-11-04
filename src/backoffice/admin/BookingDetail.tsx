@@ -18,7 +18,7 @@ import { unwrap, useLoad } from './useLoad';
 const EMAIL_TYPE: Record<string, string> = {
   ticket: 'Ticket',
   reminder: 'Erinnerung',
-  doi: 'Newsletter-Bestätigung',
+  doi: 'Newsletter-Eintrag',
   contact: 'Kontaktliste',
 };
 
@@ -111,7 +111,7 @@ export function BookingDetail({
       b.billing_street ? `${b.billing_street}, ${b.billing_zip} ${b.billing_city}` : '–',
     ],
     ['Wünsche', b.notes || '–'],
-    ['Newsletter', b.newsletter_opt_in ? 'Ja (Double-Opt-in)' : 'Nein'],
+    ['Newsletter', b.newsletter_opt_in ? 'Ja' : 'Nein'],
     [
       'Zahlungsart',
       `${PAYMENT_LABEL[b.payment_method]}${b.source === 'manual' ? ' · manuell angelegt' : ''}`,

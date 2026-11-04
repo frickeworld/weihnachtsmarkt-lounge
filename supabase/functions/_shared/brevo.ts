@@ -67,24 +67,25 @@ export function upsertBookingContact(
   });
 }
 
-/** Newsletter nur per Double-Opt-in: Brevo verschickt die Bestätigungsmail. */
-export function requestNewsletterDoubleOptIn(
+/**
+ * Newsletter-Haken bei der Buchung: Kontakt direkt in die Newsletter-Liste (Single-Opt-in,
+ * Entscheidung Louis 04.11.2026). Keine Bestätigungsmail, keine Gewinnspiel-Liste.
+ */
+export function addNewsletterContact(
   email: string,
   attributes: Record<string, string>,
 ): Promise<void> {
-  const site = requireEnv('PUBLIC_SITE_URL').replace(/\/$/, '');
-  return call('/contacts/doubleOptinConfirmation', {
+  return call('/contacts', {
     email,
     attributes,
-    includeListIds: [Number(requireEnv('BREVO_LIST_NEWSLETTER'))],
-    templateId: Number(requireEnv('BREVO_DOI_TEMPLATE_ID')),
-    redirectionUrl: `${site}/newsletter/bestaetigt`,
+    listIds: [Number(requireEnv('BREVO_LIST_NEWSLETTER'))],
+    updateEnabled: true,
   });
 }
 
 /**
  * Kontakt direkt in die Newsletter-Liste (und optional „Gewinnspiel“) – nur nach eigenem
- * Double-Opt-in (Gewinnspiel-Bestätigung), sonst requestNewsletterDoubleOptIn verwenden.
+ * Double-Opt-in (Gewinnspiel-Bestätigung).
  */
 export function upsertNewsletterContact(
   email: string,
