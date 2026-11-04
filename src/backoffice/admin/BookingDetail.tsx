@@ -45,6 +45,9 @@ export function BookingDetail({
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [cancelOpen, setCancelOpen] = useState(false);
   const [reason, setReason] = useState('');
+  const [forwardOpen, setForwardOpen] = useState(false);
+  const [forwardEmail, setForwardEmail] = useState('');
+  const [forwardName, setForwardName] = useState('');
   const log = useLoad(
     async () =>
       unwrap(
@@ -169,6 +172,14 @@ export function BookingDetail({
           >
             Ticket erneut senden
           </button>
+          <button
+            type="button"
+            className={smallBtn}
+            disabled={busy}
+            onClick={() => setForwardOpen((o) => !o)}
+          >
+            An andere E-Mail senden …
+          </button>
           {!b.checked_in_at && (
             <button
               type="button"
@@ -204,6 +215,60 @@ export function BookingDetail({
           >
             Stornieren …
           </button>
+        </div>
+      )}
+
+      {forwardOpen && paid && !b.anonymized_at && (
+        <div className="mt-5 space-y-3 rounded-xl border border-line bg-sand/50 p-4">
+          <p className="text-sm">
+            Das Ticket ist übertragbar. Eine Kopie mit QR-Code, PDF und Kalendereintrag geht an die
+            neue Adresse; die Buchung bleibt unverändert und das Ticket gilt weiter für alle.
+          </p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="block text-sm">
+              <span className="field-label">E-Mail-Adresse</span>
+              <input
+                type="email"
+                className="field-input"
+                value={forwardEmail}
+                onChange={(e) => setForwardEmail(e.target.value)}
+              />
+            </label>
+            <label className="block text-sm">
+              <span className="field-label">Name (optional)</span>
+              <input
+                className="field-input"
+                value={forwardName}
+                onChange={(e) => setForwardName(e.target.value)}
+              />
+            </label>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              className={smallBtn}
+              disabled={busy || !/^\S+@\S+\.\S+$/.test(forwardEmail.trim())}
+              onClick={() =>
+                void run(`Ticket an ${forwardEmail.trim()} verschickt.`, async () => {
+                  const r = await callAdmin('resend_ticket', {
+                    booking_id: b.id,
+                    to_email: forwardEmail.trim(),
+                    to_name: forwardName.trim(),
+                  });
+                  return r.ok ? null : r.message;
+                }).then(() => {
+                  setForwardOpen(false);
+                  setForwardEmail('');
+                  setForwardName('');
+                })
+              }
+            >
+              Ticket senden
+            </button>
+            <button type="button" className={smallBtn} onClick={() => setForwardOpen(false)}>
+              Abbrechen
+            </button>
+          </div>
         </div>
       )}
 

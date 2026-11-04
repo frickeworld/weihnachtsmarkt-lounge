@@ -33,8 +33,14 @@ Deno.test({
   sanitizeOps: false,
   sanitizeResources: false,
   async fn(t) {
-    const brevo = Deno.serve({ hostname: '127.0.0.1', port: 8199, onListen: () => {} }, () =>
-      Response.json({ messageId: 'm1' }, { status: 201 }),
+    const sent: { to: { email: string; name: string }[]; tags?: string[] }[] = [];
+    const brevo = Deno.serve(
+      { hostname: '127.0.0.1', port: 8199, onListen: () => {} },
+      async (req) => {
+        if (new URL(req.url).pathname.endsWith('/smtp/email')) sent.push(await req.json());
+        else await req.body?.cancel();
+        return Response.json({ messageId: 'm1' }, { status: 201 });
+      },
     );
 
     const email = `admin-${crypto.randomUUID().slice(0, 8)}@example.de`;
@@ -180,6 +186,27 @@ Deno.test({
       await t.step('Ticket erneut senden', async () => {
         const r = await call({ action: 'resend_ticket', booking_id: ids[0] });
         assertEquals(r.status, 200, JSON.stringify(r.body));
+      });
+
+      await t.step('Ticket an eine andere Person senden (übertragbar)', async () => {
+        const before = sent.length;
+        const r = await call({
+          action: 'resend_ticket',
+          booking_id: ids[0],
+          to_email: ' Freundin@Example.de ',
+          to_name: 'Frieda Freundin',
+        });
+        assertEquals(r.status, 200, JSON.stringify(r.body));
+        const mail = sent[sent.length - 1]!;
+        assertEquals(sent.length, before + 1);
+        assertEquals(mail.to, [{ email: 'freundin@example.de', name: 'Frieda Freundin' }]);
+        assertEquals(mail.tags, ['lounge-ticket-weiter']);
+        const bad = await call({
+          action: 'resend_ticket',
+          booking_id: ids[0],
+          to_email: 'keine-mail',
+        });
+        assertEquals(bad.status, 400);
       });
 
       await t.step('bestehendem Nutzer die Händler-Rolle geben', async () => {

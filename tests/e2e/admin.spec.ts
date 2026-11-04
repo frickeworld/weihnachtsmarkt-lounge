@@ -138,6 +138,33 @@ test.describe('Admin', () => {
     await expect(dialog.getByText('Eingecheckt.')).toBeVisible();
   });
 
+  test('Ticket an eine andere E-Mail-Adresse senden', async ({ page }) => {
+    const adminRequests: Record<string, unknown>[] = [];
+    await mockBackoffice(page, { hasFactor: true, adminRequests });
+    await enter(page, '/admin/buchungen');
+    await page
+      .getByRole('button', { name: /Erika Muster/ })
+      .filter({ visible: true })
+      .first()
+      .click();
+    const dialog = page.getByRole('dialog', { name: 'Buchung HL-ABCD-EFGH' });
+    await dialog.getByRole('button', { name: 'An andere E-Mail senden …' }).click();
+    const send = dialog.getByRole('button', { name: 'Ticket senden' });
+    await expect(send).toBeDisabled();
+    await dialog.getByLabel('E-Mail-Adresse').fill('frieda@example.de');
+    await dialog.getByLabel('Name (optional)').fill('Frieda Freundin');
+    await send.click();
+    await expect(dialog.getByText('Ticket an frieda@example.de verschickt.')).toBeVisible();
+    expect(adminRequests).toEqual([
+      {
+        action: 'resend_ticket',
+        booking_id: expect.any(String),
+        to_email: 'frieda@example.de',
+        to_name: 'Frieda Freundin',
+      },
+    ]);
+  });
+
   test('manuelle Buchung: Rückfrage bei Sperre, dann bestätigt', async ({ page }) => {
     const adminRequests: Record<string, unknown>[] = [];
     await mockBackoffice(page, {

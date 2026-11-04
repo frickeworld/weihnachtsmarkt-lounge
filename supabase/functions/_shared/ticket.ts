@@ -32,14 +32,23 @@ async function log(db: SupabaseClient, bookingId: string, type: string, error: u
   });
 }
 
+/** Abweichender Empfänger (Ticket ist übertragbar): Kopie an eine andere Person. */
+export interface TicketRecipient {
+  email: string;
+  name?: string;
+}
+
 /**
  * Erzeugt QR-Code (Storage) und PDF und verschickt die Mail über Brevo.
- * Brevo-Kontakt und Double-Opt-in laufen nur beim ersten Ticket und dürfen den Versand nie verhindern.
+ * Brevo-Kontakt und Double-Opt-in laufen nur beim ersten Ticket an die Buchungsadresse und dürfen
+ * den Versand nie verhindern. Mit `recipient` geht das Ticket an eine andere Adresse; die Buchung
+ * bleibt unverändert, Kontakt/Newsletter werden dann nicht angefasst.
  */
 export async function deliverTicket(
   db: SupabaseClient,
   bookingId: string,
   kind: TicketKind,
+  recipient?: TicketRecipient,
 ): Promise<{ ok: boolean; error?: string }> {
   const { data: b, error } = await db
     .from('bookings')
@@ -91,7 +100,9 @@ export async function deliverTicket(
     });
 
     await sendTransactionalEmail({
-      to: { email: b.email, name: `${b.first_name} ${b.last_name}` },
+      to: recipient
+        ? { email: recipient.email, name: recipient.name?.trim() || recipient.email }
+        : { email: b.email, name: `${b.first_name} ${b.last_name}` },
       subject: mail.subject,
       html: mail.html,
       text: mail.text,
@@ -121,7 +132,13 @@ export async function deliverTicket(
             ]
           : []),
       ],
-      tags: [kind === 'reminder' ? 'lounge-erinnerung' : 'lounge-ticket'],
+      tags: [
+        kind === 'reminder'
+          ? 'lounge-erinnerung'
+          : recipient
+            ? 'lounge-ticket-weiter'
+            : 'lounge-ticket',
+      ],
     });
     await log(db, b.id, kind, null);
   } catch (e) {
@@ -130,7 +147,7 @@ export async function deliverTicket(
     return { ok: false, error: 'send_failed' };
   }
 
-  if (kind === 'ticket') {
+  if (kind === 'ticket' && !recipient) {
     const attrs = contactAttributes(b.first_name, b.last_name, b.company_name);
     try {
       await upsertBookingContact(b.email, attrs);

@@ -1,5 +1,5 @@
 // admin: Aktionen, die den service_role-Schlüssel brauchen – nur für studio_admin mit 2FA.
-//   resend_ticket   Ticket erneut senden
+//   resend_ticket   Ticket erneut senden (optional an eine andere E-Mail-Adresse)
 //   manual_booking  Buchung per Telefon / Sonderfall (bar, Überweisung, kostenlos)
 //   invite_user     Zugang per Einladung (Rolle studio_admin oder haendler)
 //   giveaway_draw   Gewinnspiel: Gewinner ziehen, Gewinn- und Trostpreis-Mails senden
@@ -53,7 +53,21 @@ Deno.serve(async (req) => {
   switch (body.action) {
     case 'resend_ticket': {
       const id = String(body.booking_id ?? '');
-      const r = await deliverTicket(db, id, 'ticket');
+      // Optional an eine andere Person (Ticket ist übertragbar); die Buchung bleibt unverändert.
+      const toEmail = String(body.to_email ?? '')
+        .trim()
+        .toLowerCase();
+      const toName = String(body.to_name ?? '')
+        .trim()
+        .slice(0, 120);
+      if (toEmail && !z.string().email().safeParse(toEmail).success)
+        return json({ ok: false, message: 'Bitte eine gültige E-Mail-Adresse angeben.' }, 400);
+      const r = await deliverTicket(
+        db,
+        id,
+        'ticket',
+        toEmail ? { email: toEmail, name: toName || undefined } : undefined,
+      );
       if (r.ok) return json({ ok: true });
       const message =
         r.error === 'not_paid'
