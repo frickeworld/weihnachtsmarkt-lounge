@@ -1,6 +1,12 @@
 import { dayStatus, type SlotAvailability } from '@/lib/availability';
 import { DAY_STATUS_META } from './dayStatusMeta';
-import { formatLongDate, formatMonth, monthGrid, parseIsoDate, type IsoDate } from '@/lib/dates';
+import {
+  calendarWeeks,
+  formatLongDate,
+  formatMonth,
+  parseIsoDate,
+  type IsoDate,
+} from '@/lib/dates';
 import { IconChevron } from '@/components/Icons';
 
 const WEEKDAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
@@ -28,7 +34,8 @@ export function Calendar({
   selected,
   onSelect,
 }: Props) {
-  const weeks = monthGrid(year, month);
+  const weeks = calendarWeeks(year, month);
+  const prefix = `${year}-${String(month).padStart(2, '0')}-`;
 
   return (
     <div>
@@ -74,8 +81,9 @@ export function Calendar({
           {weeks.map((week, wi) => (
             <tr key={wi}>
               {week.map((d, di) => {
-                if (!d) return <td key={di} />;
                 const status = dayStatus(byDate.get(d) ?? []);
+                // Tage der Nachbarmonate nur zeigen, wenn sie in der Saison liegen (z. B. 30.11. im Dezember)
+                if (!d.startsWith(prefix) && status === 'unavailable') return <td key={di} />;
                 const selectable = status === 'free' || status === 'last';
                 const isSelected = d === selected;
                 const meta = status === 'unavailable' ? null : DAY_STATUS_META[status];

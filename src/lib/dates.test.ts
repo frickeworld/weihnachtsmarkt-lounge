@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { addDays, formatLongDate, isoWeekday, monthGrid, todayInBerlin } from './dates';
+import {
+  addDays,
+  calendarWeeks,
+  formatLongDate,
+  isoWeekday,
+  monthGrid,
+  todayInBerlin,
+} from './dates';
 
 describe('dates', () => {
   it('rechnet ISO-Wochentage (Mo = 1, So = 7)', () => {
@@ -32,5 +39,16 @@ describe('dates', () => {
 
   it('formatiert deutsch', () => {
     expect(formatLongDate('2026-12-05')).toBe('Samstag, 5. Dezember 2026');
+  });
+});
+
+describe('calendarWeeks', () => {
+  it('Dezember 2026 beginnt mit Montag, 30.11., und endet mit Sonntag, 3.1.', () => {
+    const w = calendarWeeks(2026, 12);
+    expect(w).toHaveLength(5);
+    expect(w[0]![0]).toBe('2026-11-30');
+    expect(w[0]![1]).toBe('2026-12-01');
+    expect(w[4]![6]).toBe('2027-01-03');
+    expect(w.every((week) => week.length === 7)).toBe(true);
   });
 });

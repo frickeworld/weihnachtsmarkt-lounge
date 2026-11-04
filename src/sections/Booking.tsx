@@ -3,7 +3,13 @@ import { Reveal } from '@/components/Reveal';
 import { releaseHold } from '@/lib/api';
 import { ScarcityNote } from '@/components/ScarcityNote';
 import { SectionHeading } from '@/components/SectionHeading';
-import { addDays, formatLongDate, parseIsoDate, todayInBerlin, type IsoDate } from '@/lib/dates';
+import {
+  calendarWeeks,
+  formatLongDate,
+  parseIsoDate,
+  todayInBerlin,
+  type IsoDate,
+} from '@/lib/dates';
 import { SELECT_SLOT_EVENT, type SelectSlotDetail } from '@/lib/selectSlot';
 import { useSettings } from '@/lib/settingsContext';
 import { useAvailability } from '@/lib/useAvailability';
@@ -25,14 +31,20 @@ const ym = (d: IsoDate): YM => ({
 const ymKey = (v: YM) => v.year * 12 + v.month;
 const clampView = (v: YM, min: YM, max: YM): YM =>
   ymKey(v) < ymKey(min) ? min : ymKey(v) > ymKey(max) ? max : v;
+/** Erster und letzter Tag der Kalenderansicht (ganze Wochen, inkl. Nachbarmonate). */
+const viewRange = (v: YM): { from: IsoDate; to: IsoDate } => {
+  const weeks = calendarWeeks(v.year, v.month);
+  return { from: weeks[0]![0]!, to: weeks[weeks.length - 1]![6]! };
+};
+/** Startmonat: Liegt der erste buchbare Tag in der ersten Zeile des Folgemonats (z. B. Mo 30.11.
+ * vor dem 1.12.), beginnt der Kalender gleich im Folgemonat. */
+const startMonth = (first: IsoDate): YM => {
+  const v = ym(first);
+  const next =
+    v.month === 12 ? { year: v.year + 1, month: 1 } : { year: v.year, month: v.month + 1 };
+  return first >= viewRange(next).from ? next : v;
+};
 const monthStart = (v: YM): IsoDate => `${v.year}-${String(v.month).padStart(2, '0')}-01`;
-const monthEnd = (v: YM): IsoDate =>
-  addDays(
-    monthStart(
-      v.month === 12 ? { year: v.year + 1, month: 1 } : { year: v.year, month: v.month + 1 },
-    ),
-    -1,
-  );
 
 function Step({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {
   return (
@@ -54,8 +66,8 @@ export function Booking() {
   const today = todayInBerlin();
 
   const first = settings.seasonStart > today ? settings.seasonStart : today;
-  const minMonth = ym(first);
   const maxMonth = ym(settings.seasonEnd);
+  const minMonth = clampView(startMonth(first), ym(first), maxMonth);
   // Link aus der Warteliste-Mail: /?datum=YYYY-MM-DD#buchen öffnet direkt diesen Tag.
   const [linkedDate] = useState<IsoDate | null>(() => {
     const d = new URLSearchParams(window.location.search).get('datum');
@@ -109,11 +121,8 @@ export function Booking() {
   }, [abortedBookingId]);
 
   // Verfügbarkeit erst laden, wenn eine abgebrochene Reservierung freigegeben ist.
-  const { byDate, state, reload } = useAvailability(
-    monthStart(view),
-    monthEnd(view),
-    open && holdReleased,
-  );
+  const range = viewRange(view);
+  const { byDate, state, reload } = useAvailability(range.from, range.to, open && holdReleased);
 
   const daySlots = date ? (byDate.get(date) ?? []) : [];
   // Ausgebuchte Tage im angezeigten Monat (für die Warteliste)

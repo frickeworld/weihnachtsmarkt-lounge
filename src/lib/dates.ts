@@ -43,6 +43,23 @@ export function monthGrid(year: number, month: number): (IsoDate | null)[][] {
   return weeks;
 }
 
+/**
+ * Kalenderwochen eines Monats mit den angrenzenden Tagen der Nachbarmonate (Mo–So), z. B. für
+ * Dezember 2026: erste Zeile beginnt mit Montag, 30.11.
+ */
+export function calendarWeeks(year: number, month: number): IsoDate[][] {
+  const first = toIsoDate(new Date(Date.UTC(year, month - 1, 1)));
+  const last = toIsoDate(new Date(Date.UTC(year, month, 0)));
+  let d = addDays(first, 1 - isoWeekday(first));
+  const end = addDays(last, 7 - isoWeekday(last));
+  const weeks: IsoDate[][] = [];
+  while (d <= end) {
+    weeks.push(Array.from({ length: 7 }, (_, i) => addDays(d, i)));
+    d = addDays(d, 7);
+  }
+  return weeks;
+}
+
 const longDate = new Intl.DateTimeFormat('de-DE', {
   weekday: 'long',
   day: 'numeric',

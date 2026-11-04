@@ -70,6 +70,8 @@ export interface MockOptions {
   overrides?: Record<string, string>;
   /** Sonderpreise pro "YYYY-MM-DD HH:MM". */
   specials?: Record<string, { title: string; total_cents: number; taler_count: number }>;
+  /** Andere Saison (Standard: MOCK_SETTINGS). */
+  season?: { start: string; end: string };
   /** Simuliert einen Serverfehler bei get_availability. */
   failAvailability?: boolean;
   /** Alle Aufrufe von track_event landen hier. */
@@ -115,7 +117,10 @@ export async function mockSupabase(page: Page, opts: MockOptions = {}) {
   // .single() fordert bei PostgREST ein einzelnes Objekt an (Accept: application/vnd.pgrst.object+json).
   await page.route('**/rest/v1/rpc/get_public_settings*', (route) => {
     const single = (route.request().headers()['accept'] ?? '').includes('vnd.pgrst.object');
-    return route.fulfill({ json: single ? MOCK_SETTINGS : [MOCK_SETTINGS] });
+    const s = opts.season
+      ? { ...MOCK_SETTINGS, season_start: opts.season.start, season_end: opts.season.end }
+      : MOCK_SETTINGS;
+    return route.fulfill({ json: single ? s : [s] });
   });
   await page.route('**/rest/v1/rpc/track_event*', async (route) => {
     opts.tracked?.push(route.request().postDataJSON());
@@ -232,7 +237,9 @@ export async function mockSupabase(page: Page, opts: MockOptions = {}) {
       const wd = isoWeekday(d);
       for (const t of MOCK_PRICE_LIST.filter((x) => x.weekday === wd)) {
         const st = t.start_time.slice(0, 5);
-        const inSeason = d >= MOCK_SETTINGS.season_start && d <= MOCK_SETTINGS.season_end;
+        const inSeason =
+          d >= (opts.season?.start ?? MOCK_SETTINGS.season_start) &&
+          d <= (opts.season?.end ?? MOCK_SETTINGS.season_end);
         const status = opts.overrides?.[`${d} ${st}`] ?? (inSeason ? 'free' : 'out_of_season');
         const special = opts.specials?.[`${d} ${st}`];
         rows.push({

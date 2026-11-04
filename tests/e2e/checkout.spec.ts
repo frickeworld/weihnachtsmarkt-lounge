@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { pickDay } from './support/calendar';
 import {
   addDays,
   FAKE_STRIPE_URL,
@@ -45,42 +46,7 @@ test.describe('Checkout (Phase 3)', () => {
       },
     });
     await page.goto('/#buchen');
-    const label = new Intl.DateTimeFormat('de-DE', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-      timeZone: 'UTC',
-    }).format(new Date(`${monday}T00:00:00Z`));
-    const day = page.getByRole('button', { name: new RegExp(`^${label}`) });
-    // Zum Monat des Termins blättern (der Kalender startet je nach Datum in einem anderen Monat)
-    const months = [
-      'Januar',
-      'Februar',
-      'März',
-      'April',
-      'Mai',
-      'Juni',
-      'Juli',
-      'August',
-      'September',
-      'Oktober',
-      'November',
-      'Dezember',
-    ];
-    const heading = page.locator('#buchen h3[aria-live]');
-    const target = Number(monday.slice(0, 4)) * 12 + Number(monday.slice(5, 7)) - 1;
-    for (let i = 0; i < 6; i++) {
-      await expect(page.locator('#buchen table button:not([disabled])').first()).toBeVisible();
-      const [name, year] = (await heading.innerText()).trim().split(' ');
-      const shown = Number(year) * 12 + months.indexOf(name);
-      if (shown === target) break;
-      await page
-        .getByRole('button', { name: shown < target ? 'Nächster Monat' : 'Vorheriger Monat' })
-        .click();
-      await expect(heading).not.toHaveText(`${name} ${year}`);
-    }
-    await day.click();
+    await pickDay(page, monday);
     const slots = page.getByRole('group', { name: 'Zeitfenster' }).locator('button');
     await expect(slots).toHaveCount(3);
     await expect(slots.nth(0)).toContainText('14:30–16:30 Uhr');
@@ -277,4 +243,26 @@ test.describe('Besondere Termine', () => {
     await section.getByRole('link', { name: 'Auf die Warteliste' }).click();
     await expect(page.getByLabel('Wunschtag')).toHaveValue(tuesday);
   });
+});
+
+test('Saison ab Montag, 30.11.: Kalender startet im Dezember und zeigt den 30.11.', async ({
+  page,
+}) => {
+  test.skip(new Date() > new Date('2026-11-29T12:00:00Z'), 'nur vor Saisonstart sinnvoll');
+  await mockSupabase(page, { season: { start: '2026-11-30', end: '2026-12-30' } });
+  await page.goto('/#buchen');
+  await expect(page.locator('#buchen h3[aria-live]')).toHaveText('Dezember 2026');
+  await expect(
+    page.getByRole('button', { name: 'Vorheriger Monat', includeHidden: true }),
+  ).toBeDisabled();
+  const first = page.getByRole('button', { name: /^Montag, 30\. November 2026, frei/ });
+  await expect(first).toBeVisible();
+  // 31.12. außerhalb der Saison: ausgegraut; Januar-Tage der letzten Zeile werden nicht gezeigt
+  await expect(
+    page.getByRole('button', { name: /^Donnerstag, 31\. Dezember 2026/ }),
+  ).toBeDisabled();
+  await expect(page.getByRole('button', { name: /Januar 2027/ })).toHaveCount(0);
+  await first.click();
+  const slots = page.getByRole('group', { name: 'Zeitfenster' }).locator('button');
+  await expect(slots.first()).toContainText('14:30–16:30 Uhr');
 });
