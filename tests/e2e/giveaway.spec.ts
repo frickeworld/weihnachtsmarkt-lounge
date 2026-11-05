@@ -7,7 +7,7 @@ test.describe('Gewinnspiel', () => {
     await mockSupabase(page);
     await page.goto('/');
     await expect(page.locator('#start h1')).toBeVisible();
-    await expect(page.getByRole('heading', { name: /Jeden Sonntag eine Lounge/ })).toHaveCount(0);
+    await expect(page.getByRole('heading', { name: /Jede Woche eine Lounge/ })).toHaveCount(0);
     await expect(page.getByRole('link', { name: 'Lounge gewinnen' })).toHaveCount(0);
 
     await mockSupabase(page, { giveawayActive: true });

@@ -37,11 +37,13 @@ export function GiveawayTermsPage() {
 
       <H2>3. Ablauf und Ziehung</H2>
       <p>
-        Das Gewinnspiel läuft bis {s.seasonEnd ? formatLongDate(s.seasonEnd) : '[ENDDATUM]'}. Jeden
-        Sonntag um 18:00 Uhr wird automatisch unter allen bestätigten Teilnehmenden, die noch nicht
-        gewonnen haben, ein Gewinner per Zufall gezogen. Wer einmal angemeldet ist, nimmt an allen
-        folgenden Ziehungen teil. Für jede Person, die über den persönlichen Einladungslink
-        teilnimmt und ihre Teilnahme bestätigt, erhält die einladende Person ein zusätzliches Los.
+        Das Gewinnspiel läuft bis {s.seasonEnd ? formatLongDate(s.seasonEnd) : '[ENDDATUM]'}. Bis
+        zur ersten Ziehung am Samstag, 28. November 2026, um 20:00 Uhr werden alle Teilnahmen
+        gesammelt; danach wird jeden Sonntag um 18:00 Uhr gezogen. Bei jeder Ziehung wird
+        automatisch unter allen bestätigten Teilnehmenden, die noch nicht gewonnen haben, ein
+        Gewinner per Zufall gezogen. Wer einmal angemeldet ist, nimmt an allen folgenden Ziehungen
+        teil. Für jede Person, die über den persönlichen Einladungslink teilnimmt und ihre Teilnahme
+        bestätigt, erhält die einladende Person ein zusätzliches Los.
       </p>
 
       <H2>4. Gewinn</H2>

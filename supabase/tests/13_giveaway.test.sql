@@ -1,6 +1,6 @@
 -- pgTAP: Gewinnspiel – Rabatt-Berechnung, Code nur einmal, Ziehung mit Losen, RLS
 begin;
-select plan(22);
+select plan(23);
 
 update public.settings set season_start = '2026-11-26', season_end = '2026-12-23',
        giveaway_active = true, giveaway_end = '2026-12-20', giveaway_discount_percent = 30;
@@ -89,8 +89,15 @@ select is((select reason from public.discount_pricing(
             (select code from d1 where role = 'trostpreis'), '2026-12-15', '16:45')),
   'expired', 'nach 48 Stunden nicht mehr einlösbar');
 
+-- Erste Ziehung fest (z. B. Sa 28.11. 20 Uhr): solange sie bevorsteht, ist sie die nächste
+update public.settings set giveaway_end = null, season_end = (now() + interval '60 days')::date,
+       giveaway_first_draw_at = date_trunc('hour', now()) + interval '10 days';
+select is(public.next_giveaway_draw(), date_trunc('hour', now()) + interval '10 days',
+  'vor der ersten Ziehung: Countdown bis zur festen ersten Ziehung');
+-- Danach (oder ohne festen Termin): wöchentlich Sonntag 18:00 Uhr
+update public.settings set giveaway_first_draw_at = now() - interval '2 hours';
 -- Countdown: nächste Ziehung ist ein Sonntag 18:00 Uhr Berliner Zeit (sofern vor Aktionsende)
-update public.settings set giveaway_end = null, season_end = (now() + interval '30 days')::date;
+update public.settings set season_end = (now() + interval '30 days')::date;
 select ok((select extract(isodow from t at time zone 'Europe/Berlin') = 7
               and to_char(t at time zone 'Europe/Berlin', 'HH24:MI') = '18:00'
               and t > now() and t <= now() + interval '7 days'

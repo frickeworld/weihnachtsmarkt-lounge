@@ -180,11 +180,14 @@ export function GiveawayAdminPage() {
           <div className="grid gap-6 xl:grid-cols-2">
             <Panel title="Gewinner ziehen">
               <p className="mb-4 text-sm text-ink-soft">
-                <strong>Automatisch jeden Sonntag um 18:00 Uhr</strong>, solange das Gewinnspiel
-                aktiv ist. Von Hand nur, wenn eine Ziehung nachgeholt werden muss. Gezogen wird per
-                Zufall unter allen bestätigten Teilnehmenden, die noch nicht gewonnen haben
-                (Freunde-Bonus: 1 Extra-Los je bestätigtem Freund). Danach gehen sofort raus: dem
-                Gewinner sein 100-%-Code, allen anderen ihr persönlicher{' '}
+                <strong>
+                  Automatisch: erste Ziehung Sa 28.11. um 20:00 Uhr, danach jeden Sonntag um 18:00
+                  Uhr
+                </strong>
+                , solange das Gewinnspiel aktiv ist. Von Hand nur, wenn eine Ziehung nachgeholt
+                werden muss. Gezogen wird per Zufall unter allen bestätigten Teilnehmenden, die noch
+                nicht gewonnen haben (Freunde-Bonus: 1 Extra-Los je bestätigtem Freund). Danach
+                gehen sofort raus: dem Gewinner sein 100-%-Code, allen anderen ihr persönlicher{' '}
                 {d.settings.giveaway_discount_percent}-%-Code, 48 Stunden einlösbar (alle Tage außer
                 Sonderveranstaltungen).
               </p>

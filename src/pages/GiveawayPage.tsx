@@ -88,12 +88,13 @@ export function GiveawayPage() {
           <div>
             <p className="eyebrow mb-3">Gewinnspiel der Händler</p>
             <h1 className="text-4xl leading-tight font-medium sm:text-6xl">
-              Jeden Sonntag eine Lounge gewinnen
+              Jede Woche eine Lounge gewinnen
             </h1>
             <p className="mt-6 text-lg leading-relaxed text-ink-soft">
-              Jeden Sonntag um 18 Uhr verlosen wir automatisch einen Abend in unserer Lounge auf dem
-              Weihnachtsmarkt im Schlosspark – für dich und bis zu {s.maxPersons - 1} Gäste, mit bis
-              zu {maxTalerCount(s)} € Freiverzehr und Tischservice. Einmal anmelden, und du bist bei
+              Erste Ziehung am Samstag, 28. November, um 20 Uhr – danach verlosen wir jeden Sonntag
+              um 18 Uhr automatisch einen Abend in unserer Lounge auf dem Weihnachtsmarkt im
+              Schlosspark – für dich und bis zu {s.maxPersons - 1} Gäste, mit bis zu{' '}
+              {maxTalerCount(s)} € Freiverzehr und Tischservice. Einmal anmelden, und du bist bei
               allen Ziehungen bis zum Ende der Aktion dabei.
             </p>
             <ul className="mt-8 space-y-3">

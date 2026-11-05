@@ -1,4 +1,4 @@
-// giveaway-draw: automatische Gewinnspiel-Ziehung jeden Sonntag 18:00 Uhr (Europe/Berlin).
+// giveaway-draw: automatische Gewinnspiel-Ziehung (erste am 28.11. 20 Uhr, danach sonntags 18 Uhr, Europe/Berlin).
 // Aufruf nur durch pg_cron (public.invoke_giveaway_draw, Header x-cron-secret) oder mit dem
 // Service-Role-Schlüssel. Höchstens eine automatische Ziehung in 12 Stunden.
 import { adminClient } from '../_shared/db.ts';

@@ -7,8 +7,8 @@ import { formatDrawTime } from '@/lib/drawCountdown';
 import { useGiveawayInfo } from '@/lib/useGiveawayInfo';
 
 /**
- * Band „Jeden Sonntag eine Lounge gewinnen“ mit Countdown bis zur automatischen Ziehung
- * (sonntags 18:00 Uhr). Nur sichtbar, solange das Gewinnspiel aktiv ist.
+ * Band „Jede Woche eine Lounge gewinnen“ mit Countdown bis zur automatischen Ziehung
+ * (erste am Sa 28.11. 20 Uhr, danach sonntags 18 Uhr). Nur sichtbar, solange das Gewinnspiel aktiv ist.
  */
 export function GiveawayBand() {
   const info = useGiveawayInfo();
@@ -33,7 +33,7 @@ export function GiveawayBand() {
                   id="gewinnspiel-band"
                   className="font-display mt-1 text-3xl font-medium sm:text-4xl"
                 >
-                  Jeden Sonntag eine Lounge gewinnen
+                  Jede Woche eine Lounge gewinnen
                 </h2>
                 <p className="mt-2 font-medium">
                   {info.nextDrawAt

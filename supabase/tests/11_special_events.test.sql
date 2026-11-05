@@ -4,6 +4,8 @@ select plan(4);
 
 -- Nur die Testdaten betrachten (die Weihnachts-Sondertermine aus der Migration ausblenden)
 delete from public.slot_specials;
+-- Echte Sperren aus Daten-Migrationen (z. B. für die Händler) nicht mitprüfen
+delete from public.blocked_slots;
 
 insert into public.slot_specials (date, start_time, title, act, description, price_cents, taler_count, haendler_share_cents)
 values ('2026-12-05', '20:00', 'Party-Abend', 'DJ [NAME]', 'Tanzen bis 22 Uhr.', 24900, 125, 15000),
