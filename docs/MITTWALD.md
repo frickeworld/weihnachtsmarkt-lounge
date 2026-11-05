@@ -31,17 +31,17 @@ Adresse gebaut wurde. Ohne hinterlegten Zugang wird er übersprungen (kein Fehle
 
 ## 1. Subdomain im alten Kundencenter (studio-f.club)
 
-Nur **einen** neuen Eintrag für `lounge` anlegen. Bestehende Einträge (`@`, `www`, MX für
+Nur **einen** neuen Eintrag für `weihnachtslounge` anlegen. Bestehende Einträge (`@`, `www`, MX für
 E-Mail, `_dmarc`, DKIM, andere Subdomains) **nicht anfassen**.
 
 1. Kundencenter → Tarif **Webhosting L 10.0 (p346507)** → **Domains** → bei `studio-f.club`
-   **Subdomain anlegen**: `lounge`. Ziel/Ordner ist egal (die Seite liegt nicht hier).
+   **Subdomain anlegen**: `weihnachtslounge`. Ziel/Ordner ist egal (die Seite liegt nicht hier).
 2. **DNS-Editor** → `weihnachtslounge.studio-f.club` → eigene Einträge setzen:
    - **A-Record:** IPv4 der mStudio-Projektdomain (steht im mStudio bei der Domain bzw.
      `p-…project.space`; für den Server „Sen-Yoga“ derzeit `185.215.158.107`)
    - **AAAA-Record:** IPv6 entsprechend (derzeit `2a03:2a01:a330:b::3`)
    - Falls mStudio beim Anlegen der Domain einen **TXT-Eintrag zur Bestätigung** verlangt,
-     diesen ebenfalls bei `lounge` anlegen.
+     diesen ebenfalls bei `weihnachtslounge` anlegen.
 3. Wirkt meist nach wenigen Minuten, spätestens nach einigen Stunden.
 
 ## 2. mStudio
