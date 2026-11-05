@@ -22,7 +22,7 @@ export function Highlights() {
     { value: '2 Std.', label: 'exklusiv', note: 'nur für euch' },
   ];
   return (
-    <section aria-label="Das Angebot auf einen Blick" className="px-4 pt-10 sm:px-6 sm:pt-14">
+    <section aria-label="Das Angebot auf einen Blick" className="px-4 py-10 sm:px-6 sm:py-14">
       <Reveal className="mx-auto max-w-6xl">
         <ul className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           {items.map((i, idx) => (

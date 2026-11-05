@@ -31,6 +31,20 @@ test.describe('One-Pager', () => {
     await expect(page.locator('body')).not.toContainText('Kaminfeuer');
   });
 
+  test('mobil: Burger-Menü springt zum Abschnitt und schließt sich', async ({ page, isMobile }) => {
+    test.skip(!isMobile, 'nur mobil');
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Menü öffnen' }).click();
+    const menu = page.getByRole('navigation', { name: 'Menü' });
+    await expect(menu.getByRole('link', { name: 'Partys und besondere Abende' })).toBeVisible();
+    await menu.getByRole('link', { name: 'Preis', exact: true }).click();
+    await expect(menu).toBeHidden();
+    await expect(page).toHaveURL(/#preis$/);
+    await page.getByRole('button', { name: 'Menü öffnen' }).click();
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('navigation', { name: 'Menü' })).toBeHidden();
+  });
+
   test('mobil: Logo im Header zentriert, kein Buchen-Button oben', async ({ page, isMobile }) => {
     test.skip(!isMobile, 'nur mobil');
     await page.goto('/');
