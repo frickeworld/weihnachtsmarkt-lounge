@@ -89,10 +89,11 @@ geht die Seite unter der echten Domain online.
 
 - [ ] Abrechnung für die Händler erstellen (Admin → Abrechnung → PDF).
 - [ ] **Ab 31. März**: Kundendaten anonymisieren (kein Admin-Menüpunkt mehr). Supabase → SQL Editor,
-      alle drei Zeilen zusammen ausführen (entfernt Namen, Kontaktdaten und Wünsche; Beträge und
+      beide Befehle zusammen ausführen (entfernt Namen, Kontaktdaten und Wünsche; Beträge und
       Statistik bleiben; nicht rückgängig zu machen):
-      `sql
-    select set_config('request.jwt.claims', json_build_object('sub', (select id from auth.users
-      where email = 'louis@tanzschule-fricke.de'), 'role', 'authenticated', 'aal', 'aal2')::text, true);
-    select public.admin_anonymize_before('2027-03-31');
-    `
+
+  ```sql
+  select set_config('request.jwt.claims', json_build_object('sub', (select id from auth.users
+    where email = 'louis@tanzschule-fricke.de'), 'role', 'authenticated', 'aal', 'aal2')::text, true);
+  select public.admin_anonymize_before('2027-03-31');
+  ```
