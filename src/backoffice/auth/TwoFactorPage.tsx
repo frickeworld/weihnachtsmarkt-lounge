@@ -9,7 +9,7 @@ import { AuthShell } from './AuthShell';
 type Mode =
   | { kind: 'loading' }
   | { kind: 'verify'; factorId: string }
-  | { kind: 'enroll'; factorId: string; qr: string; secret: string }
+  | { kind: 'enroll'; factorId: string; qr: string; secret: string; uri: string }
   | { kind: 'done' }
   | { kind: 'error'; message: string };
 
@@ -62,6 +62,7 @@ export function TwoFactorPage() {
         factorId: enrolled.id,
         qr: enrolled.totp.qr_code,
         secret: enrolled.totp.secret,
+        uri: enrolled.totp.uri,
       });
     })();
   }, [loading, session, aalCurrent, isAdmin, voluntary]);
@@ -130,20 +131,29 @@ export function TwoFactorPage() {
       {mode.kind === 'error' && <ErrorBox>{mode.message}</ErrorBox>}
       {mode.kind === 'verify' && (
         <div className="space-y-5">
-          <p className="text-ink-soft">Gib den aktuellen Code aus deiner Authenticator-App ein.</p>
+          <p className="text-ink-soft">
+            Gib den aktuellen Code ein (iPhone: App „Passwörter“, sonst deine Code-App).
+          </p>
           {codeForm}
         </div>
       )}
       {mode.kind === 'enroll' && (
         <div className="space-y-5">
           <ol className="list-decimal space-y-2 pl-5 text-ink-soft">
-            <li>Öffne eine Authenticator-App (z. B. Google Authenticator, 1Password).</li>
-            <li>Scanne den QR-Code oder gib den Schlüssel von Hand ein.</li>
+            <li>
+              <strong>Am iPhone:</strong> QR-Code mit der Kamera scannen oder unten „Auf diesem
+              Gerät einrichten“ tippen – der Code landet in der App „Passwörter“ und wird beim Login
+              automatisch vorgeschlagen.
+            </li>
+            <li>Andere Geräte: eine Code-App (z. B. Google Authenticator) öffnen und scannen.</li>
             <li>Gib den angezeigten 6-stelligen Code ein.</li>
           </ol>
           <div className="flex justify-center rounded-xl border border-line bg-white p-4">
-            <img src={mode.qr} alt="QR-Code für die Authenticator-App" className="h-48 w-48" />
+            <img src={mode.qr} alt="QR-Code für die Zwei-Faktor-Anmeldung" className="h-48 w-48" />
           </div>
+          <a href={mode.uri} className={`${smallBtn} w-full justify-center`}>
+            Auf diesem Gerät einrichten
+          </a>
           <details className="text-sm">
             <summary className="cursor-pointer font-semibold text-gold-deep">
               Schlüssel zum Abtippen anzeigen
