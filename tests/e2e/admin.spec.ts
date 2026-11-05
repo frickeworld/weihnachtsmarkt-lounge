@@ -138,6 +138,38 @@ test.describe('Admin', () => {
     await expect(dialog.getByText('Eingecheckt.')).toBeVisible();
   });
 
+  test('Stornieren mit Erstattung ohne Verarbeitungsgebühr', async ({ page }) => {
+    const adminRequests: Record<string, unknown>[] = [];
+    await mockBackoffice(page, {
+      hasFactor: true,
+      adminRequests,
+      adminFn: [{ status: 200, body: { ok: true, refundCents: 17500 } }],
+    });
+    await enter(page, '/admin/buchungen');
+    await page
+      .getByRole('button', { name: /Erika Muster/ })
+      .filter({ visible: true })
+      .first()
+      .click();
+    const dialog = page.getByRole('dialog', { name: 'Buchung HL-ABCD-EFGH' });
+    await dialog.getByRole('button', { name: 'Stornieren …' }).click();
+    await expect(dialog.getByLabel('Alles erstatten (178,50 €)')).toBeChecked();
+    await dialog.getByLabel('Ohne Verarbeitungsgebühr (175,00 €)').check();
+    const confirm = dialog.getByRole('button', { name: 'Endgültig stornieren' });
+    await expect(confirm).toBeDisabled();
+    await dialog.getByLabel('Grund (Pflicht)').fill('Krankheit, Kulanz');
+    await confirm.click();
+    await expect(dialog.getByText('Buchung storniert.')).toBeVisible();
+    expect(adminRequests).toEqual([
+      {
+        action: 'cancel_booking',
+        booking_id: expect.any(String),
+        reason: 'Krankheit, Kulanz',
+        refund: 'without_fee',
+      },
+    ]);
+  });
+
   test('Ticket an eine andere E-Mail-Adresse senden', async ({ page }) => {
     const adminRequests: Record<string, unknown>[] = [];
     await mockBackoffice(page, { hasFactor: true, adminRequests });

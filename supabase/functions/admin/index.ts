@@ -2,6 +2,7 @@
 //   resend_ticket   Ticket erneut senden (optional an eine andere E-Mail-Adresse)
 //   manual_booking  kostenlose Buchung nach Absprache – auch für Händler (ohne Übergehen von
 //                   Buchungsschluss, Sperre, Schließtag oder Saison)
+//   cancel_booking  Stornieren, optional mit Erstattung über Stripe (alles / ohne Gebühr / keine)
 //   invite_user     Zugang per Einladung (Rolle studio_admin oder haendler)
 //   giveaway_draw   Gewinnspiel: Gewinner ziehen, Gewinn- und Trostpreis-Mails senden
 import { createClient } from '@supabase/supabase-js';
@@ -11,6 +12,7 @@ import { adminClient } from '../_shared/db.ts';
 import { json, preflight, requireEnv } from '../_shared/http.ts';
 import { deliverTicket } from '../_shared/ticket.ts';
 import { runGiveawayDraw } from '../_shared/giveawayDraw.ts';
+import { stripeClient } from '../_shared/stripe.ts';
 
 const STATUS_TEXT: Record<string, string> = {
   past: 'Der Buchungsschluss für dieses Zeitfenster ist vorbei.',
@@ -86,6 +88,9 @@ Deno.serve(async (req) => {
 
     case 'manual_booking':
       return manualBooking(db, body, auth.userId, auth.isAdmin);
+
+    case 'cancel_booking':
+      return cancelBooking(db, body);
 
     case 'invite_user':
       return inviteUser(db, body);
@@ -255,4 +260,115 @@ async function giveawayDraw(db: ReturnType<typeof adminClient>, userId: string):
   const r = await runGiveawayDraw(db, userId);
   if (!r.ok) return json({ ok: false, message: r.message }, r.status);
   return json(r);
+}
+
+const cancelSchema = z.object({
+  booking_id: z.string().uuid('Buchung nicht gefunden.'),
+  reason: z.string().trim().min(1, 'Bitte gib einen Grund für die Stornierung an.').max(500),
+  refund: z.enum(['full', 'without_fee', 'none']),
+});
+
+/**
+ * Storno mit optionaler Erstattung. Reihenfolge: erst Stripe-Erstattung, dann Status – schlägt die
+ * Erstattung fehl, bleibt die Buchung unverändert. Der Idempotency-Key verhindert doppelte
+ * Erstattungen bei einem erneuten Klick.
+ */
+async function cancelBooking(
+  db: ReturnType<typeof adminClient>,
+  body: Record<string, unknown>,
+): Promise<Response> {
+  const parsed = cancelSchema.safeParse(body);
+  if (!parsed.success) {
+    return json(
+      { ok: false, message: parsed.error.issues[0]?.message ?? 'Ungültige Angaben.' },
+      400,
+    );
+  }
+  const { booking_id, reason, refund } = parsed.data;
+  const { data: b } = await db
+    .from('bookings')
+    .select('id, status, payment_method, stripe_payment_intent_id, amount_total_cents, fee_cents')
+    .eq('id', booking_id)
+    .maybeSingle<{
+      id: string;
+      status: string;
+      payment_method: string;
+      stripe_payment_intent_id: string | null;
+      amount_total_cents: number;
+      fee_cents: number;
+    }>();
+  if (!b || !['paid', 'pending'].includes(b.status)) {
+    return json({ ok: false, message: 'Buchung nicht gefunden oder bereits storniert.' }, 404);
+  }
+
+  let refundCents = 0;
+  let refundId: string | null = null;
+  if (refund !== 'none' && b.status === 'paid') {
+    if (b.payment_method !== 'stripe' || !b.stripe_payment_intent_id) {
+      return json(
+        {
+          ok: false,
+          message: 'Diese Buchung wurde nicht über Stripe bezahlt – keine Erstattung möglich.',
+        },
+        422,
+      );
+    }
+    refundCents =
+      refund === 'full' ? b.amount_total_cents : Math.max(0, b.amount_total_cents - b.fee_cents);
+    if (refundCents > 0) {
+      try {
+        const r = await stripeClient().refunds.create(
+          {
+            payment_intent: b.stripe_payment_intent_id,
+            amount: refundCents,
+            reason: 'requested_by_customer',
+            metadata: { booking_id: b.id },
+          },
+          { idempotencyKey: `refund-${b.id}-${refundCents}` },
+        );
+        refundId = r.id;
+      } catch (e) {
+        console.error('refund', e);
+        const msg = e instanceof Error ? e.message : '';
+        return json(
+          {
+            ok: false,
+            message:
+              `Stripe hat die Erstattung abgelehnt. Die Buchung bleibt bestehen. ${msg}`.trim(),
+          },
+          502,
+        );
+      }
+    }
+  }
+
+  const { error } = await db
+    .from('bookings')
+    .update({
+      status: 'cancelled',
+      cancelled_at: new Date().toISOString(),
+      cancel_reason: reason,
+      ...(refundId
+        ? {
+            refund_cents: refundCents,
+            refunded_at: new Date().toISOString(),
+            stripe_refund_id: refundId,
+          }
+        : {}),
+    })
+    .eq('id', b.id)
+    .in('status', ['paid', 'pending']);
+  if (error) {
+    console.error('cancel_booking', error);
+    return json(
+      {
+        ok: false,
+        message: refundId
+          ? 'Erstattet, aber die Buchung konnte nicht als storniert gespeichert werden. Bitte Studio F melden.'
+          : 'Die Buchung konnte nicht storniert werden.',
+      },
+      500,
+    );
+  }
+  return json({ ok: true, refundCents });
 }

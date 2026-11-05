@@ -199,6 +199,61 @@ Deno.test({
         },
       );
 
+      await t.step('Stornieren mit Erstattung ohne Gebühr (stripe-mock)', async () => {
+        const { data: b, error } = await db
+          .from('bookings')
+          .insert({
+            date: '2026-12-09',
+            start_time: '16:45',
+            end_time: '18:45',
+            status: 'paid',
+            source: 'online',
+            payment_method: 'stripe',
+            stripe_payment_intent_id: 'pi_refundtest',
+            first_name: 'Ria',
+            last_name: 'Fund',
+            email: 'refund@example.de',
+            phone: '0123456',
+            persons: 2,
+            paid_at: new Date().toISOString(),
+          })
+          .select('id, amount_total_cents, fee_cents')
+          .single();
+        assert(!error, error?.message);
+        ids.push(b!.id);
+        const ohneGrund = await call({
+          action: 'cancel_booking',
+          booking_id: b!.id,
+          reason: '',
+          refund: 'full',
+        });
+        assertEquals(ohneGrund.status, 400);
+        const r = await call({
+          action: 'cancel_booking',
+          booking_id: b!.id,
+          reason: 'Kulanz',
+          refund: 'without_fee',
+        });
+        assertEquals(r.status, 200, JSON.stringify(r.body));
+        assertEquals(r.body.refundCents, b!.amount_total_cents - b!.fee_cents);
+        const { data: after } = await db
+          .from('bookings')
+          .select('status, cancel_reason, refund_cents, stripe_refund_id')
+          .eq('id', b!.id)
+          .single();
+        assertEquals(after!.status, 'cancelled');
+        assertEquals(after!.cancel_reason, 'Kulanz');
+        assertEquals(after!.refund_cents, b!.amount_total_cents - b!.fee_cents);
+        assert(after!.stripe_refund_id);
+        const again = await call({
+          action: 'cancel_booking',
+          booking_id: b!.id,
+          reason: 'x',
+          refund: 'full',
+        });
+        assertEquals(again.status, 404);
+      });
+
       await t.step('Ticket erneut senden', async () => {
         const r = await call({ action: 'resend_ticket', booking_id: ids[0] });
         assertEquals(r.status, 200, JSON.stringify(r.body));

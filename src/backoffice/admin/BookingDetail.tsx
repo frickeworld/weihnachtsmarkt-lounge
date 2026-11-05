@@ -45,6 +45,9 @@ export function BookingDetail({
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [cancelOpen, setCancelOpen] = useState(false);
   const [reason, setReason] = useState('');
+  const canRefund =
+    b.status === 'paid' && b.payment_method === 'stripe' && b.amount_total_cents > 0;
+  const [refund, setRefund] = useState<'full' | 'without_fee' | 'none'>('full');
   const [forwardOpen, setForwardOpen] = useState(false);
   const [forwardEmail, setForwardEmail] = useState('');
   const [forwardName, setForwardName] = useState('');
@@ -145,6 +148,8 @@ export function BookingDetail({
   if (b.admin_override) rows.push(['Hinweis', 'Vom Admin trotz Sperre/Buchungsschluss angelegt']);
   if (b.cancelled_at)
     rows.push(['Storniert', `${formatDateTime(b.cancelled_at)} – ${b.cancel_reason ?? ''}`]);
+  if (b.refund_cents != null)
+    rows.push(['Erstattet', `${formatCents(b.refund_cents)} am ${formatDateTime(b.refunded_at)}`]);
   if (b.anonymized_at) rows.push(['Anonymisiert', formatDateTime(b.anonymized_at)]);
 
   return (
@@ -277,8 +282,41 @@ export function BookingDetail({
         <div className="mt-5 space-y-3 rounded-xl border border-red-300 bg-red-50 p-4">
           <p className="text-sm text-red-950">
             Die Buchung wird storniert, das Zeitfenster wird wieder frei und zählt nicht mehr zur
-            Abrechnung. <strong>Eine Erstattung musst du selbst in Stripe auslösen.</strong>
+            Abrechnung.
           </p>
+          {canRefund ? (
+            <fieldset className="space-y-2 text-sm">
+              <legend className="field-label">Erstattung über Stripe</legend>
+              {(
+                [
+                  ['full', `Alles erstatten (${formatCents(b.amount_total_cents)})`],
+                  [
+                    'without_fee',
+                    `Ohne Verarbeitungsgebühr (${formatCents(Math.max(0, b.amount_total_cents - b.fee_cents))})`,
+                  ],
+                  ['none', 'Nicht erstatten'],
+                ] as const
+              ).map(([value, label]) => (
+                <label key={value} className="flex min-h-11 cursor-pointer items-center gap-3">
+                  <input
+                    type="radio"
+                    name="refund"
+                    value={value}
+                    checked={refund === value}
+                    onChange={() => setRefund(value)}
+                    className="h-5 w-5 accent-[#7a5a1e]"
+                  />
+                  <span>{label}</span>
+                </label>
+              ))}
+              <p className="text-ink-soft">
+                Das Geld geht auf dieselbe Karte bzw. dasselbe PayPal-Konto zurück (meist 5–10
+                Werktage).
+              </p>
+            </fieldset>
+          ) : (
+            <p className="text-sm text-red-950">Keine Stripe-Zahlung – es wird nichts erstattet.</p>
+          )}
           <label className="block text-sm">
             <span className="field-label">Grund (Pflicht)</span>
             <input
@@ -293,10 +331,14 @@ export function BookingDetail({
               className={dangerBtn}
               disabled={busy || !reason.trim()}
               onClick={() =>
-                void run(
-                  'Buchung storniert.',
-                  rpc('admin_cancel_booking', { p_booking_id: b.id, p_reason: reason.trim() }),
-                ).then(() => setCancelOpen(false))
+                void run('Buchung storniert.', async () => {
+                  const r = await callAdmin<{ refundCents: number }>('cancel_booking', {
+                    booking_id: b.id,
+                    reason: reason.trim(),
+                    refund: canRefund ? refund : 'none',
+                  });
+                  return r.ok ? null : r.message;
+                }).then(() => setCancelOpen(false))
               }
             >
               Endgültig stornieren

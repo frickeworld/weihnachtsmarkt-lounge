@@ -4,6 +4,7 @@
     "npm:@supabase/supabase-js@2.117.2": "2.117.2",
     "npm:pdf-lib@1.17.1": "1.17.1",
     "npm:qrcode@1.5.4": "1.5.4",
+    "npm:stripe@23.0.0": "23.0.0",
     "npm:zod@4.6.5": "4.6.5"
   },
   "npm": {
@@ -188,6 +189,9 @@
       "dependencies": [
         "ansi-regex"
       ]
+    },
+    "stripe@23.0.0": {
+      "integrity": "sha512-MDE2A5ZVVluYURORaZEVghSmnLJc3w6aHAlZSxDQMsOjOb3V0O6ro/CiaeFlJS4N7uIVmsg98ocRsPmUK6YfyA=="
     },
     "tslib@1.14.1": {
       "integrity": "sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg=="

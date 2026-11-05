@@ -23,6 +23,8 @@ export interface Booking {
   billing_city: string | null;
   notes: string | null;
   approval_note?: string | null;
+  refund_cents?: number | null;
+  refunded_at?: string | null;
   newsletter_opt_in: boolean;
   price_cents: number;
   fee_cents: number;
