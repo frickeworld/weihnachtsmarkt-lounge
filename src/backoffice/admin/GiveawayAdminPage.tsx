@@ -5,6 +5,7 @@ import { errorText } from '../errors';
 import { Kpi } from '../Kpi';
 import { ErrorBox, Loading, PageHeader, Panel, SuccessBox, WarnBox } from '../ui';
 import { callAdmin } from './api';
+import { downloadFile, toCsv } from './csv';
 import { formatDateTime } from './format';
 import { unwrap, useLoad } from './useLoad';
 
@@ -15,6 +16,11 @@ interface Overview {
     giveaway_discount_percent: number;
   };
   entries: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+    created_at: string;
     confirmed_at: string | null;
     unsubscribed_at: string | null;
     won_draw_id: number | null;
@@ -51,7 +57,10 @@ export function GiveawayAdminPage() {
         .single(),
       c
         .from('giveaway_entries')
-        .select('confirmed_at, unsubscribed_at, won_draw_id, referred_by, company'),
+        .select(
+          'id, first_name, last_name, email, created_at, confirmed_at, unsubscribed_at, won_draw_id, referred_by, company',
+        )
+        .order('created_at', { ascending: false }),
       c
         .from('giveaway_draws')
         .select('id, drawn_at, pool_size, lots, mails_sent, winner_entry_id')
@@ -270,6 +279,75 @@ export function GiveawayAdminPage() {
             </Panel>
           </div>
 
+          <Panel title={`Teilnehmer (${d.entries.length})`} className="mt-6">
+            {d.entries.length === 0 ? (
+              <p className="text-ink-soft">Noch niemand angemeldet.</p>
+            ) : (
+              <>
+                <div className="mb-3 flex justify-end">
+                  <button
+                    type="button"
+                    className="text-sm font-semibold text-gold-deep underline underline-offset-4"
+                    onClick={() =>
+                      downloadFile(
+                        'gewinnspiel-teilnehmer.csv',
+                        toCsv(
+                          [
+                            'Vorname',
+                            'Nachname',
+                            'E-Mail',
+                            'Firma',
+                            'Angemeldet',
+                            'Status',
+                            'Lose',
+                          ],
+                          d.entries.map((e) => [
+                            e.first_name,
+                            e.last_name,
+                            e.email,
+                            e.company,
+                            formatDateTime(e.created_at),
+                            entryStatus(e),
+                            lotsOf(e, d.entries),
+                          ]),
+                        ),
+                      )
+                    }
+                  >
+                    Als CSV herunterladen
+                  </button>
+                </div>
+                <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Teilnehmer">
+                  <table className="w-full text-left text-sm">
+                    <thead className="text-ink-soft">
+                      <tr>
+                        <th className="py-1 font-semibold">Name</th>
+                        <th className="py-1 font-semibold">E-Mail</th>
+                        <th className="py-1 font-semibold">Angemeldet</th>
+                        <th className="py-1 font-semibold">Status</th>
+                        <th className="py-1 text-right font-semibold">Lose</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {d.entries.map((e) => (
+                        <tr key={e.id} className="border-t border-line align-top">
+                          <td className="py-2">
+                            {e.first_name} {e.last_name}
+                            {e.company && <div className="text-ink-soft">{e.company}</div>}
+                          </td>
+                          <td className="py-2 break-all">{e.email}</td>
+                          <td className="py-2 whitespace-nowrap">{formatDateTime(e.created_at)}</td>
+                          <td className="py-2">{entryStatus(e)}</td>
+                          <td className="py-2 text-right tabular-nums">{lotsOf(e, d.entries)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )}
+          </Panel>
+
           <Panel title="Bisherige Ziehungen" className="mt-6">
             {d.draws.length === 0 ? (
               <p className="text-ink-soft">Noch keine Ziehung.</p>
@@ -314,5 +392,22 @@ export function GiveawayAdminPage() {
         </>
       )}
     </>
+  );
+}
+
+type Entry = Overview['entries'][number];
+
+function entryStatus(e: Entry): string {
+  if (e.unsubscribed_at) return 'abgemeldet';
+  if (e.won_draw_id) return 'gewonnen';
+  if (e.confirmed_at) return 'im Lostopf';
+  return 'wartet auf Bestätigung (E-Mail)';
+}
+
+/** 1 Los, plus 1 je bestätigtem Freund – nur solange im Lostopf. */
+function lotsOf(e: Entry, all: Entry[]): number {
+  if (!e.confirmed_at || e.unsubscribed_at || e.won_draw_id) return 0;
+  return (
+    1 + all.filter((x) => x.referred_by === e.id && x.confirmed_at && !x.unsubscribed_at).length
   );
 }

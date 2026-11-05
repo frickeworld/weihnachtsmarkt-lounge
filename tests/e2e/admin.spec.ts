@@ -113,7 +113,12 @@ test.describe('Admin', () => {
       ],
     });
     await enter(page, '/admin/gewinnspiel');
-    await expect(page.getByText('Gina Gewinn')).toBeVisible();
+    // Teilnehmerliste mit Namen, E-Mail, Status und Losen
+    const list = page.getByRole('region', { name: 'Teilnehmer' });
+    await expect(list.getByText('cem@example.de')).toBeVisible();
+    await expect(list.getByRole('row', { name: /Cem C.*wartet auf Bestätigung/ })).toBeVisible();
+    await expect(list.getByRole('row', { name: /Ben B.*im Lostopf.*1$/ })).toBeVisible();
+    await expect(list.getByRole('row', { name: /Gina Gewinn.*gewonnen.*0$/ })).toBeVisible();
     await page.getByRole('button', { name: 'Gewinner ziehen' }).click();
     await expect(page.getByText(/Jetzt ziehen und 1 Mails versenden/)).toBeVisible();
     await page.getByRole('button', { name: 'Ja, jetzt ziehen' }).click();
