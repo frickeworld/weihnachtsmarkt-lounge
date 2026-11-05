@@ -246,6 +246,8 @@ test.describe('Admin', () => {
     await page.getByLabel('E-Mail (für das Ticket)').fill('tele@example.de');
     await page.getByLabel('Telefon').fill('05231 123456');
     await page.getByLabel('Personen').selectOption('6');
+    // Firmenname ohne Rechnungsadresse ist bei kostenlosen Buchungen erlaubt
+    await page.getByLabel('Firmenname (optional)').fill('Tanzschule Fricke');
     // Ohne Absprache-Notiz geht nichts raus
     await page.getByRole('button', { name: 'Kostenlos buchen und Ticket senden' }).click();
     await expect(
@@ -266,7 +268,7 @@ test.describe('Admin', () => {
     });
     expect(adminRequests[1]).toMatchObject({
       override: true,
-      form: { firstName: 'Tele', persons: 6 },
+      form: { firstName: 'Tele', persons: 6, companyName: 'Tanzschule Fricke' },
     });
     // Preise schickt der Browser nie mit
     expect(JSON.stringify(adminRequests)).not.toMatch(/cents/);

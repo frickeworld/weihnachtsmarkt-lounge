@@ -126,7 +126,8 @@ Deno.test({
             startTime: '16:45',
             paymentMethod: 'kostenlos',
             approvalNote: 'Paul (Händler) und Louis',
-            form,
+            // Firmenname ohne Rechnungsadresse: bei kostenlosen Buchungen erlaubt
+            form: { ...form, companyName: 'Tanzschule Fricke' },
           });
           assertEquals(r.status, 200, JSON.stringify(r.body));
           assertEquals(r.body.ticketSent, true);

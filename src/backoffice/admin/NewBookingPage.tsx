@@ -36,7 +36,10 @@ const SLOT_STATUS: Record<string, string> = {
  */
 export function NewBookingPage({ area = 'admin' }: { area?: 'admin' | 'haendler' }) {
   const settings = useSettings();
-  const schema = useMemo(() => createBookingSchema(settings.maxPersons), [settings.maxPersons]);
+  const schema = useMemo(
+    () => createBookingSchema(settings.maxPersons, { billing: false }),
+    [settings.maxPersons],
+  );
   const [date, setDate] = useState(() => {
     const tomorrow = addDays(todayInBerlin(), 1);
     return tomorrow < settings.seasonStart ? settings.seasonStart : tomorrow;
@@ -112,6 +115,12 @@ export function NewBookingPage({ area = 'admin' }: { area?: 'admin' | 'haendler'
     setError(r.message);
   };
 
+  // Nie still scheitern: Eingabefehler immer oben als Meldung zeigen.
+  const onInvalid = (errs: Record<string, { message?: string } | undefined>) => {
+    const first = Object.values(errs).find((x) => x?.message)?.message;
+    setError(first ? `Bitte prüfe die Angaben: ${first}` : 'Bitte prüfe die Angaben.');
+  };
+
   return (
     <>
       <PageHeader title="Kostenlose Buchung" />
@@ -137,7 +146,7 @@ export function NewBookingPage({ area = 'admin' }: { area?: 'admin' | 'haendler'
 
       <form
         noValidate
-        onSubmit={(e) => void handleSubmit((v) => submit(v))(e)}
+        onSubmit={(e) => void handleSubmit((v) => submit(v), onInvalid)(e)}
         className="grid gap-6 lg:grid-cols-[22rem_1fr]"
       >
         <div className="space-y-6">
@@ -314,7 +323,7 @@ export function NewBookingPage({ area = 'admin' }: { area?: 'admin' | 'haendler'
                 type="button"
                 className={smallBtn}
                 disabled={isSubmitting}
-                onClick={() => void handleSubmit((v) => submit(v, true))()}
+                onClick={() => void handleSubmit((v) => submit(v, true), onInvalid)()}
               >
                 Ja, trotzdem buchen
               </button>

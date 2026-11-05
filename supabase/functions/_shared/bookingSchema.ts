@@ -17,7 +17,12 @@ export type Occasion = (typeof OCCASIONS)[number]['value'];
 const trimmed = (max: number) => z.string().trim().max(max, `Bitte höchstens ${max} Zeichen.`);
 const required = (msg: string, max = 100) => trimmed(max).min(1, msg);
 
-export function createBookingSchema(maxPersons: number) {
+/**
+ * `billing: false` für kostenlose Buchungen im Admin: keine Rechnung, daher auch mit Firmenname
+ * keine Pflicht-Rechnungsadresse.
+ */
+export function createBookingSchema(maxPersons: number, opts: { billing?: boolean } = {}) {
+  const billing = opts.billing ?? true;
   return z
     .object({
       firstName: required('Bitte gib deinen Vornamen an.'),
@@ -62,7 +67,7 @@ export function createBookingSchema(maxPersons: number) {
       newsletterOptIn: z.boolean(),
     })
     .superRefine((v, ctx) => {
-      if (!needsBillingAddress(v)) return;
+      if (!billing || !needsBillingAddress(v)) return;
       if (!v.billingStreet)
         ctx.addIssue({
           code: 'custom',
@@ -149,7 +154,7 @@ export function createManualBookingRequestSchema(maxPersons: number) {
   return z.object({
     date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Ungültiges Datum.'),
     startTime: z.string().regex(/^\d{2}:\d{2}$/, 'Ungültige Uhrzeit.'),
-    form: createBookingSchema(maxPersons),
+    form: createBookingSchema(maxPersons, { billing: false }),
     /** Manuelle Buchungen sind nur noch kostenlos (keine Bar- oder Überweisungsbuchungen). */
     paymentMethod: z.literal('kostenlos', { message: 'Manuelle Buchungen sind nur kostenlos.' }),
     /** Mit wem die kostenlose Buchung abgesprochen ist (Tanzschule Fricke und Händler). */
