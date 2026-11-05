@@ -39,9 +39,9 @@ E-Mail, `_dmarc`, DKIM, andere Subdomains) **nicht anfassen**.
 2. **DNS-Editor** → `weihnachtslounge.studio-f.club` → eigene Einträge setzen:
    - **A-Record:** IPv4 der mStudio-Projektdomain (steht im mStudio bei der Domain bzw.
      `p-…project.space`; für den Server „Sen-Yoga“ derzeit `185.215.158.107`)
-   - **AAAA-Record:** IPv6 entsprechend (derzeit `2a03:2a01:a330:b::3`)
-   - Falls mStudio beim Anlegen der Domain einen **TXT-Eintrag zur Bestätigung** verlangt,
-     diesen ebenfalls bei `weihnachtslounge` anlegen.
+   - **Kein AAAA-Record** (IPv6 aus lassen): mStudio stellt das SSL-Zertifikat sonst nicht aus.
+   - **TXT-Eintrag** `domainVerification=…` aus mStudio (Domain → „Domain nicht verifiziert“)
+     ebenfalls bei `weihnachtslounge` anlegen, dann in mStudio „Verifizierung starten“.
 3. Wirkt meist nach wenigen Minuten, spätestens nach einigen Stunden.
 
 ## 2. mStudio
@@ -52,7 +52,8 @@ E-Mail, `_dmarc`, DKIM, andere Subdomains) **nicht anfassen**.
    Name `Weihnachtsmarkt-Lounge`, Installationsverzeichnis `weihnachtslounge` → `/html/weihnachtslounge`,
    PHP-Version wie vorgeschlagen. Eine Platzhalter-`index.php` darf liegen bleiben
    (unsere `.htaccess` setzt `index.html` als Startseite); löschen schadet auch nicht.
-3. **Domain:** `weihnachtslounge.studio-f.club` hinzufügen und mit der App verbinden. SSL-Zertifikat
+3. **Domain:** Domains → Hinzufügen → **„vHost einrichten“** (nicht „Domain umziehen“!) →
+   `weihnachtslounge.studio-f.club`, Ziel: App `weihnachtslounge`. SSL-Zertifikat
    (Let's Encrypt) erstellt mStudio automatisch, sobald der DNS-Eintrag wirkt.
 4. **SFTP-Zugang** im Projekt anlegen (Passwort). Notieren: Server (Host), Benutzername, Pfad
    der App (`/html/weihnachtslounge`). Die genauen Verbindungsdaten zeigt mStudio beim Benutzer an.
