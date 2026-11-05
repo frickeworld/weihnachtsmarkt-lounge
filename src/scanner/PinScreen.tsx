@@ -4,6 +4,7 @@ import { scannerApi } from './api';
 import { unlockAudio } from './feedback';
 import type { ScannerSession } from './storage';
 
+const PIN_LENGTH = 4;
 const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', '⌫'];
 
 /** PIN-Eingabe mit großer Zifferntastatur (auch mit Handschuhen bedienbar). */
@@ -39,10 +40,10 @@ export function PinScreen({
     unlockAudio();
     if (busy) return;
     if (k === '⌫') return setPin((p) => p.slice(0, -1));
-    if (!k || pin.length >= 6) return;
+    if (!k || pin.length >= PIN_LENGTH) return;
     const next = pin + k;
     setPin(next);
-    if (next.length === 6) void submit(next);
+    if (next.length === PIN_LENGTH) void submit(next);
   };
 
   return (
@@ -55,10 +56,10 @@ export function PinScreen({
         <h1 className="mt-2 text-3xl font-medium">PIN eingeben</h1>
         <div
           className="my-8 flex gap-3"
-          aria-label={`${pin.length} von 6 Ziffern eingegeben`}
+          aria-label={`${pin.length} von ${PIN_LENGTH} Ziffern eingegeben`}
           role="status"
         >
-          {Array.from({ length: 6 }, (_, i) => (
+          {Array.from({ length: PIN_LENGTH }, (_, i) => (
             <span
               key={i}
               aria-hidden="true"
@@ -90,7 +91,7 @@ export function PinScreen({
           )}
         </div>
         <p className="mt-8 text-center text-sm text-ink-soft">
-          Die PIN bekommst du von Studio F. Nach 5 falschen Eingaben ist der Scanner 10 Minuten
+          Die PIN bekommst du von Studio F. Nach 5 falschen Eingaben ist der Scanner 15 Minuten
           gesperrt.
         </p>
       </div>

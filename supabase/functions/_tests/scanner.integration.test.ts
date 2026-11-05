@@ -31,7 +31,7 @@ Deno.test({
     // pgcrypto versteht bcrypt im Format $2a$
     await db
       .from('settings')
-      .update({ scanner_pin_hash: bcrypt.hashSync('482915', 4) })
+      .update({ scanner_pin_hash: bcrypt.hashSync('4829', 4) })
       .eq('id', 1);
     const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Berlin' }).format(
       new Date(),
@@ -58,13 +58,13 @@ Deno.test({
 
     try {
       await t.step('falsche PIN → Hinweis mit Restversuchen', async () => {
-        const r = await call({ action: 'auth', pin: '000000' });
+        const r = await call({ action: 'auth', pin: '0000' });
         assertEquals(r.status, 401);
         assertMatch(r.body.message, /Noch 4 Versuche/);
       });
 
       await t.step('richtige PIN → Token für 12 Stunden', async () => {
-        const r = await call({ action: 'auth', pin: '482915' });
+        const r = await call({ action: 'auth', pin: '4829' });
         assertEquals(r.status, 200, JSON.stringify(r.body));
         token = r.body.token;
         const hours = (Date.parse(r.body.expiresAt) - Date.now()) / 3_600_000;

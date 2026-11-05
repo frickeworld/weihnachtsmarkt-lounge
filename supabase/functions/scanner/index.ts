@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
     if (!r.ok) {
       const message =
         r.reason === 'locked'
-          ? 'Zu viele Fehlversuche. Bitte warte 10 Minuten.'
+          ? `Zu viele Fehlversuche. Bitte warte ${waitMinutes(r.locked_until)} Minuten.`
           : r.reason === 'no_pin'
             ? 'Der Scanner ist noch nicht freigeschaltet. Studio F legt die PIN im Admin fest.'
             : `PIN falsch. Noch ${r.remaining} ${r.remaining === 1 ? 'Versuch' : 'Versuche'}.`;
@@ -94,3 +94,9 @@ Deno.serve(async (req) => {
       return json({ error: 'unknown_action' }, 400);
   }
 });
+
+/** Restliche Sperrzeit in ganzen Minuten (mindestens 1). */
+function waitMinutes(lockedUntil?: string): number {
+  const ms = lockedUntil ? Date.parse(lockedUntil) - Date.now() : 15 * 60_000;
+  return Math.max(1, Math.ceil(ms / 60_000));
+}

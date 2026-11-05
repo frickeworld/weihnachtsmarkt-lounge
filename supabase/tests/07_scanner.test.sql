@@ -1,8 +1,8 @@
 -- pgTAP Phase 6: PIN-Sperre, Scan-Ergebnisse, Taler, Liste „Heute“, Rechte
 begin;
-select plan(26);
+select plan(27);
 
-update public.settings set scanner_pin_hash = extensions.crypt('482915', extensions.gen_salt('bf', 4));
+update public.settings set scanner_pin_hash = extensions.crypt('4829', extensions.gen_salt('bf', 4));
 
 -- Heute (Berlin) mit Zeitfenster über den ganzen Tag → „jetzt“ liegt sicher darin
 create temp table t as select (now() at time zone 'Europe/Berlin')::date as today;
@@ -17,21 +17,23 @@ create temp table tok as
   select id, ticket_token, booking_code from public.bookings where id::text like 'dddddddd-%';
 
 -- ---------- PIN ----------
-select is(public.scanner_check_pin('ip-a', '000000') ->> 'remaining', '4', 'falsche PIN: noch 4 Versuche');
-select public.scanner_check_pin('ip-a', '000000');
-select public.scanner_check_pin('ip-a', '000000');
-select is(public.scanner_check_pin('ip-a', '000000') ->> 'remaining', '1', 'noch 1 Versuch');
-select is(public.scanner_check_pin('ip-a', '000000') ->> 'reason', 'locked', '5. Fehlversuch sperrt');
-select is(public.scanner_check_pin('ip-a', '482915') ->> 'reason', 'locked', 'auch die richtige PIN bleibt 10 Minuten gesperrt');
-select ok((select locked_until > now() + interval '9 minutes' from public.scanner_attempts where ip_hash = 'ip-a'), 'Sperre ca. 10 Minuten');
-select is((public.scanner_check_pin('ip-b', '482915') ->> 'ok')::boolean, true, 'richtige PIN auf anderem Gerät');
-select is((public.scanner_check_pin('ip-b', '482915') ->> 'version')::int, (select scanner_token_version from public.settings), 'liefert Token-Version');
+select is(public.scanner_check_pin('ip-a', '0000') ->> 'remaining', '4', 'falsche PIN: noch 4 Versuche');
+select public.scanner_check_pin('ip-a', '0000');
+select public.scanner_check_pin('ip-a', '0000');
+select is(public.scanner_check_pin('ip-a', '0000') ->> 'remaining', '1', 'noch 1 Versuch');
+select is(public.scanner_check_pin('ip-a', '0000') ->> 'reason', 'locked', '5. Fehlversuch sperrt');
+select is(public.scanner_check_pin('ip-a', '4829') ->> 'reason', 'locked', 'auch die richtige PIN bleibt 15 Minuten gesperrt');
+select ok((select locked_until > now() + interval '14 minutes' from public.scanner_attempts where ip_hash = 'ip-a'), 'Sperre ca. 15 Minuten');
+select is((public.scanner_check_pin('ip-b', '4829') ->> 'ok')::boolean, true, 'richtige PIN auf anderem Gerät');
+select is((public.scanner_check_pin('ip-b', '4829') ->> 'version')::int, (select scanner_token_version from public.settings), 'liefert Token-Version');
 
--- Gerätübergreifend: 30 Fehlversuche von wechselnden Geräten → Pause für alle
-select public.scanner_check_pin('ip-x' || i, '111111') from generate_series(1, 25) i;
-select is(public.scanner_check_pin('ip-y', '482915') ->> 'reason', 'locked', 'nach 30 Fehlversuchen insgesamt gesperrt');
+-- Gerätübergreifend: 20 Fehlversuche in einer Stunde von wechselnden Geräten → 1 Stunde Pause
+select public.scanner_check_pin('ip-x' || i, '1111') from generate_series(1, 14) i;
+select isnt(public.scanner_check_pin('ip-z', '4829') ->> 'reason', 'locked', 'nach 19 Fehlversuchen noch offen');
+select public.scanner_check_pin('ip-x99', '1111');
+select is(public.scanner_check_pin('ip-y', '4829') ->> 'reason', 'locked', 'nach 20 Fehlversuchen insgesamt gesperrt');
 update public.scanner_attempts set locked_until = now() - interval '1 second' where ip_hash = '*global*';
-select is((public.scanner_check_pin('ip-y', '482915') ->> 'ok')::boolean, true, 'nach Ablauf wieder frei');
+select is((public.scanner_check_pin('ip-y', '4829') ->> 'ok')::boolean, true, 'nach Ablauf wieder frei');
 
 -- ---------- Scannen ----------
 select is(public.scanner_scan((select ticket_token from tok where id = 'dddddddd-0000-0000-0000-000000000001')) ->> 'result', 'ok', 'gültiger QR-Code → grün');

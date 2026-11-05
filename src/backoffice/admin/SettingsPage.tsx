@@ -253,8 +253,8 @@ function ScannerPinPanel() {
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!/^\d{6}$/.test(pin))
-      return setMsg({ ok: false, text: 'Die PIN muss genau 6 Ziffern haben.' });
+    if (!/^\d{4}$/.test(pin))
+      return setMsg({ ok: false, text: 'Die PIN muss genau 4 Ziffern haben.' });
     if (pin !== repeat) return setMsg({ ok: false, text: 'Die PINs stimmen nicht überein.' });
     setBusy(true);
     const { error } = await requireClient().rpc('admin_set_scanner_pin', { p_pin: pin });
@@ -298,7 +298,7 @@ function ScannerPinPanel() {
             type="password"
             inputMode="numeric"
             autoComplete="new-password"
-            maxLength={6}
+            maxLength={4}
             className="field-input tracking-widest"
             value={pin}
             onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
@@ -310,7 +310,7 @@ function ScannerPinPanel() {
             type="password"
             inputMode="numeric"
             autoComplete="new-password"
-            maxLength={6}
+            maxLength={4}
             className="field-input tracking-widest"
             value={repeat}
             onChange={(e) => setRepeat(e.target.value.replace(/\D/g, ''))}

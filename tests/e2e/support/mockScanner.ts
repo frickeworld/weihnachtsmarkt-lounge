@@ -43,7 +43,7 @@ export async function mockScanner(page: Page, mock: ScannerMock) {
     const body = route.request().postDataJSON() as Record<string, unknown>;
     mock.requests.push(body);
     if (body.action === 'auth') {
-      if (body.pin !== '482915')
+      if (body.pin !== '4829')
         return route.fulfill({
           status: 401,
           json: { error: 'wrong_pin', message: 'PIN falsch. Noch 4 Versuche.' },
@@ -113,6 +113,6 @@ export async function enterPin(page: Page, pin: string) {
 
 export async function login(page: Page) {
   await page.goto('/scan');
-  await enterPin(page, '482915');
+  await enterPin(page, '4829');
   await expect(page.getByRole('button', { name: 'Abmelden' })).toBeVisible();
 }

@@ -31,7 +31,7 @@ set local role authenticated;
 set local request.jwt.claims = '{"sub":"00000000-0000-0000-0000-0000000000a1","role":"authenticated","aal":"aal1"}';
 select throws_ok($$select public.admin_dashboard('2026-12-01', '2026-12-07')$$, '42501', null, 'Kennzahlen ohne 2FA gesperrt');
 select throws_ok($$select public.admin_check_in('bbbbbbbb-0000-0000-0000-000000000001')$$, '42501', null, 'Check-in ohne 2FA gesperrt');
-select throws_ok($$select public.admin_set_scanner_pin('123456')$$, '42501', null, 'PIN ohne 2FA gesperrt');
+select throws_ok($$select public.admin_set_scanner_pin('1234')$$, '42501', null, 'PIN ohne 2FA gesperrt');
 
 -- ---------- Händler: gesperrt ----------
 set local request.jwt.claims = '{"sub":"00000000-0000-0000-0000-0000000000b1","role":"authenticated","aal":"aal2"}';
@@ -62,8 +62,8 @@ select is((select (j ->> 'taler_handed_out')::int from k), 1, '1 × Taler überg
 select is((select jsonb_array_length(j -> 'daily') from k), 7, 'Tagesreihe hat 7 Tage');
 
 -- Scanner-PIN
-select is(public.admin_set_scanner_pin('482915'), (select v + 1 from pin_before), 'PIN gesetzt, Version erhöht (alle Scanner abgemeldet)');
-select throws_ok($$select public.admin_set_scanner_pin('12ab56')$$, '22023', null, 'PIN muss 6 Ziffern haben');
+select is(public.admin_set_scanner_pin('4829'), (select v + 1 from pin_before), 'PIN gesetzt, Version erhöht (alle Scanner abgemeldet)');
+select throws_ok($$select public.admin_set_scanner_pin('12a4')$$, '22023', null, 'PIN muss 4 Ziffern haben');
 select throws_ok($$select scanner_pin_hash from public.settings$$, '42501', null, 'Admin kann den PIN-Hash nicht lesen');
 
 -- Anonymisieren (Stichtag darf nicht in der Zukunft liegen)

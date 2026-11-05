@@ -7,9 +7,9 @@ test.describe('Scanner', () => {
     await mockScanner(page, mock);
     await page.goto('/scan');
     await expect(page.locator('meta[name="robots"][content*="noindex"]').first()).toBeAttached();
-    await enterPin(page, '111111');
+    await enterPin(page, '1111');
     await expect(page.getByRole('alert')).toHaveText('PIN falsch. Noch 4 Versuche.');
-    await enterPin(page, '482915');
+    await enterPin(page, '4829');
     await expect(page.getByRole('button', { name: /Heute \(0\/1\)/ })).toBeVisible();
   });
 

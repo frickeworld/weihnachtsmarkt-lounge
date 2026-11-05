@@ -39,7 +39,7 @@ Mobile-first One-Page-Website, über die eine überdachte Lounge auf dem Weihnac
 
 - `studio_admin`: alles. **2FA (TOTP) Pflicht** – Admin-Funktionen prüfen `aal2`.
 - `haendler`: Dashboard, Buchungsliste ohne E-Mail/Telefon/Adresse/Wünsche/USt-ID, Abrechnung, Export. Nur lesen. 2FA optional.
-- Scanner: kein Konto. `/scan` + 6-stellige PIN → signiertes Token (12 h, enthält `scanner_token_version`). Nur Edge Functions.
+- Scanner: kein Konto. `/scan` + 4-stellige PIN (Entscheidung Louis, 05.11.2026; 5 Fehlversuche je Gerät → 15 Min. Sperre, 20 insgesamt pro Stunde → 1 Std. Pause) → signiertes Token (12 h, enthält `scanner_token_version`). Nur Edge Functions.
 - Öffentliche Registrierung aus. Zugänge nur per Einladung aus dem Admin.
 - Admin darf bei manuellen Buchungen Buchungsschluss, Sperren und Saison übergehen (mit Warnung). Doppelbuchung bleibt unmöglich.
 

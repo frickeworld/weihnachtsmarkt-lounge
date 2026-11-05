@@ -364,7 +364,7 @@ Pflichtfeld Grund → `cancelled`, `cancelled_at`, `cancel_reason`. Hinweis „D
 2. Buchungen: Tabelle, Suche, Filter, Detail inkl. Kontakt, Stripe-Links, email_log. Aktionen: Ticket erneut senden, manuell einchecken, Taler markieren, stornieren.
 3. Manuelle Buchung (4.3).
 4. Kalender: Monatsansicht (frei, reserviert, gebucht, gesperrt, geschlossen), Zeitfenster sperren/entsperren, Tage schließen/öffnen, Buchung öffnen.
-5. Einstellungen: Saison, Zeitfenster pro Wochentag, Preis, Gebühr, Taler, Händler-Anteil, Buchungsschluss, Reservierungsdauer, Kontakt-E-Mail, Scanner-PIN (6 Ziffern, einmal angezeigt). Hinweis „Preisänderungen gelten nur für neue Buchungen“.
+5. Einstellungen: Saison, Zeitfenster pro Wochentag, Preis, Gebühr, Taler, Händler-Anteil, Buchungsschluss, Reservierungsdauer, Kontakt-E-Mail, Scanner-PIN (4 Ziffern, einmal angezeigt). Hinweis „Preisänderungen gelten nur für neue Buchungen“.
 6. Zugänge: Einladen (`auth.admin.inviteUserByEmail`) mit Rolle, Rolle ändern, Zugang entziehen.
 7. Export: CSV aller Buchungen im Zeitraum. **Tagesliste als PDF** zum Ausdrucken (Netz-Fallback).
 8. Abrechnung (wie Händler, plus Studio-F-Anteil).
@@ -390,7 +390,7 @@ Alle Admin-Aktionen serverseitig mit `is_admin_aal2()` geprüft.
 - Routen: `/login`, `/login/passwort-vergessen`, `/login/neues-passwort` (Ziel von Einladung und Zurücksetzen), `/login/2fa` (Einrichten oder Code; Händler freiwillig über `?einrichten=1`), `/login/kein-zugang`. Rücksprung über `?next=` nur auf interne Pfade.
 - Zugriffsregel (`decideAccess`): Admin braucht immer aal2; Händler nur, wenn ein Faktor eingerichtet ist. Die Datenbank prüft unabhängig davon (`is_admin_aal2()`).
 - Schreibende Buchungsaktionen über RPCs (`admin_check_in`, `admin_mark_taler`, `admin_cancel_booking`) bzw. die Edge Function `admin` (`resend_ticket`, `manual_booking`, `invite_user`). Kalender, Einstellungen und Zeitfenster schreiben direkt per RLS (`is_admin_aal2()`); `scanner_pin_hash` ist per Spaltenrechten weder les- noch schreibbar.
-- Scanner-PIN: Der Admin legt die 6-stellige PIN selbst fest (zweimal eingeben); sie wird nur als bcrypt-Hash gespeichert und nie wieder angezeigt. Jede neue PIN erhöht `scanner_token_version`.
+- Scanner-PIN: Der Admin legt die 4-stellige PIN selbst fest (zweimal eingeben); sie wird nur als bcrypt-Hash gespeichert und nie wieder angezeigt. Jede neue PIN erhöht `scanner_token_version`.
 - Tagesliste: Druckansicht `/admin/tagesliste/:datum`, PDF über „Drucken → Als PDF speichern“ (kein PDF-Generator im Browser nötig).
 - CSV: Semikolon, UTF-8 mit BOM, CRLF, Formel-Schutz gegen CSV-Injection.
 - Anonymisierung: Standard-Stichtag ist der letzte vergangene 31. März; Bestätigung durch Eintippen von „ANONYMISIEREN“.

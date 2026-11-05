@@ -254,7 +254,7 @@ Koordinaten der Lounge für die Sperrbildschirm-Anzeige prüfen: `LOUNGE_COORDIN
 1. **Supabase-Secret** `SCANNER_TOKEN_SECRET`: eine lange Zufallszeichenfolge (z. B. `openssl rand -hex 32`).
    Damit werden die Anmeldungen der Scanner-Handys signiert. Ohne eigenes Secret wird der
    service_role-Schlüssel genutzt – funktioniert, ist aber weniger sauber.
-2. Im Admin unter **Einstellungen → Scanner-PIN** eine 6-stellige PIN festlegen.
+2. Im Admin unter **Einstellungen → Scanner-PIN** eine 4-stellige PIN festlegen.
 3. Auf dem Einlass-Handy `https://[DOMAIN]/scan` öffnen, PIN eingeben, Kamera erlauben.
    Tipp: Seite zum Home-Bildschirm hinzufügen. Den Tab während des Einlasses offen lassen –
    Offline-Check-ins liegen nur in diesem Tab, bis sie übertragen sind.
