@@ -68,6 +68,21 @@ jobs:
         if: steps.check.outputs.ready == 'true'
         run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
 
+      # Klare Fehlermeldung, falls der SFTP-Server nicht erreichbar ist (statt nur „max-retries“)
+      - name: SFTP-Server erreichbar?
+        if: steps.check.outputs.ready == 'true'
+        run: |
+          port="${DEPLOY_SFTP_PORT:-22}"
+          echo "Runner-IP: $(curl -fsS https://api.ipify.org || echo unbekannt)"
+          getent ahosts "$DEPLOY_SFTP_HOST" | head -1 || echo "::warning::DNS-Auflösung fehlgeschlagen"
+          if timeout 15 bash -c "</dev/tcp/$DEPLOY_SFTP_HOST/$port"; then
+            echo "TCP-Port $port erreichbar"
+            timeout 15 ssh-keyscan -p "$port" "$DEPLOY_SFTP_HOST" 2>/dev/null | head -1 | cut -c1-60 || true
+          else
+            echo "::error::SFTP-Server $port nicht erreichbar (Zeitüberschreitung) – Mittwald blockiert die Verbindung oder der Server ist gestört"
+            exit 1
+          fi
+
       # Prüft Zielordner und Build, lädt dann hoch (zuletzt .htaccess und index.html)
       - name: Hochladen
         if: steps.check.outputs.ready == 'true'
