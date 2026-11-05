@@ -104,16 +104,19 @@ export function SpecialEvents() {
           Partys mit STUDIO/F und der Tanzschule Fricke, Live-Musik am Wochenende – und du hast
           deine eigene Lounge mittendrin.
         </SectionHeading>
-        <div className={`grid gap-5 ${groups.length > 1 ? 'md:grid-cols-2' : ''}`}>
+        <SwipeHint />
+        <div
+          className={`-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-4 px-4 pb-3 md:mx-0 md:grid md:gap-5 md:overflow-visible md:px-0 md:pb-0 ${groups.length > 1 ? 'md:grid-cols-2' : ''}`}
+        >
           {groups.map(({ key, first: e, days }) => {
             const all = days.flatMap((d) => d.slots);
             const soldOut = all.every((s) => s.status !== 'free');
             const someTaken = all.some((s) => s.status !== 'free');
             const singleDay = days.length === 1;
             return (
-              <Reveal
+              <div
                 key={key}
-                className="card relative flex flex-col overflow-hidden p-6 text-ink sm:p-7"
+                className="card relative flex w-[85%] shrink-0 snap-start flex-col overflow-hidden p-6 text-ink sm:p-7 md:w-auto"
               >
                 <div className="glitter absolute inset-x-0 top-0 h-1.5" aria-hidden="true" />
                 <div className="flex flex-wrap items-center justify-between gap-2">
@@ -206,7 +209,7 @@ export function SpecialEvents() {
                     Warteliste.
                   </p>
                 )}
-              </Reveal>
+              </div>
             );
           })}
         </div>
@@ -228,14 +231,18 @@ function WeekendProgram({ program, slots }: { program: ProgramItem[]; slots: Slo
           Freitags und samstags Live-Musik – deine Lounge ist mittendrin.
         </p>
       </Reveal>
-      <div className="grid gap-5 md:grid-cols-2">
+      <SwipeHint />
+      <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-4 px-4 pb-3 md:mx-0 md:grid md:gap-5 md:overflow-visible md:px-0 md:pb-0 md:grid-cols-2">
         {days.map((date) => {
           const acts = program.filter((p) => p.date === date);
           const evening = slots.filter(
             (s) => s.date === date && (s.status === 'free' || s.status === 'taken'),
           );
           return (
-            <Reveal key={date} className="card relative flex flex-col p-6 text-ink sm:p-7">
+            <div
+              key={date}
+              className="card relative flex w-[85%] shrink-0 snap-start flex-col overflow-hidden p-6 text-ink sm:p-7 md:w-auto"
+            >
               <div className="glitter absolute inset-x-0 top-0 h-1.5" aria-hidden="true" />
               <p className="eyebrow">{formatLongDate(date)}</p>
               <ul className="mt-3 space-y-2">
@@ -291,15 +298,24 @@ function WeekendProgram({ program, slots }: { program: ProgramItem[]; slots: Slo
                       );
                     })}
                   </span>
-                  <p className="mt-2 text-xs text-ink-soft">
-                    Lounge-Preise inkl. Freiverzehr, {feeNote(settings)}
-                  </p>
                 </>
               )}
-            </Reveal>
+            </div>
           );
         })}
       </div>
+      <p className="mt-4 text-center text-sm text-on-dark/75">
+        Lounge-Preise inkl. Freiverzehr, {feeNote(settings)}
+      </p>
     </div>
+  );
+}
+
+/** Mobil: Karten stehen nebeneinander zum Wischen – kurzer Hinweis darüber. */
+function SwipeHint() {
+  return (
+    <p className="mb-3 text-right text-sm text-on-dark/70 md:hidden" aria-hidden="true">
+      Wischen für mehr →
+    </p>
   );
 }

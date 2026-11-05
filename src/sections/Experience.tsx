@@ -36,10 +36,8 @@ export function Experience() {
       <div className="mx-auto max-w-6xl">
         <SectionHeading eyebrow="Das Erlebnis" title="Weihnachtsmarkt, wie er sein soll">
           <p>
-            Glühweinduft, das beleuchtete Residenzschloss, Musik im Hintergrund – und du sitzt
-            mittendrin. Trocken, warm, mit Fellen auf den Bänken und Lichterketten über dem Tisch.
-            Kein Suchen nach einem freien Stehtisch, kein Gedränge: Die Lounge gehört zwei Stunden
-            lang nur dir und deinen Leuten.
+            Glühweinduft, Lichter, Musik – und du sitzt mittendrin: trocken, warm und zwei Stunden
+            lang nur mit deinen Leuten.
           </p>
         </SectionHeading>
         <Reveal>

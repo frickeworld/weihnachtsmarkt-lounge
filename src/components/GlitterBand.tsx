@@ -25,7 +25,7 @@ export function GlitterBand({
 }) {
   return (
     <div className={`glitter relative overflow-hidden ${className}`}>
-      {soft && <div aria-hidden="true" className="absolute inset-0 bg-[#fff8e6]/45" />}
+      {soft && <div aria-hidden="true" className="absolute inset-0 bg-[#fff8e6]/65" />}
       {stars &&
         STARS.map((s, i) => (
           <svg

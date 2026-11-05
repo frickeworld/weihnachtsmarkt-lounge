@@ -98,7 +98,7 @@ export function Hero() {
               direkt an deinem Platz.
             </p>
             {/* Das stärkste Argument groß: Freiverzehr */}
-            <div className="glitter mt-6 inline-flex items-center gap-4 rounded-2xl px-5 py-3 shadow-[0_18px_40px_-20px_rgba(0,0,0,0.8)]">
+            <div className="mt-6 inline-flex items-center gap-4 rounded-2xl border-2 border-gold bg-brown/80 px-5 py-3 text-gold-light shadow-[0_18px_40px_-20px_rgba(0,0,0,0.8)] backdrop-blur-sm">
               <span className="text-sm leading-tight font-bold tracking-wide uppercase">
                 bis zu
               </span>
