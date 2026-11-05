@@ -12,6 +12,7 @@ import { WeekPlanPage } from './WeekPlanPage';
 import { ExportPage } from './ExportPage';
 import { NewBookingPage } from './NewBookingPage';
 import { OverviewPage } from './OverviewPage';
+import { PromoCodesPage } from './PromoCodesPage';
 import { SettingsPage } from './SettingsPage';
 
 /** /admin/* – eigenes Bundle, nur für studio_admin mit 2FA. */
@@ -28,6 +29,7 @@ export default function AdminRoutes() {
             <Route path="einstellungen" element={<SettingsPage />} />
             <Route path="zugaenge" element={<AccessPage />} />
             <Route path="gewinnspiel" element={<GiveawayAdminPage />} />
+            <Route path="rabattcodes" element={<PromoCodesPage />} />
             <Route path="abrechnung" element={<SettlementPage />} />
             <Route path="export" element={<ExportPage />} />
             <Route path="*" element={<Navigate to="/admin" replace />} />

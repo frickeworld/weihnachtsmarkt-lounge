@@ -336,7 +336,7 @@ export function BookingForm({
           </div>
           {discount && !won && (
             <div className="flex justify-between gap-4 font-semibold text-emerald-800">
-              <dt>Gewinnspiel-Code −{discount.preview.percent} %</dt>
+              <dt>Code −{discount.preview.percent} %</dt>
               <dd>−{formatCents(discount.preview.discountCents)}</dd>
             </div>
           )}

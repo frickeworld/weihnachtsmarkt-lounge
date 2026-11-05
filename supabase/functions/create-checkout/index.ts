@@ -79,8 +79,9 @@ Deno.serve(async (req) => {
   if (slot.status !== 'free')
     return json({ error: 'slot_unavailable', message: SLOT_UNAVAILABLE }, 422);
 
-  // Persönlicher Code aus dem Gewinnspiel: Preis rechnet ausschließlich die Datenbank.
+  // Gewinnspiel- oder Admin-Rabattcode: Preis rechnet ausschließlich die Datenbank.
   type Discounted = {
+    source: 'giveaway' | 'promo';
     reason: string | null;
     discount_cents: number;
     total_cents: number;
@@ -91,7 +92,7 @@ Deno.serve(async (req) => {
   };
   let discount: Discounted | null = null;
   if (discountCode) {
-    const { data: rows, error: discountError } = await db.rpc('discount_pricing', {
+    const { data: rows, error: discountError } = await db.rpc('code_pricing', {
       p_code: discountCode,
       p_date: date,
       p_start: slot.start_time,
@@ -112,7 +113,10 @@ Deno.serve(async (req) => {
   }
   const amounts = discount
     ? {
-        discount_code: discountCode,
+        // Gewinnspiel-Codes sind einmalig (eigene Spalte mit Unique-Index), Admin-Codes mehrfach.
+        ...(discount.source === 'promo'
+          ? { promo_code: discountCode }
+          : { discount_code: discountCode }),
         discount_cents: discount.discount_cents,
         amount_total_cents: discount.total_cents,
         fee_cents: discount.fee_cents,
@@ -253,7 +257,7 @@ Deno.serve(async (req) => {
         product_data: {
           name: `Weihnachtsmarkt-Lounge am ${when} – bis zu ${settings.max_persons} Personen${
             discount
-              ? ` (Gewinnspiel-Code ${discountCode}, −${(discount.discount_cents / 100).toFixed(2).replace('.', ',')} €)`
+              ? ` (${discount.source === 'promo' ? 'Rabattcode' : 'Gewinnspiel-Code'} ${discountCode}, −${(discount.discount_cents / 100).toFixed(2).replace('.', ',')} €)`
               : ''
           }`,
         },

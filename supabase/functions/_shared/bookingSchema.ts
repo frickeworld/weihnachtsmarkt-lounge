@@ -115,7 +115,7 @@ export function createCheckoutRequestSchema(maxPersons: number) {
     date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Ungültiges Datum.'),
     startTime: z.string().regex(/^\d{2}:\d{2}$/, 'Ungültige Uhrzeit.'),
     form: createBookingSchema(maxPersons),
-    /** Persönlicher Code aus dem Gewinnspiel (optional) */
+    /** Gewinnspiel- oder Rabattcode (optional) */
     discountCode: z
       .string()
       .trim()
@@ -134,6 +134,8 @@ export const DISCOUNT_REASON_TEXT: Record<string, string> = {
   used: 'Dieser Code wurde bereits eingelöst.',
   weekday: 'Dieser Code gilt nur montags bis donnerstags.',
   special: 'Für Sonderveranstaltungen gilt dieser Code leider nicht.',
+  used_up: 'Dieser Code ist leider schon ausgeschöpft.',
+  not_yet: 'Dieser Code gilt noch nicht.',
 };
 
 /** Manuelle Buchung im Admin (Telefon, Sonderfälle). Ticket geht trotzdem per E-Mail raus. */

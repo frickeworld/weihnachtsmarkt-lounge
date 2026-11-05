@@ -11,6 +11,7 @@ const NAV = [
   { to: '/admin/einstellungen', label: 'Einstellungen' },
   { to: '/admin/zugaenge', label: 'Zugänge' },
   { to: '/admin/gewinnspiel', label: 'Gewinnspiel' },
+  { to: '/admin/rabattcodes', label: 'Rabattcodes' },
   { to: '/admin/abrechnung', label: 'Abrechnung' },
   { to: '/admin/export', label: 'Export' },
 ];

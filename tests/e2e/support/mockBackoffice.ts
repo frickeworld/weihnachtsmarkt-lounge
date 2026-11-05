@@ -394,6 +394,43 @@ export async function mockBackoffice(page: Page, opts: BackofficeOptions = {}) {
       ],
     }),
   );
+  const promoCodes: Record<string, unknown>[] = [
+    {
+      code: 'FRUEH15',
+      percent: 15,
+      valid_from: null,
+      bookable_until: '2026-11-29',
+      max_uses: 20,
+      allow_specials: false,
+      active: true,
+      note: 'Frühbucher',
+      uses: 3,
+      discount_cents: 7000,
+      revenue_cents: 40000,
+    },
+  ];
+  await page.route('**/rest/v1/rpc/admin_promo_codes*', (route) =>
+    route.fulfill({ json: promoCodes }),
+  );
+  await page.route('**/rest/v1/rpc/admin_create_promo_code*', (route) => {
+    const b = route.request().postDataJSON() as Record<string, unknown>;
+    opts.adminRequests?.push({ rpc: 'admin_create_promo_code', ...b });
+    const code = String(b.p_code).trim().toUpperCase();
+    promoCodes.unshift({
+      code,
+      percent: b.p_percent,
+      valid_from: b.p_valid_from,
+      bookable_until: b.p_bookable_until,
+      max_uses: b.p_max_uses,
+      allow_specials: b.p_allow_specials,
+      active: true,
+      note: b.p_note || null,
+      uses: 0,
+      discount_cents: 0,
+      revenue_cents: 0,
+    });
+    return route.fulfill({ json: code });
+  });
   await page.route('**/rest/v1/rpc/haendler_giveaway_summary*', (route) =>
     route.fulfill({
       json: {

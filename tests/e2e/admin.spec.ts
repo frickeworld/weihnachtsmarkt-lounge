@@ -170,6 +170,28 @@ test.describe('Admin', () => {
     ]);
   });
 
+  test('Rabattcode anlegen und Einlösungen sehen', async ({ page }) => {
+    const adminRequests: Record<string, unknown>[] = [];
+    await mockBackoffice(page, { hasFactor: true, adminRequests });
+    await enter(page, '/admin/rabattcodes');
+    await expect(page.getByText('3 von 20 eingelöst', { exact: false })).toBeVisible();
+    await page.getByLabel('Code', { exact: true }).fill('lounge10');
+    await page.getByLabel('Buchbar bis').fill('2026-12-30');
+    await page.getByRole('button', { name: 'Code anlegen' }).click();
+    await expect(page.getByText('Code LOUNGE10 angelegt.')).toBeVisible();
+    await expect(page.locator('li').getByText('LOUNGE10', { exact: true })).toBeVisible();
+    expect(adminRequests).toEqual([
+      expect.objectContaining({
+        rpc: 'admin_create_promo_code',
+        p_code: 'lounge10',
+        p_percent: 10,
+        p_bookable_until: '2026-12-30',
+        p_max_uses: null,
+        p_allow_specials: false,
+      }),
+    ]);
+  });
+
   test('Ticket an eine andere E-Mail-Adresse senden', async ({ page }) => {
     const adminRequests: Record<string, unknown>[] = [];
     await mockBackoffice(page, { hasFactor: true, adminRequests });

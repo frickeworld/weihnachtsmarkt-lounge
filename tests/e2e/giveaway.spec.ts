@@ -88,7 +88,7 @@ test.describe('Gewinnspiel', () => {
     await pickDay(page, tuesday);
     await page.getByRole('group', { name: 'Zeitfenster' }).locator('button').first().click();
     await expect(page.getByText('LOUNGE-ABC234')).toBeVisible();
-    await expect(page.getByText('Gewinnspiel-Code −25 %')).toBeVisible();
+    await expect(page.getByText('Code −25 %')).toBeVisible();
     await expect(page.getByLabel('Zusammenfassung')).toContainText(/Lounge-Preis\s*73,01\s€/);
     await page.getByLabel('Vorname').fill('Anna');
     await page.getByLabel('Nachname').fill('Muster');
@@ -110,8 +110,8 @@ test.describe('Gewinnspiel', () => {
     await page.goto('/#buchen');
     await page.locator('#buchen table button:not([disabled])').first().click();
     await page.getByRole('group', { name: 'Zeitfenster' }).locator('button').first().click();
-    await page.getByRole('button', { name: 'Gewinnspiel-Code einlösen' }).click();
-    await page.getByLabel('Gewinnspiel-Code').fill('FALSCH-123');
+    await page.getByRole('button', { name: 'Rabatt- oder Gewinnspiel-Code einlösen' }).click();
+    await page.getByLabel('Rabatt- oder Gewinnspiel-Code').fill('FALSCH-123');
     await page.getByRole('button', { name: 'Einlösen' }).click();
     await expect(
       page.getByText('Diesen Code kennen wir nicht. Bitte prüfe die Schreibweise.'),

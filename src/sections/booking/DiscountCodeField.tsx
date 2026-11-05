@@ -10,7 +10,7 @@ function codeFromUrl(): string {
 }
 
 /**
- * „Gewinnspiel-Code“ – zeigt nach „Einlösen“ den neuen Preis an. Verbindlich rechnet der Server;
+ * „Rabatt- oder Gewinnspiel-Code“ – zeigt nach „Einlösen“ den neuen Preis an. Verbindlich rechnet der Server;
  * hier nur die Vorschau. Meldet den gültigen Code (oder undefined) an das Formular.
  */
 export function DiscountCodeField({
@@ -71,14 +71,14 @@ export function DiscountCodeField({
         className="text-sm font-semibold text-gold-deep underline underline-offset-4"
         onClick={() => setOpen(true)}
       >
-        Gewinnspiel-Code einlösen
+        Rabatt- oder Gewinnspiel-Code einlösen
       </button>
     );
 
   return (
     <div className="rounded-2xl border border-line bg-sand/50 p-4">
       <label htmlFor="discountCode" className="field-label">
-        Gewinnspiel-Code
+        Rabatt- oder Gewinnspiel-Code
       </label>
       {applied ? (
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -95,7 +95,7 @@ export function DiscountCodeField({
             id="discountCode"
             className="field-input font-mono uppercase"
             autoComplete="off"
-            placeholder="z. B. LOUNGE-ABC123"
+            placeholder="z. B. LOUNGE10"
             value={code}
             aria-invalid={message ? true : undefined}
             aria-describedby={message ? 'discountCode-error' : undefined}

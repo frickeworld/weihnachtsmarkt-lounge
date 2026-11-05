@@ -41,6 +41,7 @@ const nextWeekday = (offset: number, isoDow: number) => {
 };
 const tuesday = nextWeekday(12, 2);
 const friday = nextWeekday(12, 5);
+const promoCode = `TEST${Date.now() % 1_000_000}`;
 
 const form = (email: string) => ({
   firstName: 'Gina',
@@ -347,6 +348,52 @@ Deno.test({
         },
       );
 
+      await t.step(
+        'Admin-Rabattcode 10 %, einmal einlösbar → promo_code, dann ausgeschöpft',
+        async () => {
+          const thursday = nextWeekday(12, 4);
+          const { error } = await db.from('promo_codes').insert({
+            code: promoCode,
+            percent: 10,
+            bookable_until: '2026-12-30',
+            max_uses: 1,
+          });
+          assert(!error, error?.message);
+          const r = await post(FN.checkout, {
+            date: thursday,
+            startTime: '16:45',
+            form: form(`gina-${tag}@example.de`),
+            discountCode: promoCode.toLowerCase(),
+          });
+          assertEquals(r.status, 200, JSON.stringify(r.body));
+          bookingIds.push(r.body.bookingId);
+          const { data: b } = await db
+            .from('bookings')
+            .select(
+              'amount_total_cents, discount_cents, haendler_share_cents, promo_code, discount_code',
+            )
+            .eq('id', r.body.bookingId)
+            .single();
+          assertEquals(b, {
+            amount_total_cents: 14080, // 156,45 € − 10 % (15,65 €)
+            discount_cents: 1565,
+            haendler_share_cents: 9601, // 72 % von 133,35 € (140,80 € − 7,45 € Gebühr)
+            promo_code: promoCode,
+            discount_code: null,
+          });
+          const again = await post(FN.checkout, {
+            date: thursday,
+            startTime: '19:00',
+            form: form(`gina-${tag}@example.de`),
+            discountCode: promoCode,
+          });
+          assertEquals(
+            again.body.fields?.discountCode,
+            'Dieser Code ist leider schon ausgeschöpft.',
+          );
+        },
+      );
+
       await t.step('Abmelden: nicht mehr im Lostopf', async () => {
         const { data: e } = await db
           .from('giveaway_entries')
@@ -367,6 +414,7 @@ Deno.test({
         await db.from('email_log').delete().in('booking_id', bookingIds);
         await db.from('bookings').delete().in('id', bookingIds);
       }
+      await db.from('promo_codes').delete().eq('code', promoCode);
       const { data: entries } = await db
         .from('giveaway_entries')
         .select('id')
