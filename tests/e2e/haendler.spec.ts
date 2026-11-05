@@ -52,6 +52,28 @@ test.describe('Händler-Bereich', () => {
     expect(bytes.subarray(0, 5).toString()).toBe('%PDF-');
   });
 
+  test('Buchungen als CSV ohne Kontaktdaten exportieren', async ({ page }) => {
+    await page.getByRole('link', { name: 'Buchungen' }).click();
+    const [csv] = await Promise.all([
+      page.waitForEvent('download'),
+      page.getByRole('button', { name: 'CSV (Excel) herunterladen' }).click(),
+    ]);
+    const text = await readFile((await csv.path())!, 'utf8');
+    expect(text.split('\r\n')[0]).toContain('Händler-Anteil');
+    expect(text).not.toMatch(/@|E-Mail|Telefon/);
+  });
+
+  test('Gewinnspiel nur lesen, kostenlose Buchung mit Absprache', async ({ page }) => {
+    await page.getByRole('link', { name: 'Gewinnspiel' }).click();
+    await expect(page.getByText('Greta G.', { exact: false })).toBeVisible();
+    await expect(page.getByText('42', { exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Ziehen|Gewinner/ })).toHaveCount(0);
+    await page.getByRole('link', { name: 'Kostenlose Buchung' }).click();
+    await expect(page.getByRole('heading', { name: 'Kostenlose Buchung' })).toBeVisible();
+    await expect(page.getByLabel('Abgesprochen mit / Grund')).toBeVisible();
+    await expect(page.getByText(/Rechnung gewünscht|Überweisung|Bar/)).toHaveCount(0);
+  });
+
   test('Konto: 2FA freiwillig einrichten', async ({ page }) => {
     await page.getByRole('link', { name: 'Konto' }).click();
     await expect(page.getByRole('link', { name: 'Jetzt einrichten' })).toHaveAttribute(

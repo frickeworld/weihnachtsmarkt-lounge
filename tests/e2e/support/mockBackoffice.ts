@@ -169,6 +169,8 @@ export async function mockBackoffice(page: Page, opts: BackofficeOptions = {}) {
       price_cents: 17500,
       fee_cents: 350,
       fee_percent: 5,
+      studio_share_percent: 28,
+      vat_percent: 19,
       taler_count: 100,
       taler_cents: 10000,
       haendler_share_cents: 13750,
@@ -390,6 +392,23 @@ export async function mockBackoffice(page: Page, opts: BackofficeOptions = {}) {
           taler_handed_out_at: null,
         }),
       ],
+    }),
+  );
+  await page.route('**/rest/v1/rpc/haendler_giveaway_summary*', (route) =>
+    route.fulfill({
+      json: {
+        active: true,
+        end: null,
+        discount_percent: 25,
+        next_draw: new Date(Date.now() + 3 * 86400_000).toISOString(),
+        entries_confirmed: 42,
+        entries_pending: 5,
+        referrals: 7,
+        codes_redeemed: 3,
+        draws: [
+          { drawn_at: new Date().toISOString(), pool_size: 40, lots: 47, winner: 'Greta G.' },
+        ],
+      },
     }),
   );
   await page.route('**/rest/v1/rpc/settlement*', (route) => {

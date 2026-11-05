@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { addDays, todayInBerlin } from '@/lib/dates';
 import { formatCents } from '@/lib/money';
@@ -6,6 +6,7 @@ import { requireClient } from '../authClient';
 import { errorText } from '../errors';
 import { ErrorBox, Loading, PageHeader, Panel } from '../ui';
 import { BOOKING_COLUMNS } from './api';
+import { Kpi } from '../Kpi';
 import { OccupancyHeatmapPanel } from '../OccupancyHeatmap';
 import { DailyBars } from './DailyBars';
 import { hhmm, percent } from './format';
@@ -21,9 +22,14 @@ export function OverviewPage() {
       unwrap(
         await requireClient()
           .from('settings')
-          .select('season_start, season_end')
+          .select('season_start, season_end, vat_percent, studio_share_percent')
           .eq('id', 1)
-          .single<{ season_start: string; season_end: string }>(),
+          .single<{
+            season_start: string;
+            season_end: string;
+            vat_percent: number;
+            studio_share_percent: number;
+          }>(),
       ),
     [],
   );
@@ -64,6 +70,8 @@ export function OverviewPage() {
   );
 
   const d = dash.data;
+  const vat = season.data?.vat_percent ?? 19;
+  const studioPct = season.data?.studio_share_percent ?? 28;
   const presets: { id: Preset; label: string }[] = [
     { id: 'saison', label: 'Saison' },
     { id: 'heute', label: 'Heute' },
@@ -171,32 +179,64 @@ export function OverviewPage() {
       {(dash.loading || !d) && !dash.error && <Loading />}
       {d && (
         <>
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-            <Kpi
-              label="Gebuchte Lounges"
-              value={d.paid_bookings}
-              sub={`von ${d.available_slots} Zeitfenstern`}
-            />
-            <Kpi label="Auslastung" value={percent(d.paid_bookings, d.available_slots)} />
-            <Kpi label="Umsatz brutto" value={formatCents(d.revenue_cents)} />
-            <Kpi label="Anteil Händler" value={formatCents(d.haendler_cents)} />
-            <Kpi label="Anteil Studio F" value={formatCents(d.studio_cents)} />
-            <Kpi label="Seitenaufrufe" value={d.page_views} />
-            <Kpi label="Klicks „Lounge buchen“" value={d.book_clicks} />
-            <Kpi
-              label="Abschlussquote"
-              value={percent(d.online_paid_in_period, d.book_clicks)}
-              sub="Online-Buchungen ÷ Klicks"
-            />
-            <Kpi label="Eingecheckt" value={d.checked_in} />
-            <Kpi
-              label="Nicht erschienen"
-              value={d.no_shows}
-              sub="Zeitfenster vorbei, kein Check-in"
-            />
-            <Kpi label="Residenztaler übergeben" value={d.taler_handed_out} />
-            <Kpi label="Offen / storniert" value={`${d.pending} / ${d.cancelled}`} />
-          </div>
+          <KpiGroup title="Buchungen und Umsatz">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              <Kpi
+                label="Gebuchte Lounges"
+                value={d.paid_bookings}
+                sub={`von ${d.available_slots} Zeitfenstern`}
+              />
+              <Kpi label="Auslastung" value={percent(d.paid_bookings, d.available_slots)} />
+              <Kpi label="Umsatz brutto" value={formatCents(d.revenue_cents)} sub="inkl. MwSt." />
+              <Kpi
+                label="Umsatz netto"
+                value={formatCents(Math.round(d.revenue_cents / (1 + vat / 100)))}
+                sub={`ohne ${vat.toLocaleString('de-DE')} % MwSt.`}
+              />
+            </div>
+          </KpiGroup>
+          <KpiGroup title="Aufteilung">
+            <div className="grid gap-3 md:grid-cols-2">
+              <ShareCard
+                label="Anteil Händler"
+                value={formatCents(d.haendler_cents)}
+                sub={`${100 - studioPct} % vom Lounge-Preis, mindestens der Freiverzehr`}
+              />
+              <ShareCard
+                label="Anteil Studio F"
+                value={formatCents(d.studio_cents)}
+                sub={`${studioPct} % vom Lounge-Preis plus Verarbeitungsgebühr`}
+              />
+            </div>
+          </KpiGroup>
+          <KpiGroup title="Website">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+              <Kpi label="Seitenaufrufe" value={d.page_views} />
+              <Kpi label="Klicks „Lounge buchen“" value={d.book_clicks} />
+              <Kpi
+                label="Abschlussquote"
+                value={percent(d.online_paid_in_period, d.book_clicks)}
+                sub="Online-Buchungen ÷ Klicks"
+              />
+            </div>
+          </KpiGroup>
+          <KpiGroup title="Am Einlass">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
+              <Kpi label="Eingecheckt" value={d.checked_in} sub="schon da gewesen" />
+              <Kpi
+                label="Noch erwartet"
+                value={Math.max(0, d.paid_bookings - d.checked_in - d.no_shows)}
+                sub="Termin kommt noch"
+              />
+              <Kpi
+                label="Nicht erschienen"
+                value={d.no_shows}
+                sub="Zeitfenster vorbei, kein Check-in"
+              />
+              <Kpi label="Residenztaler übergeben" value={d.taler_handed_out} />
+              <Kpi label="Offen / storniert" value={`${d.pending} / ${d.cancelled}`} />
+            </div>
+          </KpiGroup>
           {d.daily.length > 1 && (
             <div className="mt-8 grid gap-4 lg:grid-cols-2">
               <DailyBars
@@ -218,14 +258,27 @@ export function OverviewPage() {
   );
 }
 
-function Kpi({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
+function KpiGroup({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="card p-4">
-      <div className="text-sm text-ink-soft">{label}</div>
-      <div className="mt-1 font-display text-2xl font-medium tabular-nums sm:text-3xl">
-        {typeof value === 'number' ? value.toLocaleString('de-DE') : value}
+    <section className="mb-6">
+      <h2 className="eyebrow mb-3">{title}</h2>
+      {children}
+    </section>
+  );
+}
+
+/** Große Kachel für die Aufteilung – Tannengrün mit Gold. */
+function ShareCard({ label, value, sub }: { label: string; value: string; sub: string }) {
+  return (
+    <div className="on-dark relative overflow-hidden rounded-[24px] bg-brown p-6 text-on-dark sm:p-7">
+      <div className="glitter absolute inset-x-0 top-0 h-1.5" aria-hidden="true" />
+      <div className="text-sm font-semibold tracking-[0.12em] text-gold-light uppercase">
+        {label}
       </div>
-      {sub && <div className="mt-1 text-xs text-ink-soft">{sub}</div>}
+      <div className="mt-2 font-display text-4xl font-medium text-gold-light tabular-nums sm:text-5xl">
+        {value}
+      </div>
+      <div className="mt-2 text-sm text-on-dark/75">{sub}</div>
     </div>
   );
 }

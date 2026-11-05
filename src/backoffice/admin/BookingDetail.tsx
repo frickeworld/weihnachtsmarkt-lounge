@@ -111,6 +111,7 @@ export function BookingDetail({
       b.billing_street ? `${b.billing_street}, ${b.billing_zip} ${b.billing_city}` : '–',
     ],
     ['Wünsche', b.notes || '–'],
+    ...(b.approval_note ? [['Kostenlos – abgesprochen', b.approval_note] as [string, string]] : []),
     ['Newsletter', b.newsletter_opt_in ? 'Ja' : 'Nein'],
     [
       'Zahlungsart',

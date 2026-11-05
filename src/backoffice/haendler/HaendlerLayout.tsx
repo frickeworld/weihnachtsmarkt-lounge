@@ -6,11 +6,13 @@ import { useAuth } from '../AuthProvider';
 const NAV = [
   { to: '/haendler', label: 'Übersicht', end: true },
   { to: '/haendler/buchungen', label: 'Buchungen' },
+  { to: '/haendler/neue-buchung', label: 'Kostenlose Buchung' },
+  { to: '/haendler/gewinnspiel', label: 'Gewinnspiel' },
   { to: '/haendler/abrechnung', label: 'Abrechnung' },
   { to: '/haendler/konto', label: 'Konto' },
 ];
 
-/** Händler-Bereich: nur lesen. Gleiche Gestaltung wie der Admin, eigener Hinweis „Händler“. */
+/** Händler-Bereich: lesen, kostenlose Buchungen nach Absprache, Abrechnung und Export. Gleiche Gestaltung wie der Admin, eigener Hinweis „Händler“. */
 export function HaendlerLayout() {
   useNoindex();
   const { session, roles, signOut } = useAuth();

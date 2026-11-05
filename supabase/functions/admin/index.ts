@@ -1,6 +1,7 @@
-// admin: Aktionen, die den service_role-Schlüssel brauchen – nur für studio_admin mit 2FA.
+// admin: Aktionen, die den service_role-Schlüssel brauchen – für studio_admin mit 2FA.
 //   resend_ticket   Ticket erneut senden (optional an eine andere E-Mail-Adresse)
-//   manual_booking  Buchung per Telefon / Sonderfall (bar, Überweisung, kostenlos)
+//   manual_booking  kostenlose Buchung nach Absprache – auch für Händler (ohne Übergehen von
+//                   Buchungsschluss, Sperre, Schließtag oder Saison)
 //   invite_user     Zugang per Einladung (Rolle studio_admin oder haendler)
 //   giveaway_draw   Gewinnspiel: Gewinner ziehen, Gewinn- und Trostpreis-Mails senden
 import { createClient } from '@supabase/supabase-js';
@@ -19,7 +20,10 @@ const STATUS_TEXT: Record<string, string> = {
 };
 
 /** Prüft Rolle und 2FA über die Datenbank (PostgREST verifiziert das JWT). */
-async function authorize(req: Request): Promise<{ userId: string } | Response> {
+async function authorize(
+  req: Request,
+  allowHaendler: boolean,
+): Promise<{ userId: string; isAdmin: boolean } | Response> {
   const authorization = req.headers.get('Authorization') ?? '';
   if (!authorization.startsWith('Bearer ')) return json({ error: 'unauthorized' }, 401);
   const userClient = createClient(requireEnv('SUPABASE_URL'), requireEnv('SUPABASE_ANON_KEY'), {
@@ -30,23 +34,26 @@ async function authorize(req: Request): Promise<{ userId: string } | Response> {
     userClient.auth.getUser(authorization.slice(7)),
     userClient.rpc('is_admin_aal2'),
   ]);
-  if (!user?.user || isAdmin !== true) {
-    return json({ error: 'forbidden', message: 'Nur für Admins mit Zwei-Faktor-Anmeldung.' }, 403);
+  if (!user?.user) return json({ error: 'unauthorized' }, 401);
+  if (isAdmin === true) return { userId: user.user.id, isAdmin: true };
+  if (allowHaendler) {
+    // Händler (mit 2FA, falls eingerichtet) – gleiche Regel wie in der Datenbank
+    const { data: isHaendler } = await userClient.rpc('is_haendler_or_admin');
+    if (isHaendler === true) return { userId: user.user.id, isAdmin: false };
   }
-  return { userId: user.user.id };
+  return json({ error: 'forbidden', message: 'Nur für Admins mit Zwei-Faktor-Anmeldung.' }, 403);
 }
 
 Deno.serve(async (req) => {
   const early = preflight(req);
   if (early) return early;
 
-  const auth = await authorize(req);
-  if (auth instanceof Response) return auth;
-
   const body = (await req.json().catch(() => ({}))) as { action?: string } & Record<
     string,
     unknown
   >;
+  const auth = await authorize(req, body.action === 'manual_booking');
+  if (auth instanceof Response) return auth;
   const db = adminClient();
 
   switch (body.action) {
@@ -78,7 +85,7 @@ Deno.serve(async (req) => {
     }
 
     case 'manual_booking':
-      return manualBooking(db, body, auth.userId);
+      return manualBooking(db, body, auth.userId, auth.isAdmin);
 
     case 'invite_user':
       return inviteUser(db, body);
@@ -95,6 +102,7 @@ async function manualBooking(
   db: ReturnType<typeof adminClient>,
   body: Record<string, unknown>,
   userId: string,
+  isAdmin: boolean,
 ): Promise<Response> {
   const { data: settings } = await db
     .from('settings')
@@ -110,7 +118,9 @@ async function manualBooking(
     for (const issue of parsed.error.issues) fields[issue.path.join('.')] ??= issue.message;
     return json({ ok: false, message: 'Bitte prüfe die Angaben.', fields }, 400);
   }
-  const { date, startTime, form, paymentMethod, includeInSettlement, override } = parsed.data;
+  const { date, startTime, form, paymentMethod, approvalNote } = parsed.data;
+  // Nur Admins dürfen Buchungsschluss, Sperre, Schließtag oder Saison übergehen.
+  const override = isAdmin && parsed.data.override;
 
   const { data: slots, error: availError } = await db.rpc('get_availability', {
     from_date: date,
@@ -136,6 +146,9 @@ async function manualBooking(
       409,
     );
   }
+  if (slot.status !== 'free' && !isAdmin) {
+    return json({ ok: false, message: STATUS_TEXT[slot.status] ?? 'Nicht frei.' }, 409);
+  }
   if (slot.status !== 'free' && !override) {
     return json(
       {
@@ -147,7 +160,6 @@ async function manualBooking(
     );
   }
 
-  const free = paymentMethod === 'kostenlos';
   const { data: booking, error } = await db
     .from('bookings')
     .insert({
@@ -164,16 +176,14 @@ async function manualBooking(
       persons: form.persons,
       occasion: form.occasion ?? null,
       company_name: form.companyName || null,
-      vat_id: form.vatId ? form.vatId.replace(/\s/g, '') : null,
-      invoice_requested: form.invoiceRequested,
-      billing_street: form.billingStreet || null,
-      billing_zip: form.billingZip || null,
-      billing_city: form.billingCity || null,
+      invoice_requested: false,
       notes: form.notes || null,
+      approval_note: approvalNote,
       newsletter_opt_in: false,
       paid_at: new Date().toISOString(),
-      include_in_settlement: free ? false : includeInSettlement,
-      ...(free ? { amount_total_cents: 0 } : {}),
+      // Kostenlos: Betrag 0 €, zählt nicht zur Händler-Abrechnung
+      include_in_settlement: false,
+      amount_total_cents: 0,
       admin_override: slot.status !== 'free',
       created_by: userId,
     })

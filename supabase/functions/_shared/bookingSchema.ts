@@ -148,10 +148,14 @@ export function createManualBookingRequestSchema(maxPersons: number) {
     date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Ungültiges Datum.'),
     startTime: z.string().regex(/^\d{2}:\d{2}$/, 'Ungültige Uhrzeit.'),
     form: createBookingSchema(maxPersons),
-    paymentMethod: z.enum(['bar', 'ueberweisung', 'kostenlos'], {
-      message: 'Bitte wähle die Zahlungsart.',
-    }),
-    includeInSettlement: z.boolean(),
+    /** Manuelle Buchungen sind nur noch kostenlos (keine Bar- oder Überweisungsbuchungen). */
+    paymentMethod: z.literal('kostenlos', { message: 'Manuelle Buchungen sind nur kostenlos.' }),
+    /** Mit wem die kostenlose Buchung abgesprochen ist (Tanzschule Fricke und Händler). */
+    approvalNote: z
+      .string()
+      .trim()
+      .min(3, 'Bitte angeben, mit wem die kostenlose Buchung abgesprochen ist.')
+      .max(200, 'Bitte höchstens 200 Zeichen.'),
     /** Admin bestätigt bewusst: Buchungsschluss, Sperre, Schließtag oder Saison übergehen. */
     override: z.boolean().default(false),
   });

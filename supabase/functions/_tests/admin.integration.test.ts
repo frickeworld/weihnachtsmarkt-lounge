@@ -108,43 +108,59 @@ Deno.test({
         assertEquals(aal!.currentLevel, 'aal2');
       });
 
-      await t.step('manuelle Buchung (bar) → bezahlt, Ticket verschickt', async () => {
-        const r = await call({
-          action: 'manual_booking',
-          date: '2026-12-08',
-          startTime: '16:45',
-          paymentMethod: 'bar',
-          includeInSettlement: true,
-          form,
-        });
-        assertEquals(r.status, 200, JSON.stringify(r.body));
-        assertEquals(r.body.ticketSent, true);
-        ids.push(r.body.bookingId);
-        const { data: b } = await db
-          .from('bookings')
-          .select('status, source, payment_method, amount_total_cents, created_by')
-          .eq('id', r.body.bookingId)
-          .single();
-        assertEquals(b!.status, 'paid');
-        assertEquals(b!.source, 'manual');
-        assertEquals(b!.payment_method, 'bar');
-        assertEquals(b!.amount_total_cents, 15645); // Dienstag 16:45: 156,45 € (149 € + 5 %)
-        assertEquals(b!.created_by, userId);
-        const { data: log } = await db
-          .from('email_log')
-          .select('type, status')
-          .eq('booking_id', r.body.bookingId)
-          .eq('type', 'ticket');
-        assertEquals(log, [{ type: 'ticket', status: 'sent' }]);
+      await t.step('Bar oder ohne Absprache → 400 (nur kostenlose Buchungen)', async () => {
+        const base = { action: 'manual_booking', date: '2026-12-08', startTime: '16:45', form };
+        const bar = await call({ ...base, paymentMethod: 'bar', approvalNote: 'Louis' });
+        assertEquals(bar.status, 400);
+        const ohne = await call({ ...base, paymentMethod: 'kostenlos', approvalNote: '' });
+        assertEquals(ohne.status, 400);
+        assert(ohne.body.fields?.approvalNote);
       });
+
+      await t.step(
+        'kostenlose Buchung mit Absprache → bezahlt, 0 €, Ticket verschickt',
+        async () => {
+          const r = await call({
+            action: 'manual_booking',
+            date: '2026-12-08',
+            startTime: '16:45',
+            paymentMethod: 'kostenlos',
+            approvalNote: 'Paul (Händler) und Louis',
+            form,
+          });
+          assertEquals(r.status, 200, JSON.stringify(r.body));
+          assertEquals(r.body.ticketSent, true);
+          ids.push(r.body.bookingId);
+          const { data: b } = await db
+            .from('bookings')
+            .select(
+              'status, source, payment_method, amount_total_cents, include_in_settlement, approval_note, created_by',
+            )
+            .eq('id', r.body.bookingId)
+            .single();
+          assertEquals(b!.status, 'paid');
+          assertEquals(b!.source, 'manual');
+          assertEquals(b!.payment_method, 'kostenlos');
+          assertEquals(b!.amount_total_cents, 0);
+          assertEquals(b!.include_in_settlement, false);
+          assertEquals(b!.approval_note, 'Paul (Händler) und Louis');
+          assertEquals(b!.created_by, userId);
+          const { data: log } = await db
+            .from('email_log')
+            .select('type, status')
+            .eq('booking_id', r.body.bookingId)
+            .eq('type', 'ticket');
+          assertEquals(log, [{ type: 'ticket', status: 'sent' }]);
+        },
+      );
 
       await t.step('gleiches Zeitfenster → 409, auch mit Override', async () => {
         const r = await call({
           action: 'manual_booking',
           date: '2026-12-08',
           startTime: '16:45',
-          paymentMethod: 'bar',
-          includeInSettlement: true,
+          paymentMethod: 'kostenlos',
+          approvalNote: 'Louis',
           override: true,
           form,
         });
@@ -163,7 +179,7 @@ Deno.test({
             date: '2026-12-08',
             startTime: '19:00',
             paymentMethod: 'kostenlos',
-            includeInSettlement: true,
+            approvalNote: 'Louis',
             form,
           };
           const ask = await call(base);

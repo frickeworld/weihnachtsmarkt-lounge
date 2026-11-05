@@ -192,8 +192,14 @@ test.describe('Admin', () => {
     await page.getByLabel('E-Mail (für das Ticket)').fill('tele@example.de');
     await page.getByLabel('Telefon').fill('05231 123456');
     await page.getByLabel('Personen').selectOption('6');
-    await page.getByText('Überweisung').click();
-    await page.getByRole('button', { name: 'Buchung anlegen und Ticket senden' }).click();
+    // Ohne Absprache-Notiz geht nichts raus
+    await page.getByRole('button', { name: 'Kostenlos buchen und Ticket senden' }).click();
+    await expect(
+      page.getByText('Bitte angeben, mit wem die kostenlose Buchung abgesprochen ist.'),
+    ).toBeVisible();
+    expect(adminRequests).toHaveLength(0);
+    await page.getByLabel('Abgesprochen mit / Grund').fill('Paul (Händler) und Louis');
+    await page.getByRole('button', { name: 'Kostenlos buchen und Ticket senden' }).click();
     await expect(page.getByText('Dieses Zeitfenster ist gesperrt. Trotzdem buchen?')).toBeVisible();
     await page.getByRole('button', { name: 'Ja, trotzdem buchen' }).click();
     await expect(page.getByText('HL-NEUE-BUCH')).toBeVisible();
@@ -201,7 +207,8 @@ test.describe('Admin', () => {
     expect(adminRequests[0]).toMatchObject({
       action: 'manual_booking',
       override: false,
-      paymentMethod: 'ueberweisung',
+      paymentMethod: 'kostenlos',
+      approvalNote: 'Paul (Händler) und Louis',
     });
     expect(adminRequests[1]).toMatchObject({
       override: true,

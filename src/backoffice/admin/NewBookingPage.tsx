@@ -1,19 +1,16 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMemo, useState } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import {
   BOOKING_FORM_DEFAULTS,
   createBookingSchema,
-  needsBillingAddress,
   OCCASIONS,
-  PAYMENT_METHODS_MANUAL,
   type BookingFormInput,
   type BookingFormValues,
 } from '@/lib/bookingSchema';
 import { addDays, todayInBerlin } from '@/lib/dates';
 import { formatCents } from '@/lib/money';
-import { totalCents } from '@/lib/settings';
 import { useSettings } from '@/lib/settingsContext';
 import { a11y } from '@/sections/booking/a11y';
 import { Field } from '@/sections/booking/fields';
@@ -24,8 +21,6 @@ import { callAdmin } from './api';
 import { hhmm } from './format';
 import { unwrap, useLoad } from './useLoad';
 
-type PaymentMethod = (typeof PAYMENT_METHODS_MANUAL)[number]['value'];
-
 const SLOT_STATUS: Record<string, string> = {
   free: 'frei',
   taken: 'gebucht',
@@ -35,7 +30,11 @@ const SLOT_STATUS: Record<string, string> = {
   out_of_season: 'außerhalb der Saison',
 };
 
-export function NewBookingPage() {
+/**
+ * Kostenlose Buchung nach Absprache (Entscheidung Louis, 05.11.2026: keine Bar- oder
+ * Überweisungsbuchungen). Admins und Händler; nur Admins dürfen gesperrte Zeitfenster übergehen.
+ */
+export function NewBookingPage({ area = 'admin' }: { area?: 'admin' | 'haendler' }) {
   const settings = useSettings();
   const schema = useMemo(() => createBookingSchema(settings.maxPersons), [settings.maxPersons]);
   const [date, setDate] = useState(() => {
@@ -43,8 +42,7 @@ export function NewBookingPage() {
     return tomorrow < settings.seasonStart ? settings.seasonStart : tomorrow;
   });
   const [startTime, setStartTime] = useState('');
-  const [payment, setPayment] = useState<PaymentMethod>('bar');
-  const [inSettlement, setInSettlement] = useState(true);
+  const [approvalNote, setApprovalNote] = useState('');
   const [override, setOverride] = useState<string | null>(null);
   const [result, setResult] = useState<{ code: string; ticketSent: boolean } | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -64,12 +62,9 @@ export function NewBookingPage() {
     [date, result],
   );
 
-  const selectedSlot = slots.data?.find((s) => hhmm(s.start_time) === startTime);
-
   const {
     register,
     handleSubmit,
-    control,
     reset,
     setError: setFieldError,
     formState: { errors, isSubmitting },
@@ -78,27 +73,33 @@ export function NewBookingPage() {
     defaultValues: { ...BOOKING_FORM_DEFAULTS, termsAccepted: true },
     mode: 'onTouched',
   });
-  const [companyName, invoiceRequested] = useWatch({
-    control,
-    name: ['companyName', 'invoiceRequested'],
-  });
-  const showBilling = needsBillingAddress({ companyName, invoiceRequested });
 
   const submit = async (form: BookingFormValues, confirmOverride = false) => {
     setError(null);
     if (!startTime) return setError('Bitte wähle ein Zeitfenster.');
+    if (approvalNote.trim().length < 3)
+      return setError('Bitte angeben, mit wem die kostenlose Buchung abgesprochen ist.');
     const r = await callAdmin<{ bookingCode: string; ticketSent: boolean }>('manual_booking', {
       date,
       startTime,
-      paymentMethod: payment,
-      includeInSettlement: payment === 'kostenlos' ? false : inSettlement,
+      paymentMethod: 'kostenlos',
+      approvalNote: approvalNote.trim(),
       override: confirmOverride,
-      form: { ...form, newsletterOptIn: false },
+      form: {
+        ...form,
+        newsletterOptIn: false,
+        invoiceRequested: false,
+        billingStreet: '',
+        billingZip: '',
+        billingCity: '',
+        vatId: '',
+      },
     });
     if (r.ok) {
       setResult({ code: r.bookingCode, ticketSent: r.ticketSent });
       setOverride(null);
       setStartTime('');
+      setApprovalNote('');
       reset({ ...BOOKING_FORM_DEFAULTS, termsAccepted: true });
       window.scrollTo({ top: 0 });
       return;
@@ -113,10 +114,11 @@ export function NewBookingPage() {
 
   return (
     <>
-      <PageHeader title="Neue Buchung" />
+      <PageHeader title="Kostenlose Buchung" />
       <p className="mb-6 max-w-2xl text-ink-soft">
-        Für Buchungen per Telefon oder Sonderfälle. Die Buchung ist sofort bezahlt, das Ticket geht
-        per E-Mail raus. Doppelbuchungen sind ausgeschlossen.
+        Nur nach Absprache mit der Tanzschule Fricke und den Händlern, für ausgewählte Gäste. Betrag
+        0 €, zählt nicht zur Abrechnung, keine Rechnung. Das Ticket geht sofort per E-Mail raus.
+        Doppelbuchungen sind ausgeschlossen.
       </p>
 
       {result && (
@@ -126,7 +128,7 @@ export function NewBookingPage() {
             {result.ticketSent
               ? 'Das Ticket wurde verschickt.'
               : 'Das Ticket konnte nicht verschickt werden – bitte in der Buchung erneut senden.'}{' '}
-            <Link to={`/admin/buchungen?code=${result.code}`} className="font-semibold underline">
+            <Link to={`/${area}/buchungen?code=${result.code}`} className="font-semibold underline">
               Buchung öffnen
             </Link>
           </SuccessBox>
@@ -208,45 +210,22 @@ export function NewBookingPage() {
             </fieldset>
           </Panel>
 
-          <Panel title="Zahlung">
-            <fieldset>
-              <legend className="sr-only">Zahlungsart</legend>
-              <div className="flex flex-wrap gap-2">
-                {PAYMENT_METHODS_MANUAL.map((p) => (
-                  <label key={p.value} className="cursor-pointer">
-                    <input
-                      type="radio"
-                      name="payment"
-                      value={p.value}
-                      checked={payment === p.value}
-                      onChange={() => setPayment(p.value)}
-                      className="peer sr-only"
-                    />
-                    <span className="inline-flex min-h-11 items-center rounded-full border border-line bg-surface px-4 text-sm peer-checked:border-gold-deep peer-checked:bg-gold peer-checked:font-semibold peer-focus-visible:outline-2 peer-focus-visible:outline-gold-deep">
-                      {p.label}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </fieldset>
+          <Panel title="Absprache">
+            <label className="block">
+              <span className="field-label">Abgesprochen mit / Grund</span>
+              <input
+                className="field-input"
+                maxLength={200}
+                required
+                aria-required="true"
+                placeholder="z. B. Paul (Händler) und Louis – Gewinn Radio Lippe"
+                value={approvalNote}
+                onChange={(e) => setApprovalNote(e.target.value)}
+              />
+            </label>
             <p className="mt-3 text-sm text-ink-soft">
-              {payment === 'kostenlos'
-                ? 'Betrag 0 €, zählt nicht zur Händler-Abrechnung.'
-                : `Betrag ${formatCents(selectedSlot?.total_cents ?? totalCents(settings))}${
-                    selectedSlot ? ' (Preis dieses Zeitfensters).' : ' (Standardpreis).'
-                  }`}
+              Pflichtfeld. Steht nur intern in der Buchung, nicht auf dem Ticket.
             </p>
-            {payment !== 'kostenlos' && (
-              <label className="mt-3 flex min-h-11 cursor-pointer items-center gap-3">
-                <input
-                  type="checkbox"
-                  className="h-5 w-5 accent-[#7a5a1e]"
-                  checked={inSettlement}
-                  onChange={(e) => setInSettlement(e.target.checked)}
-                />
-                <span>In die Händler-Abrechnung aufnehmen</span>
-              </label>
-            )}
           </Panel>
         </div>
 
@@ -317,52 +296,6 @@ export function NewBookingPage() {
                 {...register('companyName')}
               />
             </Field>
-            <label className="flex min-h-11 cursor-pointer items-center gap-3 self-end">
-              <input
-                type="checkbox"
-                className="h-5 w-5 accent-[#7a5a1e]"
-                {...register('invoiceRequested')}
-              />
-              <span>Rechnung gewünscht</span>
-            </label>
-            {showBilling && (
-              <>
-                <Field
-                  id="billingStreet"
-                  label="Straße und Hausnummer"
-                  error={errors.billingStreet}
-                >
-                  <input
-                    className="field-input"
-                    {...a11y('billingStreet', errors.billingStreet)}
-                    {...register('billingStreet')}
-                  />
-                </Field>
-                <div className="grid grid-cols-[7rem_1fr] gap-3">
-                  <Field id="billingZip" label="PLZ" error={errors.billingZip}>
-                    <input
-                      className="field-input"
-                      {...a11y('billingZip', errors.billingZip)}
-                      {...register('billingZip')}
-                    />
-                  </Field>
-                  <Field id="billingCity" label="Ort" error={errors.billingCity}>
-                    <input
-                      className="field-input"
-                      {...a11y('billingCity', errors.billingCity)}
-                      {...register('billingCity')}
-                    />
-                  </Field>
-                </div>
-                <Field id="vatId" label="USt-ID (optional)" error={errors.vatId}>
-                  <input
-                    className="field-input uppercase"
-                    {...a11y('vatId', errors.vatId)}
-                    {...register('vatId')}
-                  />
-                </Field>
-              </>
-            )}
             <div className="sm:col-span-2">
               <Field id="notes" label="Wünsche / interne Notiz (optional)" error={errors.notes}>
                 <textarea
@@ -374,13 +307,6 @@ export function NewBookingPage() {
               </Field>
             </div>
           </div>
-          {showBilling && (
-            <p className="mt-4 text-sm text-ink-soft">
-              Hinweis: Bei manuellen Buchungen erstellt Stripe keine Rechnung. Bitte die Rechnung
-              selbst schreiben.
-            </p>
-          )}
-
           {override && (
             <div className="mt-6 space-y-3">
               <WarnBox>{override}</WarnBox>
@@ -404,7 +330,7 @@ export function NewBookingPage() {
             className="btn-gold mt-6 w-full sm:w-auto"
             disabled={isSubmitting || !startTime}
           >
-            {isSubmitting ? 'Wird angelegt …' : 'Buchung anlegen und Ticket senden'}
+            {isSubmitting ? 'Wird angelegt …' : 'Kostenlos buchen und Ticket senden'}
           </button>
         </Panel>
       </form>

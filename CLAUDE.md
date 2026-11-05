@@ -33,7 +33,7 @@ Mobile-first One-Page-Website, über die eine überdachte Lounge auf dem Weihnac
 - Rechnung automatisch über Stripe, wenn Firmenname angegeben ODER „Ich benötige eine Rechnung“ angehakt. Optional USt-ID.
 - Newsletter bei der Buchung nur per freiwilliger Checkbox (nicht vorausgewählt), **Single-Opt-in** (Entscheidung Louis, 04.11.2026: keine Bestätigungsmail, Risiko bewusst in Kauf genommen). **Gewinnspiel** (Veranstalter Die Händler e. V., `/gewinnspiel`): Teilnahme = Newsletter-Anmeldung (deutlich beschriftet, eigenes Double-Opt-in), **automatische Ziehung jeden Sonntag 18:00 Uhr** (pg_cron → Edge Function `giveaway-draw`, Entscheidung Louis 04.11.2026; Knopf im Admin nur zum Nachholen), Countdown auf der Startseite und laufende Gold-Leiste „Lounge gewinnen“ oben, 1 Extra-Los je bestätigtem Freund; ⚠ Kopplung vom Anwalt prüfen lassen. Alle Bucher kommen in die Liste „Lounge-Buchungen“ (keine Werbung).
 - Tracking ohne Cookies, ohne localStorage-IDs, ohne IP-Speicherung: `page_view`, `book_click`, Buchungen.
-- Kundendaten werden nach der Saison (Stichtag 31. März) per Admin-Aktion anonymisiert; Beträge und Statistik bleiben.
+- Kundendaten werden nach der Saison (Stichtag 31. März) anonymisiert; Beträge und Statistik bleiben. Kein Menüpunkt im Admin mehr (Entscheidung Louis, 05.11.2026) – Studio F führt `admin_anonymize_before()` im SQL Editor aus (`LIVE-SCHALTUNG.md`).
 
 ## Rollen
 

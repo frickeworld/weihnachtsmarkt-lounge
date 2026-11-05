@@ -6,7 +6,6 @@ import { AccessPage } from './AccessPage';
 import { AdminLayout } from './AdminLayout';
 import { BookingsPage } from './BookingsPage';
 import { CalendarPage } from './CalendarPage';
-import { DataCarePage } from './DataCarePage';
 import { DayListPage } from './DayListPage';
 import { GiveawayAdminPage } from './GiveawayAdminPage';
 import { WeekPlanPage } from './WeekPlanPage';
@@ -31,7 +30,6 @@ export default function AdminRoutes() {
             <Route path="gewinnspiel" element={<GiveawayAdminPage />} />
             <Route path="abrechnung" element={<SettlementPage />} />
             <Route path="export" element={<ExportPage />} />
-            <Route path="datenpflege" element={<DataCarePage />} />
             <Route path="*" element={<Navigate to="/admin" replace />} />
           </Route>
           <Route path="tagesliste/:date" element={<DayListPage />} />

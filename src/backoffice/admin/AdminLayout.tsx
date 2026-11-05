@@ -6,14 +6,13 @@ import { useAuth } from '../AuthProvider';
 const NAV = [
   { to: '/admin', label: 'Übersicht', end: true },
   { to: '/admin/buchungen', label: 'Buchungen' },
-  { to: '/admin/neue-buchung', label: 'Neue Buchung' },
+  { to: '/admin/neue-buchung', label: 'Kostenlose Buchung' },
   { to: '/admin/kalender', label: 'Kalender' },
   { to: '/admin/einstellungen', label: 'Einstellungen' },
   { to: '/admin/zugaenge', label: 'Zugänge' },
   { to: '/admin/gewinnspiel', label: 'Gewinnspiel' },
   { to: '/admin/abrechnung', label: 'Abrechnung' },
   { to: '/admin/export', label: 'Export' },
-  { to: '/admin/datenpflege', label: 'Datenpflege' },
 ];
 
 export function AdminLayout() {

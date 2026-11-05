@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { csvEuro, downloadFile, toCsv } from '../admin/csv';
 import { formatDay, hhmm } from '../admin/format';
 import { OCCASION_LABEL } from '../admin/types';
 import { unwrap, useLoad } from '../admin/useLoad';
@@ -6,13 +7,13 @@ import { requireClient } from '../authClient';
 import { errorText } from '../errors';
 import { PeriodPicker } from '../PeriodPicker';
 import { usePeriod } from '../usePeriod';
-import { ErrorBox, Loading, PageHeader } from '../ui';
+import { ErrorBox, Loading, PageHeader, smallBtn } from '../ui';
 import { BookingState } from './BookingStatus';
 import type { HaendlerBooking } from './types';
 
 type Filter = 'alle' | 'bezahlt' | 'storniert' | 'nicht_erschienen';
 
-/** Buchungen ohne Kontaktdaten – nur lesen. */
+/** Buchungen ohne Kontaktdaten – lesen und als CSV exportieren. */
 export function HaendlerBookings() {
   const periodState = usePeriod('saison');
   const { period } = periodState;
@@ -73,9 +74,21 @@ export function HaendlerBookings() {
       {list.loading && <Loading />}
       {list.data && (
         <>
-          <p className="mb-3 text-sm text-ink-soft" aria-live="polite">
-            {rows.length} {rows.length === 1 ? 'Buchung' : 'Buchungen'}
-          </p>
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm text-ink-soft" aria-live="polite">
+              {rows.length} {rows.length === 1 ? 'Buchung' : 'Buchungen'}
+            </p>
+            <button
+              type="button"
+              className={smallBtn}
+              disabled={rows.length === 0}
+              onClick={() =>
+                downloadFile(`lounge-buchungen-${period.from}-${period.to}.csv`, haendlerCsv(rows))
+              }
+            >
+              CSV (Excel) herunterladen
+            </button>
+          </div>
           <ul className="space-y-3 md:hidden">
             {rows.map((b) => (
               <li key={b.id} className="card p-4">
@@ -139,5 +152,41 @@ export function HaendlerBookings() {
         </>
       )}
     </>
+  );
+}
+
+/** Export ohne Kontaktdaten – dieselben Spalten, die Händler auch auf dem Bildschirm sehen. */
+function haendlerCsv(rows: HaendlerBooking[]): string {
+  return toCsv(
+    [
+      'Datum',
+      'Beginn',
+      'Ende',
+      'Code',
+      'Vorname',
+      'Nachname',
+      'Firma',
+      'Personen',
+      'Anlass',
+      'Status',
+      'Eingecheckt',
+      'Taler übergeben',
+      'Händler-Anteil (€)',
+    ],
+    rows.map((b) => [
+      b.slot_date,
+      hhmm(b.start_time),
+      hhmm(b.end_time),
+      b.booking_code,
+      b.first_name,
+      b.last_name,
+      b.company_name,
+      b.persons,
+      b.occasion ? (OCCASION_LABEL[b.occasion] ?? b.occasion) : '',
+      b.status === 'cancelled' ? 'storniert' : b.no_show ? 'nicht erschienen' : 'bezahlt',
+      b.checked_in_at ? 'ja' : 'nein',
+      b.taler_handed_out_at ? 'ja' : 'nein',
+      b.include_in_settlement ? csvEuro(b.haendler_share_cents) : '0,00',
+    ]),
   );
 }

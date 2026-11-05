@@ -22,6 +22,7 @@ export interface Booking {
   billing_zip: string | null;
   billing_city: string | null;
   notes: string | null;
+  approval_note?: string | null;
   newsletter_opt_in: boolean;
   price_cents: number;
   fee_cents: number;
