@@ -43,13 +43,20 @@ interface Overview {
     company: string | null;
   }[];
   redeemed: { discount_code: string | null; amount_total_cents: number; status: string }[];
+  codes: {
+    code: string;
+    kind: string;
+    percent: number;
+    entry_id: string | null;
+    redeem_by: string | null;
+  }[];
 }
 
 /** Gewinnspiel: ein-/ausschalten, Kennzahlen, Gewinner ziehen, bisherige Ziehungen. */
 export function GiveawayAdminPage() {
   const data = useLoad(async (): Promise<Overview> => {
     const c = requireClient();
-    const [settings, entries, draws, redeemed] = await Promise.all([
+    const [settings, entries, draws, redeemed, codes] = await Promise.all([
       c
         .from('settings')
         .select('giveaway_active, giveaway_end, giveaway_discount_percent')
@@ -70,6 +77,7 @@ export function GiveawayAdminPage() {
         .select('discount_code, amount_total_cents, status')
         .not('discount_code', 'is', null)
         .eq('status', 'paid'),
+      c.from('discount_codes').select('code, kind, percent, entry_id, redeem_by'),
     ]);
     const d = unwrap(draws) as Overview['draws'];
     const ids = d.map((x) => x.winner_entry_id).filter((x): x is string => !!x);
@@ -87,6 +95,7 @@ export function GiveawayAdminPage() {
       draws: d,
       winners,
       redeemed: unwrap(redeemed) as Overview['redeemed'],
+      codes: unwrap(codes) as Overview['codes'],
     };
   }, []);
 
@@ -299,6 +308,8 @@ export function GiveawayAdminPage() {
                             'Firma',
                             'Angemeldet',
                             'Status',
+                            'Eingeladen von',
+                            'Codes',
                             'Lose',
                           ],
                           d.entries.map((e) => [
@@ -308,6 +319,10 @@ export function GiveawayAdminPage() {
                             e.company,
                             formatDateTime(e.created_at),
                             entryStatus(e),
+                            inviter(e, d.entries),
+                            codesOf(e, d)
+                              .map((c) => `${c.code} (${c.label})`)
+                              .join(', '),
                             lotsOf(e, d.entries),
                           ]),
                         ),
@@ -325,6 +340,8 @@ export function GiveawayAdminPage() {
                         <th className="py-1 font-semibold">E-Mail</th>
                         <th className="py-1 font-semibold">Angemeldet</th>
                         <th className="py-1 font-semibold">Status</th>
+                        <th className="py-1 font-semibold">Eingeladen von</th>
+                        <th className="py-1 font-semibold">Codes</th>
                         <th className="py-1 text-right font-semibold">Lose</th>
                       </tr>
                     </thead>
@@ -338,6 +355,14 @@ export function GiveawayAdminPage() {
                           <td className="py-2 break-all">{e.email}</td>
                           <td className="py-2 whitespace-nowrap">{formatDateTime(e.created_at)}</td>
                           <td className="py-2">{entryStatus(e)}</td>
+                          <td className="py-2">{inviter(e, d.entries)}</td>
+                          <td className="py-2">
+                            {codesOf(e, d).map((c) => (
+                              <div key={c.code} className="whitespace-nowrap">
+                                <span className="font-mono">{c.code}</span> · {c.label}
+                              </div>
+                            ))}
+                          </td>
                           <td className="py-2 text-right tabular-nums">{lotsOf(e, d.entries)}</td>
                         </tr>
                       ))}
@@ -410,4 +435,24 @@ function lotsOf(e: Entry, all: Entry[]): number {
   return (
     1 + all.filter((x) => x.referred_by === e.id && x.confirmed_at && !x.unsubscribed_at).length
   );
+}
+
+function inviter(e: Entry, all: Entry[]): string {
+  const x = e.referred_by ? all.find((y) => y.id === e.referred_by) : undefined;
+  return x ? `${x.first_name} ${x.last_name}` : '–';
+}
+
+/** Gewinnspiel-Codes einer Person mit Art und Einlösestatus. */
+function codesOf(e: Entry, d: Overview): { code: string; label: string }[] {
+  return d.codes
+    .filter((c) => c.entry_id === e.id)
+    .map((c) => {
+      const used = d.redeemed.some((r) => r.discount_code === c.code);
+      const expired = !used && c.redeem_by != null && new Date(c.redeem_by) < new Date();
+      const kind = c.kind === 'gewinn' ? 'Gewinn 100 %' : `Trostpreis ${c.percent} %`;
+      return {
+        code: c.code,
+        label: `${kind}, ${used ? 'eingelöst' : expired ? 'abgelaufen' : 'offen'}`,
+      };
+    });
 }

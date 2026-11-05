@@ -225,6 +225,20 @@ export async function mockBackoffice(page: Page, opts: BackofficeOptions = {}) {
       ],
     }),
   );
+  await page.route('**/rest/v1/discount_codes*', (route) =>
+    route.fulfill({
+      json: [
+        { code: 'GEWINN-AB12CD', kind: 'gewinn', percent: 100, entry_id: 'g1', redeem_by: null },
+        {
+          code: 'LOUNGE-XY34ZZ',
+          kind: 'trostpreis',
+          percent: 25,
+          entry_id: 'g2',
+          redeem_by: new Date(Date.now() + 86400_000).toISOString(),
+        },
+      ],
+    }),
+  );
   await page.route('**/rest/v1/giveaway_draws*', (route) =>
     route.fulfill({
       json: [
