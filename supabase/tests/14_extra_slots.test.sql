@@ -23,7 +23,7 @@ select results_eq(
        case d when '2026-12-22' then 'Jingle Beatz'
               when '2026-12-23' then 'Coming Home for Christmas'
               when '2026-12-29' then '80er- & 90er-Party mit DJ'
-              else 'Discofox zum Jahresausklang' end
+              else 'Schlagerparty zum Jahresausklang' end
       from unnest(array['2026-12-22','2026-12-23','2026-12-29','2026-12-30']) d,
            unnest(array['16:45','19:00']) t order by 1, 2$$,
   'Party-Abende 22./23./29./30.12. je 16:45 und 19:00 mit Programm-Titel: 198,45 € (189 € + 5 %) inkl. 100 €, Händler 72 % = 136,08 €');

@@ -278,7 +278,8 @@ test('Wochenend-Programm: Acts mit Lounge-Zeitfenstern und Lounge-Preisen des Ab
   const section = page.locator('#besondere-abende');
   await expect(section.getByRole('heading', { name: 'Live am Wochenende' })).toBeVisible();
   await expect(section).toContainText('19:00 Uhr · 4 Souls');
-  await expect(section).toContainText('Soul, Pop, Rock & Schlager · Winterbühne');
+  // Mobil kompakt: nur Uhrzeit und Titel, keine Beschreibung
+  await expect(section).not.toContainText('Soul, Pop, Rock & Schlager');
   // Fr: 15:30 (149 €, vergeben), 17:45 und 20:00 (199 €) – nur Lounge-Preise
   await expect(section.getByRole('link', { name: /17:45 Uhr buchen$/ })).toHaveText(
     '17:45 · 199 €',

@@ -28,7 +28,7 @@ export function Highlights() {
           {items.map((i, idx) => (
             <li
               key={i.label}
-              className={`rounded-2xl px-4 py-5 text-center sm:px-6 sm:py-7 ${idx === 1 ? 'glitter' : 'card'}`}
+              className={`rounded-2xl px-4 py-5 text-center sm:px-6 sm:py-7 ${idx === 1 ? 'glitter glitter-soft' : 'card'}`}
             >
               <p className="font-display text-4xl leading-none font-medium sm:text-5xl">
                 {i.value}

@@ -37,26 +37,26 @@ export function Pricing() {
           Jeder Preis enthält Freiverzehr in Residenztalern – je später der Abend, desto mehr.
         </SectionHeading>
         <Reveal className="grid overflow-hidden rounded-[28px] shadow-[0_30px_60px_-40px_rgba(36,34,30,0.6)] md:grid-cols-[1fr_1.4fr]">
-          <div className="glitter flex flex-col justify-center p-8 text-center sm:p-12">
-            <p className="text-sm font-bold tracking-[0.2em] uppercase">
-              Pro Lounge und Zeitfenster
-            </p>
-            <p className="mt-3 text-2xl font-medium">ab</p>
-            <p className="font-display text-7xl leading-none font-medium sm:text-8xl">
-              {euro(minLoungeCents(s))}
-            </p>
-            <p className="mt-3 font-medium">{feeNote(s)}</p>
-            <ul className="mt-8 space-y-2 text-left text-sm">
-              {included.map((item) => (
-                <li key={item} className="flex gap-2">
-                  <IconCheck className="mt-0.5 h-4 w-4 shrink-0" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-            <a href="#buchen" onClick={trackBookClick} className="btn-outline mt-8 self-center">
-              Lounge buchen
-            </a>
+          <div className="glitter p-2.5 sm:p-3">
+            <div className="flex h-full flex-col justify-center rounded-[22px] bg-paper/95 p-8 text-center sm:p-12">
+              <p className="eyebrow">Pro Lounge und Zeitfenster</p>
+              <p className="mt-3 text-2xl font-medium">ab</p>
+              <p className="font-display text-7xl leading-none font-medium text-gold-deep sm:text-8xl">
+                {euro(minLoungeCents(s))}
+              </p>
+              <p className="mt-3 text-ink-soft">{feeNote(s)}</p>
+              <ul className="mt-8 space-y-2 text-left text-sm">
+                {included.map((item) => (
+                  <li key={item} className="flex gap-2">
+                    <IconCheck className="mt-0.5 h-4 w-4 shrink-0 text-gold-deep" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+              <a href="#buchen" onClick={trackBookClick} className="btn-gold mt-8 self-center">
+                Lounge buchen
+              </a>
+            </div>
           </div>
           <div className="bg-surface p-6 sm:p-10">
             <h3 className="text-xl font-medium">Preise je Zeitfenster</h3>

@@ -225,8 +225,7 @@ function WeekendProgram({ program, slots }: { program: ProgramItem[]; slots: Slo
       <Reveal className="mx-auto mb-8 max-w-2xl text-center">
         <h3 className="text-3xl font-medium sm:text-4xl">Live am Wochenende</h3>
         <p className="mt-4 text-lg leading-relaxed text-on-dark/85">
-          Freitags und samstags spielt auf der Winterbühne und auf Frickes Tanzfläche Live-Musik –
-          deine Lounge ist mittendrin.
+          Freitags und samstags Live-Musik – deine Lounge ist mittendrin.
         </p>
       </Reveal>
       <div className="grid gap-5 md:grid-cols-2">
@@ -239,7 +238,7 @@ function WeekendProgram({ program, slots }: { program: ProgramItem[]; slots: Slo
             <Reveal key={date} className="card relative flex flex-col p-6 text-ink sm:p-7">
               <div className="glitter absolute inset-x-0 top-0 h-1.5" aria-hidden="true" />
               <p className="eyebrow">{formatLongDate(date)}</p>
-              <ul className="mt-3 space-y-3">
+              <ul className="mt-3 space-y-2">
                 {acts.map((a) => (
                   <li key={a.startTime + a.title}>
                     <p className="font-semibold">
@@ -249,11 +248,6 @@ function WeekendProgram({ program, slots }: { program: ProgramItem[]; slots: Slo
                       </span>{' '}
                       · {a.title}
                     </p>
-                    {(a.description || a.location) && (
-                      <p className="text-sm text-ink-soft">
-                        {[a.description, a.location].filter(Boolean).join(' · ')}
-                      </p>
-                    )}
                   </li>
                 ))}
               </ul>

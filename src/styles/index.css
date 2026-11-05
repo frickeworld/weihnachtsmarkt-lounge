@@ -97,6 +97,13 @@
     color: var(--color-ink);
   }
 
+  /* Glitzer hinter Text: heller Schleier, damit dunkle Schrift gut lesbar bleibt */
+  .glitter-soft {
+    background-image:
+      linear-gradient(rgb(251 247 239 / 0.62), rgb(251 247 239 / 0.62)),
+      url('../assets/gold-glitzer.webp');
+  }
+
   /* Haupt-Button: Gold mit dunkler Schrift und Glanz-Sweep */
   .btn-gold {
     position: relative;

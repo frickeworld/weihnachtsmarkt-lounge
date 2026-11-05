@@ -49,7 +49,7 @@ export function GiveawayTicker() {
   return (
     <Link
       to="/gewinnspiel"
-      className="ticker glitter block overflow-hidden py-1.5 text-sm font-semibold text-ink"
+      className="ticker glitter glitter-soft block overflow-hidden py-1.5 text-sm font-semibold text-ink"
       aria-label={`Lounge gewinnen: Ziehung ${formatDrawTime(target)}. Jetzt kostenlos mitmachen.`}
     >
       <span className="ticker-track flex w-max">

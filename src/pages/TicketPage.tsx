@@ -106,7 +106,7 @@ function TicketView({ ticket, qr, token }: { ticket: TicketInfo; qr: string; tok
   return (
     <>
       {won && (
-        <p className="glitter mt-2 rounded-2xl px-5 py-3 font-semibold" role="status">
+        <p className="glitter glitter-soft mt-2 rounded-2xl px-5 py-3 font-semibold" role="status">
           Herzlichen Glückwunsch – dein Gewinn ist eingelöst!
         </p>
       )}

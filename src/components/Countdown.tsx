@@ -30,7 +30,7 @@ export function Countdown({
   return (
     <div className="mt-6 w-full" role="timer" aria-live="off">
       {c.phase === 'running' ? (
-        <p className="glitter rounded-2xl px-5 py-3 text-center font-semibold">
+        <p className="glitter glitter-soft rounded-2xl px-5 py-3 text-center font-semibold">
           Deine Lounge läuft gerade – viel Freude!
         </p>
       ) : (

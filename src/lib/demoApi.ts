@@ -30,34 +30,33 @@ const party = (title: string, act: string, description: string): DemoSpecial => 
   totalCents: 19845,
   talerCount: 100,
 });
-/** Programm wie Migration 20261104150000_party_program. */
+/** Programm wie Migrationen 20261104150000_party_program und 20261105100000_party_texts_short. */
 const PARTIES: Record<IsoDate, DemoSpecial> = {
   '2026-12-22': party(
     'Jingle Beatz',
-    'Disco Classics open air · powered by STUDIO/F',
-    'STUDIO/F holt den Club auf den Weihnachtsmarkt: die größten Disco-Hits zum Mitfeiern und Mittanzen auf Frickes Tanzfläche (17:30–21:45 Uhr, Eintritt frei). Du feierst aus deiner eigenen überdachten Lounge – mit 100 € Freiverzehr und Tischservice.',
+    'powered by STUDIO/F',
+    'Die größten Disco-Hits zum Mitfeiern auf Frickes Tanzfläche.',
   ),
   '2026-12-23': party(
     'Coming Home for Christmas',
-    'All Time Classics – die größten Hits aller Zeiten',
-    'Die Party vor Heiligabend auf Frickes Tanzfläche (18:00–21:45 Uhr): All Time Classics zum Mitsingen und Tanzen. Du feierst aus deiner eigenen überdachten Lounge – mit 100 € Freiverzehr und Tischservice.',
+    'All Time Classics',
+    'Die Party vor Heiligabend – Hits zum Mitsingen und Tanzen.',
   ),
   '2026-12-29': party(
     '80er- & 90er-Party mit DJ',
     'präsentiert von der Tanzschule Fricke',
-    'Zum Aufwärmen um 17:00 Uhr ein kostenloser Discofox-Workshop der Tanzschule Fricke für Einsteiger und Fortgeschrittene, danach die Hits der 80er und 90er auf Frickes Tanzfläche (17:30–21:45 Uhr). Du feierst aus deiner eigenen überdachten Lounge – mit 100 € Freiverzehr und Tischservice.',
+    'Die Hits der 80er und 90er – vorher kostenloser Discofox-Workshop.',
   ),
   '2026-12-30': party(
-    'Discofox zum Jahresausklang',
-    'Discofox-Workshop der Tanzschule Fricke',
-    'Um 17:00 Uhr zeigt dir die Tanzschule Fricke auf Frickes Tanzfläche die Discofox-Schritte – kostenlos, für Einsteiger und Fortgeschrittene. Danach genießt du den letzten Marktabend des Jahres in deiner eigenen überdachten Lounge – mit 100 € Freiverzehr und Tischservice.',
+    'Schlagerparty zum Jahresausklang',
+    'Die größten Schlager zum Mitsingen',
+    'Der letzte Partyabend des Jahres auf Frickes Tanzfläche.',
   ),
 };
 const HEILIGABEND: DemoSpecial = {
   title: 'Heiligabend exklusiv',
   act: null,
-  description:
-    'Nur einmal im Jahr: drei Stunden Lounge am Heiligabend-Vormittag, exklusiv für dich und deine Gäste – mit 150 € Freiverzehr und Tischservice. Der schönste Start in den Heiligabend.',
+  description: 'Drei Stunden Lounge am Heiligabend-Vormittag – exklusiv für dich und deine Gäste.',
   totalCents: 31395,
   talerCount: 150,
 };
