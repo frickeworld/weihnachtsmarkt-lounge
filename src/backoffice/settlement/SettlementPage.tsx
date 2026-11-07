@@ -82,6 +82,11 @@ export function SettlementPage() {
             <Kpi
               label={admin ? 'Anteil Händler' : 'Euer Anteil'}
               value={formatCents(s.haendler_cents)}
+              sub={
+                s.extra_taler_cents
+                  ? `inkl. ${formatCents(s.extra_taler_cents)} Extra-Taler`
+                  : undefined
+              }
             />
             <Kpi
               label="Nicht berechnet"
@@ -144,6 +149,11 @@ export function SettlementPage() {
                     )}
                     <td className="px-3 py-2 text-right tabular-nums">
                       {formatCents(r.haendler_share_cents)}
+                      {!!r.extra_taler_cents && (
+                        <div className="text-xs text-ink-soft">
+                          inkl. {formatCents(r.extra_taler_cents)} Extra-Taler
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}

@@ -37,10 +37,11 @@ interface SettingsRow {
 export async function fetchPublicSettings(): Promise<PublicSettings> {
   if (DEMO) return demoSettings();
   ensureConfigured();
-  const [data, prices, fee] = await Promise.all([
+  const [data, prices, fee, extraTaler] = await Promise.all([
     rpc<SettingsRow>('get_public_settings', {}, 'single').then((d) => d!),
     rpc<PriceRow[]>('get_price_list').catch(() => null),
     rpc<{ fee_percent: number | string | null }[]>('get_fee_info').catch(() => null),
+    rpc<number[] | null>('get_extra_taler_options').catch(() => null),
   ]);
   const feePercent = fee?.[0]?.fee_percent;
   // Unvollständige Antworten nie übernehmen – dann bleiben die Startwerte stehen.
@@ -64,6 +65,9 @@ export async function fetchPublicSettings(): Promise<PublicSettings> {
     seasonEnd: data.season_end,
     contactEmail: data.contact_email,
     bookingCutoffMinutes: data.booking_cutoff_minutes,
+    extraTalerOptions: Array.isArray(extraTaler)
+      ? extraTaler.filter((n) => Number.isInteger(n) && n > 0)
+      : [],
     priceList: (prices ?? [])
       .filter((p) => Number.isInteger(p.total_cents) && Number.isInteger(p.taler_count))
       .map((p) => ({
@@ -168,6 +172,8 @@ export async function startCheckout(payload: {
   form: unknown;
   /** Persönlicher Code aus dem Gewinnspiel (optional) */
   discountCode?: string;
+  /** Zusätzliche Residenztaler (0 = keine); Preis rechnet der Server */
+  extraTaler?: number;
 }): Promise<CheckoutResult> {
   if (DEMO) {
     // Vorschau: statt Stripe direkt die Erfolgsseite zeigen.
@@ -270,6 +276,9 @@ export interface TicketInfo {
   persons: number;
   status: 'paid' | 'cancelled';
   checkedInAt: string | null;
+  /** Taler am Einlass (Freiverzehr + Extra-Taler); null, wenn unbekannt */
+  talerCount?: number | null;
+  extraTalerCount?: number;
 }
 
 export async function fetchTicket(token: string): Promise<TicketInfo | null> {
@@ -285,9 +294,16 @@ export async function fetchTicket(token: string): Promise<TicketInfo | null> {
       persons: 8,
       status: 'paid',
       checkedInAt: null,
+      talerCount: 175,
+      extraTalerCount: 100,
     };
   }
   ensureConfigured();
+  const talerPromise = rpc<{ taler_count: number; extra_taler_count: number }>(
+    'get_ticket_taler',
+    { p_token: token },
+    'maybe',
+  ).catch(() => null);
   const data = await rpc<{
     first_name: string;
     booking_code: string;
@@ -299,7 +315,10 @@ export async function fetchTicket(token: string): Promise<TicketInfo | null> {
     checked_in_at: string | null;
   }>('get_ticket', { p_token: token }, 'maybe');
   if (!data) return null;
+  const taler = await talerPromise;
   return {
+    talerCount: taler && Number.isInteger(taler.taler_count) ? taler.taler_count : null,
+    extraTalerCount: taler?.extra_taler_count ?? 0,
     firstName: data.first_name,
     bookingCode: data.booking_code,
     date: data.slot_date,
@@ -629,7 +648,7 @@ async function loadGiveawayInfo(): Promise<GiveawayInfo | null> {
       nextDrawAt: demoNextDraw().toISOString(),
       participants: 312,
       draws: 0,
-      discountPercent: 25,
+      discountPercent: 10,
     };
   }
   if (!restConfigured()) return null;

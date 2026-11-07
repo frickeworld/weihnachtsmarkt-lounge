@@ -11,6 +11,8 @@ export interface TicketPdfData {
   bookingCode: string;
   location: string;
   talerCount: number;
+  /** Zusätzlich gebuchte Residenztaler (0 = keine) */
+  extraTalerCount?: number;
   qrPng: Uint8Array;
   /** Glitzer-Kopf mit Markt-Schriftzug (JPEG), optional */
   headerJpg?: Uint8Array | null;
@@ -125,7 +127,9 @@ export async function renderTicketPdf(d: TicketPdfData): Promise<Uint8Array> {
   const boxW = 300;
   page.drawRectangle({ x: (W - boxW) / 2, y: y - 8, width: boxW, height: 26, color: GOLD });
   center(
-    `${d.talerCount} € Freiverzehr inklusive – ${d.talerCount} Residenztaler beim Einlass`,
+    d.extraTalerCount
+      ? `${d.talerCount + d.extraTalerCount} Residenztaler beim Einlass (${d.talerCount} Freiverzehr + ${d.extraTalerCount} extra)`
+      : `${d.talerCount} € Freiverzehr inklusive – ${d.talerCount} Residenztaler beim Einlass`,
     y,
     sansBold,
     8.5,
@@ -270,7 +274,15 @@ export async function renderGiftPdf(d: GiftPdfData): Promise<Uint8Array> {
   y -= 30;
   const boxW = 290;
   page.drawRectangle({ x: (W - boxW) / 2, y: y - 9, width: boxW, height: 28, color: GOLD });
-  center(`inklusive ${d.talerCount} € Freiverzehr und Tischservice`, y, sansBold, 10, INK);
+  center(
+    d.extraTalerCount
+      ? `inklusive ${d.talerCount + d.extraTalerCount} Residenztaler und Tischservice`
+      : `inklusive ${d.talerCount} € Freiverzehr und Tischservice`,
+    y,
+    sansBold,
+    10,
+    INK,
+  );
 
   // Felder zum Ausfüllen
   y -= 50;

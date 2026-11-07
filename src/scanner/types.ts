@@ -11,6 +11,10 @@ export interface ScanBooking {
   status: 'paid' | 'cancelled' | 'pending' | 'expired';
   checked_in_at: string | null;
   taler_handed_out_at: string | null;
+  /** Taler zum Ausgeben: Freiverzehr + Extra-Taler (fehlt bei älteren Server-Ständen) */
+  taler_count?: number;
+  /** Davon zusätzlich gebuchte Taler */
+  extra_taler_count?: number;
   token_hash?: string;
 }
 

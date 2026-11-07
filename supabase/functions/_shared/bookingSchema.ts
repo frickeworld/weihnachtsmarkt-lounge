@@ -129,6 +129,11 @@ export function createCheckoutRequestSchema(maxPersons: number) {
       .regex(/^[A-Z0-9-]*$/, 'Bitte prüfe den Code.')
       .optional()
       .transform((v) => v || undefined),
+    /**
+     * Zusätzliche Residenztaler (0 = keine). Erlaubte Werte stehen in settings.extra_taler_options
+     * und werden in create-checkout geprüft; der Preis (1 Taler = 1 €) entsteht in der Datenbank.
+     */
+    extraTaler: z.coerce.number().int().min(0).max(1000).default(0),
   });
 }
 

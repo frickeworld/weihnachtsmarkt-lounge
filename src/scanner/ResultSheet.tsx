@@ -105,6 +105,17 @@ export function ResultSheet({
           </p>
         )}
         {booking && <Guest b={booking} />}
+        {canTaler && booking.taler_count != null && (
+          <div className="mt-5 rounded-2xl bg-black/25 px-4 py-3">
+            <p className="text-sm font-semibold tracking-wide uppercase">Taler ausgeben</p>
+            <p className="text-5xl leading-tight font-bold">{booking.taler_count} Taler</p>
+            {!!booking.extra_taler_count && (
+              <p className="text-lg font-semibold">
+                inkl. {booking.extra_taler_count} zusätzlich gebuchte Taler
+              </p>
+            )}
+          </div>
+        )}
         {canTaler && (
           <p className="mt-4 text-lg font-semibold">
             {booking.taler_handed_out_at
@@ -126,7 +137,9 @@ export function ResultSheet({
             }}
             className={`min-h-16 rounded-2xl text-xl font-semibold ${s.btn}`}
           >
-            Taler übergeben
+            {booking.taler_count != null
+              ? `${booking.taler_count} Taler übergeben`
+              : 'Taler übergeben'}
           </button>
         )}
         {result.result === 'wrong_slot' && (

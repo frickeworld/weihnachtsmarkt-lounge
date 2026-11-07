@@ -17,7 +17,7 @@ test.describe('Gewinnspiel', () => {
     await expect(page.getByRole('link', { name: 'Lounge gewinnen', exact: true })).toBeVisible();
     await expect(page.getByLabel(/^Noch 3 Tage, 5 Stunden/)).toBeVisible();
     await expect(
-      page.getByText('Alle anderen bekommen 25 % Rabatt', { exact: false }),
+      page.getByText('Alle anderen bekommen 10 % Rabatt', { exact: false }),
     ).toBeVisible();
     await page.getByRole('link', { name: 'Jetzt mitmachen' }).click();
     await expect(page).toHaveURL(/\/gewinnspiel$/);
@@ -79,8 +79,8 @@ test.describe('Gewinnspiel', () => {
     const opts: MockOptions = {
       checkoutRequests: [],
       discounts: {
-        // Di 14:30: 103,95 € − 25 % (25,99 €) = 77,96 € → Lounge-Preis 73,01 € zzgl. 4,95 € Gebühr
-        'LOUNGE-ABC234': { reason: null, percent: 25, discount_cents: 2599, total_cents: 7796 },
+        // Di 14:30: 103,95 € − 10 % (10,40 €) = 93,55 € → Lounge-Preis 88,60 € zzgl. 4,95 € Gebühr
+        'LOUNGE-ABC234': { reason: null, percent: 10, discount_cents: 1040, total_cents: 9355 },
       },
     };
     await mockSupabase(page, opts);
@@ -88,8 +88,8 @@ test.describe('Gewinnspiel', () => {
     await pickDay(page, tuesday);
     await page.getByRole('group', { name: 'Zeitfenster' }).locator('button').first().click();
     await expect(page.getByText('LOUNGE-ABC234')).toBeVisible();
-    await expect(page.getByText('Code −25 %')).toBeVisible();
-    await expect(page.getByLabel('Zusammenfassung')).toContainText(/Lounge-Preis\s*73,01\s€/);
+    await expect(page.getByText('Code −10 %')).toBeVisible();
+    await expect(page.getByLabel('Zusammenfassung')).toContainText(/Lounge-Preis\s*88,60\s€/);
     await page.getByLabel('Vorname').fill('Anna');
     await page.getByLabel('Nachname').fill('Muster');
     await page.locator('#buchen').getByLabel('E-Mail', { exact: true }).fill('anna@example.de');

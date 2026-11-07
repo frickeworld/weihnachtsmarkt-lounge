@@ -28,6 +28,11 @@ export interface PublicSettings {
   bookingCutoffMinutes: number;
   /** Preisstaffel je Wochentag und Zeitfenster (aus get_price_list) */
   priceList: PriceTier[];
+  /**
+   * Extra-Taler zum Dazubuchen (z. B. 100, 200, 300; 1 Taler = 1 €, ohne Gebühr und Rabatt).
+   * Leer, bis die Datenbank antwortet – dann wird die Auswahl nicht angezeigt.
+   */
+  extraTalerOptions: number[];
 }
 
 const tier = (
@@ -74,6 +79,7 @@ export const PUBLIC_SETTINGS_FALLBACK: PublicSettings = {
   contactEmail: 'info@studio-f.club',
   bookingCutoffMinutes: 60,
   priceList: FALLBACK_PRICE_LIST,
+  extraTalerOptions: [],
 };
 
 export function totalCents(s: Pick<PublicSettings, 'priceCents' | 'feeCents'>): number {

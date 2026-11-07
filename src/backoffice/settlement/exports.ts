@@ -22,6 +22,7 @@ export function settlementCsv(s: Settlement): string {
     'Personen',
     'Erschienen',
     'Händler-Anteil €',
+    'davon Extra-Taler €',
     ...(admin ? ['Gesamt €', 'Studio F €'] : []),
   ];
   const rows = s.rows.map((r) => [
@@ -34,6 +35,7 @@ export function settlementCsv(s: Settlement): string {
     r.persons,
     r.checked_in ? 'ja' : 'nein',
     csvEuro(r.haendler_share_cents),
+    csvEuro(r.extra_taler_cents ?? 0),
     ...(admin
       ? [
           csvEuro(r.amount_total_cents ?? 0),
@@ -51,6 +53,7 @@ export function settlementCsv(s: Settlement): string {
     '',
     '',
     csvEuro(s.haendler_cents),
+    csvEuro(s.extra_taler_cents ?? 0),
     ...(admin ? [csvEuro(s.revenue_cents ?? 0), csvEuro(s.studio_cents ?? 0)] : []),
   ];
   return toCsv(header, [...rows, sum]);
@@ -159,6 +162,9 @@ export async function settlementPdf(
         ['Buchungen', String(s.count)],
         ['davon nicht erschienen', String(s.no_shows)],
         ['Anteil Händler', euro(s.haendler_cents)],
+        ...(s.extra_taler_cents
+          ? ([['davon Extra-Taler', euro(s.extra_taler_cents)]] as [string, string][])
+          : []),
         ...(admin
           ? ([
               ['Umsatz brutto', euro(s.revenue_cents ?? 0)],

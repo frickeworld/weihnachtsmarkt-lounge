@@ -17,6 +17,7 @@ import { feeFor, feeLabel, totalCents } from '@/lib/settings';
 import { useSettings } from '@/lib/settingsContext';
 import { a11y } from './a11y';
 import { DiscountCodeField } from './DiscountCodeField';
+import { ExtraTalerPicker } from './ExtraTalerPicker';
 import { Field } from './fields';
 
 interface Props {
@@ -44,6 +45,7 @@ export function BookingForm({
   const schema = useMemo(() => createBookingSchema(settings.maxPersons), [settings.maxPersons]);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [discount, setDiscount] = useState<{ code: string; preview: DiscountPreview } | null>(null);
+  const [extraTaler, setExtraTaler] = useState(0);
   const navigate = useNavigate();
 
   const {
@@ -72,6 +74,9 @@ export function BookingForm({
   const loungeAfterDiscount = discount ? discount.preview.totalCents - fee : loungeValue;
   const won = discount?.preview.totalCents === 0;
   const taler = slotTaler ?? settings.talerCount;
+  // Extra-Taler: 1 Taler = 1 €, ohne Gebühr und ohne Rabatt (Betrag rechnet der Server)
+  const extraCents = settings.extraTalerOptions.includes(extraTaler) ? extraTaler * 100 : 0;
+  const payNothing = won && extraCents === 0;
 
   const onSubmit = async (values: BookingFormValues) => {
     setSubmitError(null);
@@ -80,6 +85,7 @@ export function BookingForm({
       startTime,
       form: values,
       discountCode: discount?.code,
+      extraTaler: extraCents / 100,
     });
     if (result.ok) {
       // Weiter zu Stripe. Der Button bleibt gesperrt, bis die Seite wechselt.
@@ -300,6 +306,14 @@ export function BookingForm({
         />
       </Field>
 
+      <ExtraTalerPicker
+        options={settings.extraTalerOptions}
+        value={extraCents / 100}
+        onChange={setExtraTaler}
+        baseTaler={taler}
+        persons={persons ? Number(persons) : undefined}
+      />
+
       {/* Zusammenfassung */}
       <div
         className="rounded-2xl border border-gold bg-gold/10 p-5 sm:p-6"
@@ -341,20 +355,42 @@ export function BookingForm({
             </div>
           )}
           {won ? (
-            <div className="flex justify-between gap-4 pt-2 text-xl font-bold text-emerald-800">
-              <dt>Gewinn – du zahlst nichts</dt>
+            <div
+              className={`flex justify-between gap-4 pt-2 font-bold text-emerald-800 ${extraCents ? '' : 'text-xl'}`}
+            >
+              <dt>{extraCents ? 'Lounge (Gewinn)' : 'Gewinn – du zahlst nichts'}</dt>
               <dd>{formatCents(0)}</dd>
             </div>
           ) : (
-            <div className="flex justify-between gap-4 pt-2 text-xl font-bold text-ink">
+            <div
+              className={`flex justify-between gap-4 pt-2 text-ink ${extraCents ? 'font-semibold' : 'text-xl font-bold'}`}
+            >
               <dt>Lounge-Preis</dt>
               <dd>{formatCents(loungeAfterDiscount)}</dd>
             </div>
           )}
+          {extraCents > 0 && (
+            <>
+              <div className="flex justify-between gap-4">
+                <dt>Extra-Taler ({extraCents / 100} Taler)</dt>
+                <dd>{formatCents(extraCents)}</dd>
+              </div>
+              <div className="flex justify-between gap-4 pt-2 text-xl font-bold text-ink">
+                <dt>Zusammen</dt>
+                <dd>{formatCents((won ? 0 : loungeAfterDiscount) + extraCents)}</dd>
+              </div>
+              <div className="flex justify-between gap-4 text-sm text-ink-soft">
+                <dt>Residenztaler beim Einlass</dt>
+                <dd>{taler + extraCents / 100} Taler</dd>
+              </div>
+            </>
+          )}
         </dl>
         {!won && (
           <p className="pt-1 text-sm text-ink-soft">
-            zzgl. {feeLabel(settings)} Verarbeitungsgebühr, die beim Bezahlen hinzugerechnet wird
+            zzgl. {feeLabel(settings)} Verarbeitungsgebühr
+            {extraCents > 0 ? ' auf den Lounge-Preis' : ''}, die beim Bezahlen hinzugerechnet wird
+            {extraCents > 0 ? ' – die Extra-Taler sind gebührenfrei' : ''}
           </p>
         )}
       </div>
@@ -427,10 +463,10 @@ export function BookingForm({
         className="btn-gold w-full text-lg sm:w-auto sm:px-10"
       >
         {busy
-          ? won
+          ? payNothing
             ? 'Wird gebucht …'
             : 'Weiter zur Zahlung …'
-          : won
+          : payNothing
             ? 'Gewinn einlösen – kostenlos buchen'
             : 'Zahlungspflichtig buchen'}
       </button>

@@ -122,8 +122,18 @@ export function BookingDetail({
     ],
     [
       'Betrag',
-      `${formatCents(b.amount_total_cents)} (Lounge ${formatCents(b.price_cents)} + Gebühr ${formatCents(b.fee_cents)})`,
+      `${formatCents(b.amount_total_cents)} (Lounge ${formatCents(b.price_cents)} + Gebühr ${formatCents(b.fee_cents)}${
+        b.extra_taler_cents ? ` + Extra-Taler ${formatCents(b.extra_taler_cents)}` : ''
+      })`,
     ],
+    ...(b.extra_taler_cents
+      ? [
+          [
+            'Extra-Taler',
+            `${b.extra_taler_cents / 100} Taler zusätzlich (gehen voll an die Händler)`,
+          ] as [string, string],
+        ]
+      : []),
     [
       'Händler-Anteil',
       b.include_in_settlement ? formatCents(b.haendler_share_cents) : 'nicht in der Abrechnung',

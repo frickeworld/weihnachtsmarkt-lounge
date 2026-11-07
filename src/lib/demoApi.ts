@@ -8,7 +8,7 @@ const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export async function demoSettings(): Promise<PublicSettings> {
   await wait(150);
-  return PUBLIC_SETTINGS_FALLBACK;
+  return { ...PUBLIC_SETTINGS_FALLBACK, extraTalerOptions: [100, 200, 300] };
 }
 
 interface DemoSpecial {

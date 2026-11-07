@@ -1,5 +1,5 @@
 // Integrationstest Gewinnspiel: Teilnahme mit Freunde-Link, Double-Opt-in, Ziehung im Admin mit
-// Mails, Buchung mit Trostpreis-Code (25 % über Stripe, 48 Stunden) und Gewinn-Code (ohne Zahlung).
+// Mails, Buchung mit Trostpreis-Code (10 % über Stripe, 48 Stunden) und Gewinn-Code (ohne Zahlung).
 import { assert, assertEquals, assertMatch } from 'jsr:@std/assert@1';
 import { createClient } from '@supabase/supabase-js';
 
@@ -214,7 +214,7 @@ Deno.test({
           .sort();
         assertEquals(subjects, [
           'Du hast gewonnen: ein Abend in der Weihnachtsmarkt-Lounge',
-          'Nur 48 Stunden: 25 % auf deinen Lounge-Abend',
+          'Nur 48 Stunden: 10 % auf deinen Lounge-Abend',
         ]);
       });
 
@@ -283,7 +283,7 @@ Deno.test({
           .eq('code', loserCode);
       });
 
-      await t.step('Trostpreis-Code Dienstag 16:45 → Stripe mit 117,34 € (25 %)', async () => {
+      await t.step('Trostpreis-Code Dienstag 16:45 → Stripe mit 140,80 € (10 %)', async () => {
         const r = await post(FN.checkout, {
           date: tuesday,
           startTime: '16:45',
@@ -301,10 +301,10 @@ Deno.test({
           .single();
         assertEquals(b, {
           status: 'pending',
-          amount_total_cents: 11734, // 156,45 € − 25 % (39,11 €)
-          discount_cents: 3911,
+          amount_total_cents: 14080, // 156,45 € − 10 % (15,65 €)
+          discount_cents: 1565,
           taler_cents: 7500,
-          haendler_share_cents: 7912, // 72 % von 109,89 € (117,34 € − 7,45 € Gebühr)
+          haendler_share_cents: 9601, // 72 % von 133,35 € (140,80 € − 7,45 € Gebühr)
           discount_code: loserCode,
         });
         const again = await post(FN.checkout, {

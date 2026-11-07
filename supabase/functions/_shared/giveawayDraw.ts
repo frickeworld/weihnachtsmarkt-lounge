@@ -103,7 +103,7 @@ export async function runGiveawayDraw(db: Db, adminId: string | null): Promise<D
         : renderGiveawayConsolation({
             firstName: r.first_name,
             code: r.code_used ? null : r.code,
-            percent: s?.giveaway_discount_percent ?? 25,
+            percent: s?.giveaway_discount_percent ?? 10,
             redeemBy: redeemByOf.get(r.code) ?? fallbackRedeemBy,
             nextDraw: typeof nextDraw === 'string' ? nextDraw : null,
             bookUrl,

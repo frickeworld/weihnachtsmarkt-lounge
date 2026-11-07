@@ -22,10 +22,12 @@ export interface TicketBooking {
   anonymized_at: string | null;
   /** Freiverzehr dieser Buchung (je nach Zeitfenster 50, 75, 100 € …) */
   taler_cents: number;
+  /** Zusätzlich gebuchte Residenztaler (0, 100, 200, 300 … Taler × 100) */
+  extra_taler_cents: number;
 }
 
 export const TICKET_COLUMNS =
-  'id, status, ticket_token, booking_code, first_name, last_name, email, company_name, persons, date, start_time, end_time, newsletter_opt_in, stripe_invoice_url, anonymized_at, taler_cents';
+  'id, status, ticket_token, booking_code, first_name, last_name, email, company_name, persons, date, start_time, end_time, newsletter_opt_in, stripe_invoice_url, anonymized_at, taler_cents, extra_taler_cents';
 
 export interface TicketSettings {
   taler_count: number;
@@ -59,6 +61,8 @@ export function ticketCommon(b: TicketBooking, s: TicketSettings) {
     bookingCode: b.booking_code,
     // Freiverzehr kommt aus der Buchung (Preisstaffel), nicht aus dem Standard
     talerCount: Math.round(b.taler_cents / 100),
+    // Zusätzlich gebuchte Taler – am Einlass gibt es Freiverzehr + Extra-Taler zusammen
+    extraTalerCount: Math.round((b.extra_taler_cents ?? 0) / 100),
     location: s.lounge_location,
   };
 }

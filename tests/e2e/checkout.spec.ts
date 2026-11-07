@@ -40,6 +40,41 @@ test.describe('Checkout (Phase 3)', () => {
     expect(JSON.stringify(req)).not.toMatch(/price|amount|cents/i);
   });
 
+  test('Extra-Taler: Auswahl, Rechenbeispiel, Summe und Menge an den Server', async ({ page }) => {
+    const opts: MockOptions = { checkoutRequests: [] };
+    await mockSupabase(page, opts);
+    await fillAndSubmit(page, async (p) => {
+      const picker = p.getByRole('group', { name: 'Extra-Taler dazubuchen (optional)' });
+      await expect(picker).toContainText('Ein Glühwein kostet 4,50 Taler');
+      await expect(picker).toContainText('Bei 8 Personen sind 50 Taler rund 6 Taler pro Person');
+      await picker
+        .locator('label')
+        .filter({ has: p.getByRole('radio', { name: '200 Extra-Taler für 200 Euro' }) })
+        .click();
+      await expect(picker).toContainText(
+        'Mit 250 Talern habt ihr bei 8 Personen rund 31 Taler pro Person',
+      );
+      const summary = p.getByLabel('Zusammenfassung');
+      await expect(summary).toContainText(/Lounge-Preis\s*99,00\s€/);
+      await expect(summary).toContainText(/Extra-Taler \(200 Taler\)\s*200,00\s€/);
+      await expect(summary).toContainText(/Zusammen\s*299,00\s€/);
+      await expect(summary).toContainText(/Residenztaler beim Einlass\s*250 Taler/);
+      await expect(summary).toContainText('die Extra-Taler sind gebührenfrei');
+    });
+    await page.waitForURL(FAKE_STRIPE_URL);
+    expect(opts.checkoutRequests![0]).toMatchObject({ extraTaler: 200 });
+  });
+
+  test('ohne Extra-Taler-Stufen keine Auswahl', async ({ page }) => {
+    const opts: MockOptions = { checkoutRequests: [], extraTalerOptions: [] };
+    await mockSupabase(page, opts);
+    await fillAndSubmit(page, async (p) => {
+      await expect(p.getByText('Mehr Taler für eure Runde')).toHaveCount(0);
+    });
+    await page.waitForURL(FAKE_STRIPE_URL);
+    expect(opts.checkoutRequests![0]).toMatchObject({ extraTaler: 0 });
+  });
+
   test('Preis je Zeitfenster und Sonderveranstaltung in der Zusammenfassung', async ({ page }) => {
     // Montag in der Saison: 14:30 99 € (+5 % = 104 €), 16:45 149 € (156 €), 19:00 als Sonderpreis
     let monday = MOCK_SETTINGS.season_start;

@@ -148,6 +148,19 @@ function TicketView({ ticket, qr, token }: { ticket: TicketInfo; qr: string; tok
           <dt className="text-ink-soft">Personen</dt>
           <dd>{ticket.persons}</dd>
         </div>
+        {ticket.talerCount != null && (
+          <div className="flex justify-between gap-4">
+            <dt className="text-ink-soft">Residenztaler beim Einlass</dt>
+            <dd className="text-right font-semibold">
+              {ticket.talerCount}
+              {!!ticket.extraTalerCount && (
+                <span className="block text-sm font-normal text-ink-soft">
+                  inkl. {ticket.extraTalerCount} extra
+                </span>
+              )}
+            </dd>
+          </div>
+        )}
       </dl>
 
       <p className="mt-6 text-sm leading-relaxed text-ink-soft">

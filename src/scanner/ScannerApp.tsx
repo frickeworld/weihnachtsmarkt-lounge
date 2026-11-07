@@ -242,6 +242,8 @@ function TodayView({
                 {!cancelled && (
                   <p className={b.taler_handed_out_at ? 'text-emerald-800' : 'text-ink-soft'}>
                     {b.taler_handed_out_at ? '✓ Taler' : 'Taler offen'}
+                    {b.taler_count != null && ` · ${b.taler_count}`}
+                    {!!b.extra_taler_count && ' (mit Extra)'}
                   </p>
                 )}
               </div>

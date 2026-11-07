@@ -28,6 +28,8 @@ export interface Booking {
   newsletter_opt_in: boolean;
   price_cents: number;
   fee_cents: number;
+  /** Zusätzlich gebuchte Residenztaler in Cent (in Gesamtbetrag und Händler-Anteil enthalten) */
+  extra_taler_cents?: number;
   haendler_share_cents: number;
   amount_total_cents: number;
   include_in_settlement: boolean;
@@ -101,6 +103,8 @@ export interface AdminSettings {
   taler_count: number;
   taler_cents: number;
   haendler_share_cents: number;
+  /** Extra-Taler-Stufen zum Dazubuchen, z. B. [100, 200, 300] */
+  extra_taler_options?: number[] | null;
   max_persons: number;
   booking_cutoff_minutes: number;
   hold_minutes: number;

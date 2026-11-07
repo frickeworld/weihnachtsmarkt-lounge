@@ -63,11 +63,20 @@ export function AgbPage() {
         ein abweichender Freiverzehr gelten; sie werden vor der Buchung beim jeweiligen Termin
         angezeigt. Maßgeblich ist der bei der Buchung angezeigte Gesamtpreis.
       </p>
+      {s.extraTalerOptions.length > 0 && (
+        <p>
+          Zusätzlich zum Freiverzehr kannst du bei der Buchung weitere Residenztaler dazubuchen (
+          {s.extraTalerOptions.join(', ')} Taler). Jeder zusätzliche Taler kostet 1 €; darauf wird
+          keine Verarbeitungsgebühr erhoben. Für zusätzliche Taler gelten dieselben Bedingungen wie
+          für die Taler des Freiverzehrs (§ 2). Sie werden beim Einlass zusammen mit dem Freiverzehr
+          ausgegeben.
+        </p>
+      )}
       <p>
-        Persönliche Codes aus unserem Gewinnspiel werden bei der Buchung eingegeben und gelten nach
-        den dort genannten Bedingungen (z. B. nur montags bis donnerstags, einmal einlösbar, nicht
-        für Sonderveranstaltungen). Der Freiverzehr bleibt dabei in voller Höhe enthalten. Andere
-        Rabatte gewähren wir nicht.
+        Rabattcodes und persönliche Codes aus unserem Gewinnspiel werden bei der Buchung eingegeben
+        und gelten nach den jeweils genannten Bedingungen (z. B. Gültigkeitszeitraum, einmal
+        einlösbar, nicht für Sonderveranstaltungen). Sie gelten nur für den Lounge-Preis, nicht für
+        zusätzlich gebuchte Taler. Der Freiverzehr bleibt dabei in voller Höhe enthalten.
       </p>
 
       <H2>{n(4)} Vertragsschluss</H2>

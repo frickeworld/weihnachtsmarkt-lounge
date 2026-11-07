@@ -416,14 +416,14 @@ Alle Admin-Aktionen serverseitig mit `is_admin_aal2()` geprüft.
   (`giveaway_draw()`), protokolliert in `giveaway_draws`. Danach Mails:
   - Gewinner: Code `GEWINN-…` (100 %), freier Abend nach Wahl bis Saisonende, keine Sonderveranstaltungen.
   - Alle anderen (nach jeder Ziehung): persönlicher Code `LOUNGE-…`, `giveaway_discount_percent`
-    (25 %), alle Tage außer Sonderveranstaltungen, einmal einlösbar, **nur 48 Stunden nach der
+    (10 %, seit 05.11.2026; vorher 25 %), alle Tage außer Sonderveranstaltungen, einmal einlösbar, **nur 48 Stunden nach der
     Ziehung buchbar** (`discount_codes.redeem_by`, `giveaway_code_hours`); Termin bis Saisonende.
 - **Countdown**: `next_giveaway_draw()` (öffentlich) liefert den nächsten Ziehungszeitpunkt. Startseite:
   Gewinnspiel-Band mit Countdown, laufende Gold-Leiste „Lounge gewinnen“ ganz oben, Geschenk-Symbol in
   der Kopfzeile (bei reduzierter Bewegung ohne Animation).
 - **Einlösen**: Feld „Gewinnspiel-Code“ im Buchungsformular (oder Link `/?code=…#buchen`).
   `discount_pricing()` rechnet: Freiverzehr bleibt voll, Händler bekommen 72 % vom rabattierten
-  Lounge-Preis, mindestens den Freiverzehr (25 %: 156,45 € → 117,34 €, Händler 79,12 €). 100 %: Buchung ohne Stripe sofort bezahlt (`payment_method =
+  Lounge-Preis, mindestens den Freiverzehr (10 %: 156,45 € → 140,80 €, Händler 96,01 €). 100 %: Buchung ohne Stripe sofort bezahlt (`payment_method =
 'kostenlos'`, `include_in_settlement = true`, Betrag 0 €, Händler-Anteil = halber Freiverzehr).
   Ein Code ist nur einmal gültig (partieller Unique-Index wie beim Zeitfenster).
 - **Datenpflege** nach der Saison anonymisiert auch alle Teilnahmen.
@@ -601,3 +601,17 @@ Login, MFA, alle Admin-Seiten (4.7), Tagesliste-PDF, Anonymisierung.
 - [ ] Netzempfang am Lounge-Standort
 - [ ] Freigabe der Du-Ansprache durch die Werbegemeinschaft (deren Website nutzt „Sie“)
 - [ ] PayPal im Stripe-Konto aktivieren
+
+## Extra-Taler (Entscheidung Louis, 05.11.2026)
+
+- Im Buchungsformular „Mehr Taler für eure Runde“: Stufen aus `settings.extra_taler_options`
+  (Standard 100, 200, 300; öffentlich über `get_extra_taler_options()`, im Admin unter Einstellungen).
+  Rechenbeispiel pro Person (gewählte Personenzahl, sonst 8) mit Glühwein zu 4,50 Taler.
+- 1 Taler = 1 €, keine Verarbeitungsgebühr, kein Rabatt. Geht vollständig an die Händler.
+- `create-checkout` prüft die Stufe, speichert `bookings.extra_taler_cents`; der Trigger
+  `bookings_fill_amounts` rechnet sie auf `amount_total_cents` und `haendler_share_cents`.
+  Stripe-Position „Zusätzliche Residenztaler: N Taler“ (ohne Steuersatz, wie der Freiverzehr).
+  Gewinn-Code (100 %) mit Extra-Taler: Stripe nur über die Extra-Taler.
+- Ticket (PDF, Mail, Wallet, Online-Ticket über `get_ticket_taler()`) und Scanner
+  (`scanner_booking_json`: `taler_count`, `extra_taler_count`) zeigen die Gesamtzahl der Taler.
+- Abrechnung (`settlement()`), Admin-Detail und CSV-Exporte weisen die Extra-Taler aus.

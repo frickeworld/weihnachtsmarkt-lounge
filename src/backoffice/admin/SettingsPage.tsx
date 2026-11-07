@@ -12,7 +12,7 @@ import type { AdminSettings } from './types';
 import { unwrap, useLoad } from './useLoad';
 
 const SETTINGS_COLUMNS =
-  'season_start, season_end, price_cents, fee_cents, fee_percent, studio_share_percent, taler_count, taler_cents, haendler_share_cents, max_persons, booking_cutoff_minutes, hold_minutes, checkin_early_minutes, contact_email, lounge_location, updated_at';
+  'season_start, season_end, price_cents, fee_cents, fee_percent, studio_share_percent, taler_count, taler_cents, haendler_share_cents, max_persons, booking_cutoff_minutes, hold_minutes, checkin_early_minutes, contact_email, lounge_location, extra_taler_options, updated_at';
 
 export function SettingsPage() {
   const s = useLoad(
@@ -55,7 +55,8 @@ type Draft = Record<
   | 'hold'
   | 'checkin_early'
   | 'contact_email'
-  | 'lounge_location',
+  | 'lounge_location'
+  | 'extra_taler',
   string
 >;
 
@@ -76,6 +77,7 @@ function SettingsForm({ initial, onSaved }: { initial: AdminSettings; onSaved: (
     checkin_early: String(initial.checkin_early_minutes),
     contact_email: initial.contact_email,
     lounge_location: initial.lounge_location,
+    extra_taler: (initial.extra_taler_options ?? []).join(', '),
   });
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
@@ -131,7 +133,14 @@ function SettingsForm({ initial, onSaved }: { initial: AdminSettings; onSaved: (
       return 'Reservierung beim Checkout: 30 bis 180 Minuten (Stripe-Minimum 30).';
     if (!/^\S+@\S+\.\S+$/.test(v.contact_email.trim())) return 'Bitte prüfe die Kontakt-E-Mail.';
     if (!v.lounge_location.trim()) return 'Bitte gib den Treffpunkt an.';
+    const extra = v.extra_taler
+      .split(/[,;\s]+/)
+      .filter(Boolean)
+      .map((x) => (/^\d+$/.test(x) ? Number(x) : NaN));
+    if (extra.some((x) => Number.isNaN(x) || x < 1 || x > 1000) || extra.length > 6)
+      return 'Extra-Taler: bis zu 6 ganze Zahlen von 1 bis 1000, z. B. 100, 200, 300 (leer = aus).';
     return {
+      extra_taler_options: [...new Set(extra)].sort((a, b) => a - b),
       season_start: v.season_start,
       season_end: v.season_end,
       price_cents: cents.price,
@@ -210,6 +219,9 @@ function SettingsForm({ initial, onSaved }: { initial: AdminSettings; onSaved: (
           {input('taler_count', 'Standard: Anzahl Residenztaler', { suffix: 'Stk.' })}
           {input('taler', 'Standard: Wert der Taler', { suffix: '€' })}
           {input('max_persons', 'Max. Personen', { suffix: 'Pers.' })}
+          {input('extra_taler', 'Extra-Taler zum Dazubuchen', {
+            hint: 'Stufen kommagetrennt, z. B. 100, 200, 300. 1 Taler = 1 €, ohne Gebühr, voll an die Händler. Leer = Auswahl aus.',
+          })}
           {input('cutoff', 'Online-Buchungsschluss vor Beginn', { suffix: 'Min.' })}
           {input('hold', 'Reservierung beim Checkout', { suffix: 'Min.' })}
           {input('checkin_early', 'Check-in frühestens vor Beginn', { suffix: 'Min.' })}

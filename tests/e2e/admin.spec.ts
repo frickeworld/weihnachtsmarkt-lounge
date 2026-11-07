@@ -120,7 +120,7 @@ test.describe('Admin', () => {
     await expect(list.getByRole('row', { name: /Ben B.*im Lostopf.*1$/ })).toBeVisible();
     await expect(list.getByRole('row', { name: /Gina Gewinn.*gewonnen.*0$/ })).toBeVisible();
     await expect(
-      list.getByRole('row', { name: /Ben B.*Gina Gewinn.*LOUNGE-XY34ZZ.*Trostpreis 25 %, offen/ }),
+      list.getByRole('row', { name: /Ben B.*Gina Gewinn.*LOUNGE-XY34ZZ.*Trostpreis 10 %, offen/ }),
     ).toBeVisible();
     await page.getByRole('button', { name: 'Gewinner ziehen' }).click();
     await expect(page.getByText(/Jetzt ziehen und 1 Mails versenden/)).toBeVisible();

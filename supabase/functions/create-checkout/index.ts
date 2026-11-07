@@ -31,10 +31,10 @@ Deno.serve(async (req) => {
   const { data: settings, error: settingsError } = await db
     .from('settings')
     .select(
-      'price_cents, fee_cents, taler_count, taler_cents, haendler_share_cents, max_persons, hold_minutes, booking_cutoff_minutes',
+      'price_cents, fee_cents, taler_count, taler_cents, haendler_share_cents, max_persons, hold_minutes, booking_cutoff_minutes, extra_taler_options',
     )
     .eq('id', 1)
-    .single<SettingsRow>();
+    .single<SettingsRow & { extra_taler_options: number[] | null }>();
   if (settingsError || !settings) {
     console.error('settings', settingsError);
     return json(
@@ -53,7 +53,14 @@ Deno.serve(async (req) => {
     for (const issue of parsed.error.issues) fields[issue.path.join('.')] ??= issue.message;
     return json({ error: 'validation', message: 'Bitte prüfe deine Angaben.', fields }, 400);
   }
-  const { date, startTime, form, discountCode } = parsed.data;
+  const { date, startTime, form, discountCode, extraTaler } = parsed.data;
+
+  // Extra-Taler: nur die im Admin hinterlegten Stufen (1 Taler = 1 €, ohne Gebühr und Rabatt).
+  if (extraTaler > 0 && !(settings.extra_taler_options ?? []).includes(extraTaler)) {
+    const message = 'Bitte wähle eine der angebotenen Taler-Mengen.';
+    return json({ error: 'validation', message, fields: { extraTaler: message } }, 400);
+  }
+  const extraTalerCents = extraTaler * 100;
 
   // 2. Zeitfenster prüfen: gleiche Logik wie der Kalender (Saison, Schließtag, Sperre, Buchungsschluss)
   //    get_availability gibt abgelaufene Reservierungen vorher frei.
@@ -126,8 +133,9 @@ Deno.serve(async (req) => {
       }
     : {};
 
-  // Gewinn (100 %): keine Zahlung – Buchung direkt bestätigen und Ticket senden.
-  if (discount && discount.total_cents === 0) {
+  // Gewinn (100 %) ohne Extra-Taler: keine Zahlung – Buchung direkt bestätigen und Ticket senden.
+  // Mit Extra-Taler geht es zu Stripe, bezahlt werden dann nur die Extra-Taler.
+  if (discount && discount.total_cents === 0 && extraTalerCents === 0) {
     const { data: won, error: wonError } = await db
       .from('bookings')
       .insert({
@@ -211,15 +219,21 @@ Deno.serve(async (req) => {
       newsletter_opt_in: form.newsletterOptIn,
       terms_accepted_at: new Date().toISOString(),
       hold_expires_at: holdExpiresAt.toISOString(),
+      // Der Trigger rechnet die Extra-Taler auf Gesamtbetrag und Händler-Anteil.
+      extra_taler_cents: extraTalerCents,
       ...amounts,
     })
-    .select('id, booking_code, price_cents, fee_cents, taler_cents')
+    .select(
+      'id, booking_code, price_cents, fee_cents, taler_cents, extra_taler_cents, amount_total_cents',
+    )
     .single<{
       id: string;
       booking_code: string;
       price_cents: number;
       fee_cents: number;
       taler_cents: number;
+      extra_taler_cents: number;
+      amount_total_cents: number;
     }>();
 
   if (insertError || !booking) {
@@ -248,7 +262,26 @@ Deno.serve(async (req) => {
     .map((s) => s.trim())
     .filter(Boolean) as Stripe.Checkout.SessionCreateParams.AllowedPaymentMethodType[];
 
-  const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
+  // Gewinn-Code mit Extra-Taler: Die Lounge kostet nichts, bezahlt werden nur die Extra-Taler.
+  const loungeIsFree = booking.amount_total_cents - booking.extra_taler_cents === 0;
+  const extraLine: Stripe.Checkout.SessionCreateParams.LineItem[] =
+    booking.extra_taler_cents > 0
+      ? [
+          {
+            quantity: 1,
+            price_data: {
+              currency: 'eur',
+              unit_amount: booking.extra_taler_cents,
+              product_data: {
+                name: `Zusätzliche Residenztaler: ${booking.extra_taler_cents / 100} Taler${
+                  loungeIsFree ? ` (zu deinem Lounge-Gewinn am ${when})` : ''
+                }`,
+              },
+            },
+          },
+        ]
+      : [];
+  const loungeLines: Stripe.Checkout.SessionCreateParams.LineItem[] = [
     {
       quantity: 1,
       price_data: {
@@ -282,6 +315,7 @@ Deno.serve(async (req) => {
       ...(taxFee ? { tax_rates: [taxFee] } : {}),
     },
   ];
+  const lineItems = [...(loungeIsFree ? [] : loungeLines), ...extraLine];
 
   const description = `Weihnachtsmarkt-Lounge am ${when} · Buchungscode ${booking.booking_code}`;
 

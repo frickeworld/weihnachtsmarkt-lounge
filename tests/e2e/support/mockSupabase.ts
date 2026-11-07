@@ -109,6 +109,8 @@ export interface MockOptions {
   waitlistRequests?: unknown[];
   /** Alle Anfragen an das Kontaktformular. */
   contactRequests?: unknown[];
+  /** Extra-Taler-Stufen (Standard: 100, 200, 300). */
+  extraTalerOptions?: number[];
   /** Antwort von get_ticket (null = nicht gefunden). */
   ticket?: Record<string, unknown> | null;
 }
@@ -126,6 +128,9 @@ export async function mockSupabase(page: Page, opts: MockOptions = {}) {
   });
   await page.route('**/rest/v1/rpc/get_fee_info*', (route) =>
     route.fulfill({ json: [{ fee_percent: 5, fee_cents: 350 }] }),
+  );
+  await page.route('**/rest/v1/rpc/get_extra_taler_options*', (route) =>
+    route.fulfill({ json: opts.extraTalerOptions ?? [100, 200, 300] }),
   );
   await page.route('**/rest/v1/rpc/track_event*', async (route) => {
     opts.tracked?.push(route.request().postDataJSON());
@@ -186,7 +191,7 @@ export async function mockSupabase(page: Page, opts: MockOptions = {}) {
         next_draw: addDays(todayIso(), 3),
         participants: 120,
         draws: 2,
-        discount_percent: 25,
+        discount_percent: 10,
       },
     }),
   );

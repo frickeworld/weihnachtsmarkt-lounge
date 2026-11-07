@@ -44,14 +44,14 @@ describe('Abrechnung CSV', () => {
     const csv = settlementCsv(haendler);
     expect(
       csv.startsWith(
-        '﻿Datum;Beginn;Ende;Buchungscode;Name;Firma;Personen;Erschienen;Händler-Anteil €\r\n',
+        '﻿Datum;Beginn;Ende;Buchungscode;Name;Firma;Personen;Erschienen;Händler-Anteil €;davon Extra-Taler €\r\n',
       ),
     ).toBe(true);
     expect(csv).toContain(
-      '01.12.2026;17:00;19:00;HL-ABCD-EFGH;Erika Müller;Müller & Söhne GmbH;6;ja;137,50',
+      '01.12.2026;17:00;19:00;HL-ABCD-EFGH;Erika Müller;Müller & Söhne GmbH;6;ja;137,50;0,00',
     );
-    expect(csv).toContain(';nein;137,50');
-    expect(csv.trimEnd().split('\r\n').at(-1)).toBe('Summe;;;2 Buchungen;;;;;275,00');
+    expect(csv).toContain(';nein;137,50;0,00');
+    expect(csv.trimEnd().split('\r\n').at(-1)).toBe('Summe;;;2 Buchungen;;;;;275,00;0,00');
     expect(csv).not.toContain('Studio F');
   });
 
@@ -63,8 +63,19 @@ describe('Abrechnung CSV', () => {
       rows: haendler.rows.map((r) => ({ ...r, amount_total_cents: 17850 })),
     });
     expect(csv).toContain('Gesamt €;Studio F €');
-    expect(csv).toContain(';137,50;178,50;41,00');
-    expect(csv).toContain(';275,00;357,00;82,00');
+    expect(csv).toContain(';137,50;0,00;178,50;41,00');
+    expect(csv).toContain(';275,00;0,00;357,00;82,00');
+  });
+
+  it('Extra-Taler: je Buchung und in Summe ausgewiesen (im Händler-Anteil enthalten)', () => {
+    const csv = settlementCsv({
+      ...haendler,
+      haendler_cents: 47500,
+      extra_taler_cents: 20000,
+      rows: [row({ haendler_share_cents: 33750, extra_taler_cents: 20000 }), haendler.rows[1]!],
+    });
+    expect(csv).toContain(';ja;337,50;200,00');
+    expect(csv.trimEnd().split('\r\n').at(-1)).toBe('Summe;;;2 Buchungen;;;;;475,00;200,00');
   });
 });
 

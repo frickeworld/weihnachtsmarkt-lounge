@@ -182,7 +182,7 @@ export async function mockBackoffice(page: Page, opts: BackofficeOptions = {}) {
       lounge_location: 'Schlosspark',
       giveaway_active: true,
       giveaway_end: null,
-      giveaway_discount_percent: 30,
+      giveaway_discount_percent: 10,
       updated_at: new Date().toISOString(),
     }),
   );
@@ -232,7 +232,7 @@ export async function mockBackoffice(page: Page, opts: BackofficeOptions = {}) {
         {
           code: 'LOUNGE-XY34ZZ',
           kind: 'trostpreis',
-          percent: 25,
+          percent: 10,
           entry_id: 'g2',
           redeem_by: new Date(Date.now() + 86400_000).toISOString(),
         },
@@ -450,7 +450,7 @@ export async function mockBackoffice(page: Page, opts: BackofficeOptions = {}) {
       json: {
         active: true,
         end: null,
-        discount_percent: 25,
+        discount_percent: 10,
         next_draw: new Date(Date.now() + 3 * 86400_000).toISOString(),
         entries_confirmed: 42,
         entries_pending: 5,

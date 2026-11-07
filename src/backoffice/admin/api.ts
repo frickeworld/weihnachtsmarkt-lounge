@@ -2,7 +2,7 @@ import { FunctionsHttpError } from '@supabase/supabase-js';
 import { requireClient } from '../authClient';
 
 export const BOOKING_COLUMNS =
-  'id, booking_code, date, start_time, end_time, status, source, payment_method, first_name, last_name, email, phone, persons, occasion, company_name, vat_id, invoice_requested, billing_street, billing_zip, billing_city, notes, approval_note, refund_cents, refunded_at, newsletter_opt_in, price_cents, fee_cents, haendler_share_cents, amount_total_cents, include_in_settlement, stripe_payment_intent_id, stripe_invoice_url, hold_expires_at, paid_at, checked_in_at, taler_handed_out_at, cancelled_at, cancel_reason, reminder_sent_at, admin_override, anonymized_at, created_at';
+  'id, booking_code, date, start_time, end_time, status, source, payment_method, first_name, last_name, email, phone, persons, occasion, company_name, vat_id, invoice_requested, billing_street, billing_zip, billing_city, notes, approval_note, refund_cents, refunded_at, newsletter_opt_in, price_cents, fee_cents, extra_taler_cents, haendler_share_cents, amount_total_cents, include_in_settlement, stripe_payment_intent_id, stripe_invoice_url, hold_expires_at, paid_at, checked_in_at, taler_handed_out_at, cancelled_at, cancel_reason, reminder_sent_at, admin_override, anonymized_at, created_at';
 
 export type AdminResult<T = Record<string, unknown>> =
   | ({ ok: true } & T)

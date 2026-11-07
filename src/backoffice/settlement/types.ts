@@ -9,6 +9,8 @@ export interface SettlementRow {
   source: 'online' | 'manual';
   checked_in: boolean;
   haendler_share_cents: number;
+  /** Davon zusätzlich gebuchte Taler (gehen voll an die Händler); fehlt bei älteren Ständen */
+  extra_taler_cents?: number;
   /** nur für Admins */
   amount_total_cents: number | null;
 }
@@ -18,6 +20,8 @@ export interface Settlement {
   to: string;
   count: number;
   haendler_cents: number;
+  /** Summe der Extra-Taler (in haendler_cents enthalten) */
+  extra_taler_cents?: number;
   revenue_cents: number | null;
   studio_cents: number | null;
   no_shows: number;
