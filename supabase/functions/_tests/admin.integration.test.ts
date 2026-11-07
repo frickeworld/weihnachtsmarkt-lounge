@@ -6,7 +6,6 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
 const FN_ADMIN = Deno.env.get('FN_ADMIN') ?? 'http://127.0.0.1:8106';
-const MAILPIT = Deno.env.get('MAILPIT_URL');
 const db = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
 
 /** RFC 6238 – 6 Ziffern, 30 s, SHA-1 (wie Authenticator-Apps). */
@@ -33,7 +32,11 @@ Deno.test({
   sanitizeOps: false,
   sanitizeResources: false,
   async fn(t) {
-    const sent: { to: { email: string; name: string }[]; tags?: string[] }[] = [];
+    const sent: {
+      to: { email: string; name: string }[];
+      tags?: string[];
+      htmlContent?: string;
+    }[] = [];
     const brevo = Deno.serve(
       { hostname: '127.0.0.1', port: 8199, onListen: () => {} },
       async (req) => {
@@ -310,17 +313,20 @@ Deno.test({
             .select('role')
             .eq('user_id', r.body.userId);
           assertEquals(roles, [{ role: 'studio_admin' }]);
-          if (MAILPIT) {
-            const search = await fetch(`${MAILPIT}/api/v1/search?query=to:${invitee}`);
-            const found = (await search.json()) as { messages: { ID: string }[] };
-            assertEquals(found.messages.length, 1);
-            const msg = await fetch(`${MAILPIT}/api/v1/message/${found.messages[0].ID}`);
-            const { HTML } = (await msg.json()) as { HTML: string };
-            assert(
-              decodeURIComponent(HTML.replaceAll('&amp;', '&')).includes('/login/neues-passwort'),
-              'Weiterleitung auf /login/neues-passwort fehlt',
-            );
-          }
+          // Versand über Brevo (nicht über den Supabase-Mailer)
+          const mail = sent.find((m) => m.to[0]?.email === invitee);
+          assert(mail, 'Einladungs-Mail über Brevo fehlt');
+          assertEquals(mail.tags, ['einladung']);
+          assert(
+            decodeURIComponent(mail.htmlContent!.replaceAll('&amp;', '&')).includes(
+              '/login/neues-passwort',
+            ),
+            'Weiterleitung auf /login/neues-passwort fehlt',
+          );
+          // Erneut einladen (Person existiert schon): neuer Link, keine Fehlermeldung
+          const again = await call({ action: 'invite_user', email: invitee, role: 'studio_admin' });
+          assertEquals(again.status, 200, JSON.stringify(again.body));
+          assertEquals(sent.filter((m) => m.to[0]?.email === invitee).length, 2);
           await db.auth.admin.deleteUser(r.body.userId);
         },
       );

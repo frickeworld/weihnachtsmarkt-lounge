@@ -11,6 +11,8 @@ import { createManualBookingRequestSchema } from '../_shared/bookingSchema.ts';
 import { adminClient } from '../_shared/db.ts';
 import { json, preflight, requireEnv } from '../_shared/http.ts';
 import { deliverTicket } from '../_shared/ticket.ts';
+import { sendTransactionalEmail } from '../_shared/brevo.ts';
+import { renderInviteEmail } from '../_shared/inviteEmail.ts';
 import { runGiveawayDraw } from '../_shared/giveawayDraw.ts';
 import { stripeClient } from '../_shared/stripe.ts';
 
@@ -227,24 +229,31 @@ async function inviteUser(
   const { email, role } = parsed.data;
   const site = requireEnv('PUBLIC_SITE_URL').replace(/\/$/, '');
 
+  // Link selbst erzeugen und über Brevo verschicken (wie die Tickets). Der eingebaute Mailversand
+  // von Supabase stellt ohne eigenes SMTP nur an Projektmitglieder zu.
+  const redirectTo = `${site}/login/neues-passwort`;
   let userId: string | null = null;
   let invited = false;
-  const { data, error } = await db.auth.admin.inviteUserByEmail(email, {
-    redirectTo: `${site}/login/neues-passwort`,
-  });
-  if (data?.user) {
-    userId = data.user.id;
+  let link: string | null = null;
+  const inv = await db.auth.admin.generateLink({ type: 'invite', email, options: { redirectTo } });
+  if (inv.data?.user && inv.data.properties?.action_link) {
+    userId = inv.data.user.id;
+    link = inv.data.properties.action_link;
     invited = true;
   } else {
-    // Gibt es den Nutzer schon, bekommt er nur die Rolle.
-    for (let page = 1; page <= 20 && !userId; page++) {
-      const { data: list } = await db.auth.admin.listUsers({ page, perPage: 200 });
-      userId = list?.users.find((u) => u.email?.toLowerCase() === email)?.id ?? null;
-      if (!list || list.users.length < 200) break;
-    }
-    if (!userId) {
-      console.error('invite', error);
-      return json({ ok: false, message: 'Die Einladung konnte nicht verschickt werden.' }, 502);
+    // Gibt es die Person schon (z. B. nach einer fehlgeschlagenen Einladung), bekommt sie einen
+    // Link zum Passwort-Festlegen.
+    const rec = await db.auth.admin.generateLink({
+      type: 'recovery',
+      email,
+      options: { redirectTo },
+    });
+    if (rec.data?.user && rec.data.properties?.action_link) {
+      userId = rec.data.user.id;
+      link = rec.data.properties.action_link;
+    } else {
+      console.error('invite', inv.error, rec.error);
+      return json({ ok: false, message: 'Die Einladung konnte nicht erstellt werden.' }, 502);
     }
   }
 
@@ -252,6 +261,21 @@ async function inviteUser(
   const { error: roleError } = await db.from('user_roles').insert({ user_id: userId, role });
   if (roleError)
     return json({ ok: false, message: 'Die Rolle konnte nicht gespeichert werden.' }, 500);
+
+  const mail = renderInviteEmail({ link: link!, role, siteUrl: site });
+  try {
+    await sendTransactionalEmail({ to: { email }, ...mail, tags: ['einladung'] });
+  } catch (e) {
+    console.error('invite mail', e);
+    return json(
+      {
+        ok: false,
+        message:
+          'Der Zugang ist angelegt, aber die E-Mail konnte nicht verschickt werden. Bitte gleich noch einmal auf „Einladung senden“ klicken.',
+      },
+      502,
+    );
+  }
   return json({ ok: true, invited, userId });
 }
 
