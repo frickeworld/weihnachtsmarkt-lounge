@@ -25,7 +25,7 @@ export interface TicketMailData {
   googleWalletUrl?: string | null;
   invoiceUrl?: string | null;
   talerCount: number;
-  /** Zusätzlich gebuchte Residenztaler (0 = keine) */
+  /** Zusätzlich gebuchte Weihnachtsmarkt-Taler (0 = keine) */
   extraTalerCount?: number;
   location: string;
   siteUrl: string;
@@ -148,8 +148,8 @@ export function renderTicketEmail(d: TicketMailData): {
             <p style="margin:0 0 8px;font-weight:bold;font-size:17px;">Was dich erwartet</p>
             ${
               d.extraTalerCount
-                ? `<p style="margin:0 0 6px;">&#10022; <strong>${d.talerCount + d.extraTalerCount} Residenztaler beim Einlass</strong>: ${d.talerCount} € Freiverzehr plus ${d.extraTalerCount} zusätzlich gebuchte Taler – je 1 €, an den Ständen einlösbar, pro gekauftem Artikel 1 Taler.</p>`
-                : `<p style="margin:0 0 6px;">&#10022; <strong>${d.talerCount} € Freiverzehr</strong>: ${d.talerCount} Residenztaler beim Einlass – je 1 €, an den Ständen einlösbar, pro gekauftem Artikel 1 Taler.</p>`
+                ? `<p style="margin:0 0 6px;">&#10022; <strong>${d.talerCount + d.extraTalerCount} Weihnachtsmarkt-Taler beim Einlass</strong>: ${d.talerCount} € Freiverzehr plus ${d.extraTalerCount} zusätzlich gebuchte Taler – je 1 €, an den Ständen einlösbar, pro gekauftem Artikel 1 Taler.</p>`
+                : `<p style="margin:0 0 6px;">&#10022; <strong>${d.talerCount} € Freiverzehr</strong>: ${d.talerCount} Weihnachtsmarkt-Taler beim Einlass – je 1 €, an den Ständen einlösbar, pro gekauftem Artikel 1 Taler.</p>`
             }
             <p style="margin:0;">&#10022; Tischservice der Tanzschule Fricke direkt an eurem Platz.</p>
           </td></tr>
@@ -220,8 +220,8 @@ export function renderTicketEmail(d: TicketMailData): {
     '',
     'Was dich erwartet:',
     d.extraTalerCount
-      ? `- ${d.talerCount + d.extraTalerCount} Residenztaler beim Einlass: ${d.talerCount} € Freiverzehr plus ${d.extraTalerCount} zusätzlich gebuchte Taler (je 1 €, pro gekauftem Artikel 1 Taler)`
-      : `- ${d.talerCount} € Freiverzehr: ${d.talerCount} Residenztaler beim Einlass (je 1 €, pro gekauftem Artikel 1 Taler)`,
+      ? `- ${d.talerCount + d.extraTalerCount} Weihnachtsmarkt-Taler beim Einlass: ${d.talerCount} € Freiverzehr plus ${d.extraTalerCount} zusätzlich gebuchte Taler (je 1 €, pro gekauftem Artikel 1 Taler)`
+      : `- ${d.talerCount} € Freiverzehr: ${d.talerCount} Weihnachtsmarkt-Taler beim Einlass (je 1 €, pro gekauftem Artikel 1 Taler)`,
     '- Tischservice der Tanzschule Fricke',
     '',
     `Bitte sei pünktlich – dein Zeitfenster endet um ${d.endTime} Uhr.`,

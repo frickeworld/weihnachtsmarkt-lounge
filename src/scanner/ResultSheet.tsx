@@ -119,8 +119,8 @@ export function ResultSheet({
         {canTaler && (
           <p className="mt-4 text-lg font-semibold">
             {booking.taler_handed_out_at
-              ? `Residenztaler übergeben um ${clock(booking.taler_handed_out_at)} Uhr`
-              : 'Residenztaler noch nicht übergeben'}
+              ? `Weihnachtsmarkt-Taler übergeben um ${clock(booking.taler_handed_out_at)} Uhr`
+              : 'Weihnachtsmarkt-Taler noch nicht übergeben'}
           </p>
         )}
       </div>

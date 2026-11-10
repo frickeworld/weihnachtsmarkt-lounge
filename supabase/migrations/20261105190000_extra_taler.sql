@@ -1,5 +1,5 @@
 -- Extra-Taler (Entscheidung Louis, 05.11.2026): Zu jeder Lounge-Buchung können Gäste zusätzliche
--- Residenztaler dazubuchen (Standard 100, 200 oder 300 Taler, 1 Taler = 1 €).
+-- Weihnachtsmarkt-Taler dazubuchen (Standard 100, 200 oder 300 Taler, 1 Taler = 1 €).
 -- * keine Verarbeitungsgebühr, kein Rabatt (auch nicht mit Rabatt- oder Gewinnspiel-Code)
 -- * gehen vollständig an die Händler: haendler_share_cents enthält die Extra-Taler
 -- * stehen als eigene Position auf der Stripe-Zahlung bzw. Rechnung
@@ -24,7 +24,7 @@ alter table public.bookings
     check (extra_taler_cents >= 0 and extra_taler_cents <= 100000 and extra_taler_cents % 100 = 0);
 
 comment on column public.bookings.extra_taler_cents is
-  'Zusätzlich gebuchte Residenztaler (1 Taler = 100 Cent). In amount_total_cents und haendler_share_cents enthalten.';
+  'Zusätzlich gebuchte Weihnachtsmarkt-Taler (1 Taler = 100 Cent). In amount_total_cents und haendler_share_cents enthalten.';
 
 -- Auswahl für das Buchungsformular (öffentlich, keine personenbezogenen Daten).
 create function public.get_extra_taler_options()

@@ -128,7 +128,7 @@ export function buildEventObject(cfg: GoogleWalletConfig, d: GoogleTicketData) {
       {
         id: 'included',
         header: 'Inklusive',
-        body: `Lounge exklusiv für 2 Stunden, ${d.talerCount} Residenztaler, Tischservice der Tanzschule Fricke.`,
+        body: `Lounge exklusiv für 2 Stunden, ${d.talerCount} Weihnachtsmarkt-Taler, Tischservice der Tanzschule Fricke.`,
       },
     ],
   };

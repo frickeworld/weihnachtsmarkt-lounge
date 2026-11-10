@@ -22,7 +22,7 @@ export interface TicketBooking {
   anonymized_at: string | null;
   /** Freiverzehr dieser Buchung (je nach Zeitfenster 50, 75, 100 € …) */
   taler_cents: number;
-  /** Zusätzlich gebuchte Residenztaler (0, 100, 200, 300 … Taler × 100) */
+  /** Zusätzlich gebuchte Weihnachtsmarkt-Taler (0, 100, 200, 300 … Taler × 100) */
   extra_taler_cents: number;
 }
 

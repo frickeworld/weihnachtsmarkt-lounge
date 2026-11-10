@@ -11,7 +11,7 @@ export interface TicketPdfData {
   bookingCode: string;
   location: string;
   talerCount: number;
-  /** Zusätzlich gebuchte Residenztaler (0 = keine) */
+  /** Zusätzlich gebuchte Weihnachtsmarkt-Taler (0 = keine) */
   extraTalerCount?: number;
   qrPng: Uint8Array;
   /** Glitzer-Kopf mit Markt-Schriftzug (JPEG), optional */
@@ -126,15 +126,14 @@ export async function renderTicketPdf(d: TicketPdfData): Promise<Uint8Array> {
   y -= 30;
   const boxW = 300;
   page.drawRectangle({ x: (W - boxW) / 2, y: y - 8, width: boxW, height: 26, color: GOLD });
-  center(
+  const talerLine = safe(
     d.extraTalerCount
-      ? `${d.talerCount + d.extraTalerCount} Residenztaler beim Einlass (${d.talerCount} Freiverzehr + ${d.extraTalerCount} extra)`
-      : `${d.talerCount} € Freiverzehr inklusive – ${d.talerCount} Residenztaler beim Einlass`,
-    y,
-    sansBold,
-    8.5,
-    INK,
+      ? `${d.talerCount + d.extraTalerCount} Weihnachtsmarkt-Taler beim Einlass (inkl. ${d.extraTalerCount} extra)`
+      : `${d.talerCount} € Freiverzehr – ${d.talerCount} Weihnachtsmarkt-Taler beim Einlass`,
   );
+  // Schrift notfalls verkleinern, damit der Text in die Gold-Box passt
+  const talerSize = Math.min(8.5, (boxW - 16) / sansBold.widthOfTextAtSize(talerLine, 1));
+  center(talerLine, y, sansBold, talerSize, INK);
 
   // Hinweise
   y -= 24;
@@ -276,7 +275,7 @@ export async function renderGiftPdf(d: GiftPdfData): Promise<Uint8Array> {
   page.drawRectangle({ x: (W - boxW) / 2, y: y - 9, width: boxW, height: 28, color: GOLD });
   center(
     d.extraTalerCount
-      ? `inklusive ${d.talerCount + d.extraTalerCount} Residenztaler und Tischservice`
+      ? `inklusive ${d.talerCount + d.extraTalerCount} Weihnachtsmarkt-Taler und Tischservice`
       : `inklusive ${d.talerCount} € Freiverzehr und Tischservice`,
     y,
     sansBold,

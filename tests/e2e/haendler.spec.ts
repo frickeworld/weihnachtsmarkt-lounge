@@ -42,7 +42,7 @@ test.describe('Händler-Bereich', () => {
       page.getByRole('button', { name: 'CSV (Excel)' }).click(),
     ]);
     const text = await readFile((await csv.path())!, 'utf8');
-    expect(text.trimEnd().split('\r\n').at(-1)).toBe('Summe;;;2 Buchungen;;;;;275,00');
+    expect(text.trimEnd().split('\r\n').at(-1)).toBe('Summe;;;2 Buchungen;;;;;275,00;0,00');
     const [pdf] = await Promise.all([
       page.waitForEvent('download'),
       page.getByRole('button', { name: 'PDF herunterladen' }).click(),

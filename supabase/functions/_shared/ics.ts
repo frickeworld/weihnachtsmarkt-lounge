@@ -53,7 +53,7 @@ export function buildIcs(i: IcsInput): string {
   const start = new Date(berlinIso(i.date, i.startTime));
   const end = new Date(berlinIso(i.date, i.endTime));
   const description = [
-    `Deine Lounge für bis zu ${i.persons} Personen, inkl. ${i.talerCount} € Freiverzehr in Residenztalern.`,
+    `Deine Lounge für bis zu ${i.persons} Personen, inkl. ${i.talerCount} € Freiverzehr in Weihnachtsmarkt-Talern.`,
     `Buchungscode: ${i.bookingCode}`,
     `Ticket: ${i.ticketUrl}`,
   ].join('\n');
@@ -92,7 +92,7 @@ export function googleCalendarUrl(
   const end = utc(new Date(berlinIso(i.date, i.endTime)));
   const details = [
     i.persons && i.talerCount
-      ? `Deine Lounge für bis zu ${i.persons} Personen, inkl. ${i.talerCount} € Freiverzehr in Residenztalern.`
+      ? `Deine Lounge für bis zu ${i.persons} Personen, inkl. ${i.talerCount} € Freiverzehr in Weihnachtsmarkt-Talern.`
       : 'Deine Lounge auf dem Weihnachtsmarkt im Schlosspark.',
     `Buchungscode: ${i.bookingCode}`,
     `Ticket: ${i.ticketUrl}`,

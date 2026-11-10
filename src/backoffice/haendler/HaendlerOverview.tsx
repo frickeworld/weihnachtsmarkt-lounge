@@ -77,7 +77,7 @@ export function HaendlerOverview() {
               value={formatCents(d.haendler_cents)}
               sub="72 % vom Lounge-Preis je bezahlter Buchung, darin der volle Freiverzehr"
             />
-            <Kpi label="Residenztaler übergeben" value={d.taler_handed_out} />
+            <Kpi label="Weihnachtsmarkt-Taler übergeben" value={d.taler_handed_out} />
             <Kpi label="Seitenaufrufe" value={d.page_views} />
             <Kpi label="Klicks „Lounge buchen“" value={d.book_clicks} />
             <Kpi

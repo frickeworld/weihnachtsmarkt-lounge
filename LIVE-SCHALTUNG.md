@@ -10,7 +10,7 @@ geht die Seite unter der echten Domain online.
 
 - [ ] **Impressum, Datenschutz, AGB** vom Anwalt prüfen lassen; alle `[PLATZHALTER]` füllen
       (Adresse, Registergericht, HRB, Geschäftsführung, USt-ID, Telefon, Verantwortlicher nach
-      § 18 MStV, Gültigkeit der Residenztaler, Haftung, Streitbeilegung). Danach den Vermerk
+      § 18 MStV, Gültigkeit der Weihnachtsmarkt-Taler, Haftung, Streitbeilegung). Danach den Vermerk
       „Entwurf – noch nicht freigegeben“ entfernen (`src/pages/legal/LegalLayout.tsx`) und
       Stand-Datum setzen (`supabase/functions/_shared/legal.ts`).
 - [ ] **Preisstaffel** (Lounge 99/149/199 € zzgl. 5 % Gebühr = 103,95/156,45/208,95 €, beworben „ab 99 €“)
@@ -21,7 +21,7 @@ geht die Seite unter der echten Domain online.
 - [ ] **Sonderveranstaltungen**: Partys 22./23./29./30.12., Heiligabend und 26.12. sind per
       Migration angelegt. Weitere (z. B. Weidmüller/Stegelmann) im Admin-Kalender mit Titel,
       Preis und Freiverzehr anlegen, bevor die ersten Buchungen eingehen.
-- [ ] **Umsatzsteuer**: Ausweis von Lounge-Preis, Gebühr und Residenztalern mit dem
+- [ ] **Umsatzsteuer**: Ausweis von Lounge-Preis, Gebühr und Weihnachtsmarkt-Talern mit dem
       Steuerberater klären (Stripe-Rechnungen, AGB § 3).
 - [ ] **Bildrechte**: Foto Stadt Detmold, Gold-Glitzer-Textur und Markt-Schriftzug von
       weihnachtsmarkt-detmold.de – schriftliche Erlaubnis oder ersetzen. Sponsorenliste

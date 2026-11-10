@@ -22,7 +22,7 @@ export function Pricing() {
   const included = [
     'Lounge exklusiv für 2 Stunden',
     `Platz für bis zu ${s.maxPersons} Personen`,
-    `Bis zu ${maxTalerCount(s)} € Freiverzehr in Residenztalern für die Stände`,
+    `Bis zu ${maxTalerCount(s)} € Freiverzehr in Weihnachtsmarkt-Talern für die Stände`,
     'Tischservice der Tanzschule Fricke',
     'Ticket mit QR-Code per E-Mail',
   ];
@@ -34,7 +34,8 @@ export function Pricing() {
           eyebrow="Preise und Zeiten"
           title={`Deine Lounge ab ${euro(minLoungeCents(s))}`}
         >
-          Jeder Preis enthält Freiverzehr in Residenztalern – je später der Abend, desto mehr.
+          Jeder Preis enthält Freiverzehr in Weihnachtsmarkt-Talern – je später der Abend, desto
+          mehr.
         </SectionHeading>
         <Reveal className="grid overflow-hidden rounded-[28px] shadow-[0_30px_60px_-40px_rgba(36,34,30,0.6)] md:grid-cols-[1fr_1.4fr]">
           <div className="glitter p-2.5 sm:p-3">

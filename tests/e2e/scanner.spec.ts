@@ -24,9 +24,9 @@ test.describe('Scanner', () => {
       sheet.getByRole('heading', { name: 'Gültig – herzlich willkommen!' }),
     ).toBeVisible();
     await expect(sheet.getByText('Anna Muster')).toBeVisible();
-    await expect(sheet.getByText('Residenztaler noch nicht übergeben')).toBeVisible();
+    await expect(sheet.getByText('Weihnachtsmarkt-Taler noch nicht übergeben')).toBeVisible();
     await sheet.getByRole('button', { name: 'Taler übergeben' }).click();
-    await expect(sheet.getByText(/Residenztaler übergeben um/)).toBeVisible();
+    await expect(sheet.getByText(/Weihnachtsmarkt-Taler übergeben um/)).toBeVisible();
     await sheet.getByRole('button', { name: 'Weiter scannen' }).click();
 
     await page.getByLabel('Buchungscode von Hand eingeben').fill('HL-ABCD-EFGH');

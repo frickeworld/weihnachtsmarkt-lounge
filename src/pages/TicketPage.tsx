@@ -150,7 +150,7 @@ function TicketView({ ticket, qr, token }: { ticket: TicketInfo; qr: string; tok
         </div>
         {ticket.talerCount != null && (
           <div className="flex justify-between gap-4">
-            <dt className="text-ink-soft">Residenztaler beim Einlass</dt>
+            <dt className="text-ink-soft">Weihnachtsmarkt-Taler beim Einlass</dt>
             <dd className="text-right font-semibold">
               {ticket.talerCount}
               {!!ticket.extraTalerCount && (

@@ -216,7 +216,7 @@ function SettingsForm({ initial, onSaved }: { initial: AdminSettings; onSaved: (
             hint: 'Händler bekommen den Rest (mindestens den Freiverzehr), STUDIO/F zusätzlich die Gebühr. Gilt für neue Buchungen.',
           })}
           {input('haendler', 'Standard: Anteil Händler', { suffix: '€' })}
-          {input('taler_count', 'Standard: Anzahl Residenztaler', { suffix: 'Stk.' })}
+          {input('taler_count', 'Standard: Anzahl Weihnachtsmarkt-Taler', { suffix: 'Stk.' })}
           {input('taler', 'Standard: Wert der Taler', { suffix: '€' })}
           {input('max_persons', 'Max. Personen', { suffix: 'Pers.' })}
           {input('extra_taler', 'Extra-Taler zum Dazubuchen', {

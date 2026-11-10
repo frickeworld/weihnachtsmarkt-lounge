@@ -80,7 +80,7 @@ export function buildPassJson(
         {
           key: 'included',
           label: 'Inklusive',
-          value: `Lounge exklusiv für 2 Stunden, ${d.talerCount} Residenztaler für Speisen und Getränke, Tischservice der Tanzschule Fricke.`,
+          value: `Lounge exklusiv für 2 Stunden, ${d.talerCount} Weihnachtsmarkt-Taler für Speisen und Getränke, Tischservice der Tanzschule Fricke.`,
         },
         {
           key: 'entry',

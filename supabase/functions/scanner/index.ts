@@ -2,7 +2,7 @@
 //   auth  { pin }                                   → { token, expiresAt }
 //   today { token }                                 → Liste „Heute“ (für Anzeige und Offline-Prüfung)
 //   scan  { token, code, override?, scannedAt?, offline? } → Ergebnis grün/gelb/orange/rot
-//   taler { token, bookingId, scannedAt?, offline? }       → Residenztaler übergeben
+//   taler { token, bookingId, scannedAt?, offline? }       → Weihnachtsmarkt-Taler übergeben
 import { adminClient } from '../_shared/db.ts';
 import { hashClientIp, json, preflight } from '../_shared/http.ts';
 import { signScannerToken, verifyScannerToken } from '../_shared/scannerToken.ts';

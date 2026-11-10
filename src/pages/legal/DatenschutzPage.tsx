@@ -66,8 +66,8 @@ export function DatenschutzPage() {
       <H3>Einlass</H3>
       <p>
         Am Einlass wird der QR-Code bzw. Buchungscode geprüft. Wir speichern, wann eingecheckt und
-        die Residenztaler ausgegeben wurden. Für den Schutz der Scanner-Anmeldung speichern wir nur
-        einen nicht rückrechenbaren Hash der IP-Adresse für kurze Zeit.
+        die Weihnachtsmarkt-Taler ausgegeben wurden. Für den Schutz der Scanner-Anmeldung speichern
+        wir nur einen nicht rückrechenbaren Hash der IP-Adresse für kurze Zeit.
       </p>
       <H3>Wallet</H3>
       <p>

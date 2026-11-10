@@ -380,7 +380,7 @@ export function BookingForm({
                 <dd>{formatCents((won ? 0 : loungeAfterDiscount) + extraCents)}</dd>
               </div>
               <div className="flex justify-between gap-4 text-sm text-ink-soft">
-                <dt>Residenztaler beim Einlass</dt>
+                <dt>Weihnachtsmarkt-Taler beim Einlass</dt>
                 <dd>{taler + extraCents / 100} Taler</dd>
               </div>
             </>

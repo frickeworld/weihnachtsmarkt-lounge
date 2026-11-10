@@ -22,7 +22,7 @@ export function Experience() {
     {
       icon: IconCoin,
       title: `Bis zu ${maxTalerCount(s)} € Freiverzehr`,
-      text: 'In Residenztalern, einlösbar an den Ständen des Weihnachtsmarkts.',
+      text: 'In Weihnachtsmarkt-Talern, einlösbar an den Ständen des Weihnachtsmarkts.',
     },
     {
       icon: IconService,

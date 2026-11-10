@@ -273,7 +273,7 @@ Deno.serve(async (req) => {
               currency: 'eur',
               unit_amount: booking.extra_taler_cents,
               product_data: {
-                name: `Zusätzliche Residenztaler: ${booking.extra_taler_cents / 100} Taler${
+                name: `Zusätzliche Weihnachtsmarkt-Taler: ${booking.extra_taler_cents / 100} Taler${
                   loungeIsFree ? ` (zu deinem Lounge-Gewinn am ${when})` : ''
                 }`,
               },
@@ -302,7 +302,7 @@ Deno.serve(async (req) => {
       price_data: {
         currency: 'eur',
         unit_amount: booking.taler_cents,
-        product_data: { name: `Freiverzehr: ${booking.taler_cents / 100} Residenztaler` },
+        product_data: { name: `Freiverzehr: ${booking.taler_cents / 100} Weihnachtsmarkt-Taler` },
       },
     },
     {

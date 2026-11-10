@@ -15,8 +15,8 @@ export function Faq() {
       : String(levels[0]);
   const items: { q: string; a: ReactNode }[] = [
     {
-      q: 'Wie funktionieren die Residenztaler?',
-      a: `Beim Einlass erhältst du je nach Zeitfenster ${levelText} Residenztaler im Wert von je 1 €. Du kannst sie an den Ständen des Weihnachtsmarkts im Schlosspark einlösen – pro gekauftem Artikel einen Taler.`,
+      q: 'Wie funktionieren die Weihnachtsmarkt-Taler?',
+      a: `Beim Einlass erhältst du je nach Zeitfenster ${levelText} Weihnachtsmarkt-Taler im Wert von je 1 €. Du kannst sie an den Ständen des Weihnachtsmarkts im Schlosspark einlösen – pro gekauftem Artikel einen Taler.`,
     },
     {
       q: 'Kann ich meine Buchung stornieren?',

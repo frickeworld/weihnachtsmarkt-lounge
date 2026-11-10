@@ -8,7 +8,7 @@ import { fetchInstagramFollowers } from '@/lib/api';
 const pillars = [
   {
     title: 'Genießen',
-    text: 'Der Duft von Gewürzen, eine heiße Tasse und etwas Leckeres auf die Hand – mit deinen Residenztalern direkt an den Ständen.',
+    text: 'Der Duft von Gewürzen, eine heiße Tasse und etwas Leckeres auf die Hand – mit deinen Weihnachtsmarkt-Talern direkt an den Ständen.',
   },
   {
     title: 'Stöbern',

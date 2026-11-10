@@ -15,7 +15,7 @@ export function buildProductJsonLd(opts: {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: 'Weihnachtsmarkt-Lounge der Händler',
-    description: `Überdachte Lounge auf dem Weihnachtsmarkt im Schlosspark Detmold: 2 Stunden exklusiv, bis zu ${opts.maxPersons} Personen, bis zu ${opts.maxTaler} € Freiverzehr in Residenztalern und Tischservice.`,
+    description: `Überdachte Lounge auf dem Weihnachtsmarkt im Schlosspark Detmold: 2 Stunden exklusiv, bis zu ${opts.maxPersons} Personen, bis zu ${opts.maxTaler} € Freiverzehr in Weihnachtsmarkt-Talern und Tischservice.`,
     image: `${site}/og-image.png`,
     brand: { '@type': 'Brand', name: 'Die Händler – Werbegemeinschaft Detmold' },
     offers: {

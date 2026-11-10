@@ -49,12 +49,12 @@ export function GiveawayTermsPage() {
       <H2>4. Gewinn</H2>
       <p>
         Pro Ziehung wird ein Abend in der Weihnachtsmarkt-Lounge der Händler verlost: exklusive
-        Nutzung für 2 Stunden für bis zu {s.maxPersons} Personen, Freiverzehr in Residenztalern
-        gemäß dem gewählten Zeitfenster und Tischservice. Der Gewinner erhält per E-Mail einen
-        persönlichen Code und wählt damit selbst einen freien Abend bis zum Saisonende; ausgenommen
-        sind Sonderveranstaltungen. Ein Anspruch auf einen bestimmten Termin besteht nicht. Eine
-        Barauszahlung oder Übertragung des Codes ist ausgeschlossen; das Ticket selbst ist
-        übertragbar.
+        Nutzung für 2 Stunden für bis zu {s.maxPersons} Personen, Freiverzehr in
+        Weihnachtsmarkt-Talern gemäß dem gewählten Zeitfenster und Tischservice. Der Gewinner erhält
+        per E-Mail einen persönlichen Code und wählt damit selbst einen freien Abend bis zum
+        Saisonende; ausgenommen sind Sonderveranstaltungen. Ein Anspruch auf einen bestimmten Termin
+        besteht nicht. Eine Barauszahlung oder Übertragung des Codes ist ausgeschlossen; das Ticket
+        selbst ist übertragbar.
       </p>
 
       <H2>5. Code für alle anderen</H2>

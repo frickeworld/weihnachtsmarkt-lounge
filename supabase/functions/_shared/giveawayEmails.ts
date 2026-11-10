@@ -59,7 +59,7 @@ export function renderGiveawayWin(d: {
   const html = frame(
     'Gewinnspiel Weihnachtsmarkt-Lounge',
     `Herzlichen Glückwunsch, ${escapeHtml(d.firstName)}!`,
-    `<p style="margin:0 0 12px;line-height:1.6;">Du hast in dieser Woche gewonnen: <strong>einen Abend in der Lounge der Händler</strong> für bis zu 10 Personen – mit Freiverzehr in Residenztalern und Tischservice der Tanzschule Fricke.</p>
+    `<p style="margin:0 0 12px;line-height:1.6;">Du hast in dieser Woche gewonnen: <strong>einen Abend in der Lounge der Händler</strong> für bis zu 10 Personen – mit Freiverzehr in Weihnachtsmarkt-Talern und Tischservice der Tanzschule Fricke.</p>
 <p style="margin:0 0 8px;line-height:1.6;">Such dir einfach einen freien Abend aus und gib bei der Buchung diesen Code ein:</p>
 <p style="margin:16px 0;text-align:center;font-family:Courier New,monospace;font-size:24px;font-weight:bold;letter-spacing:3px;background:#F3EBDC;padding:14px;border-radius:10px;">${escapeHtml(d.code)}</p>
 <p style="margin:0;color:#5F574B;font-size:13px;line-height:1.6;">Gültig für einen freien Abend bis ${escapeHtml(formatLongDate(d.validUntil))} (nicht für Sonderveranstaltungen). Einmal einlösbar, keine Barauszahlung.</p>

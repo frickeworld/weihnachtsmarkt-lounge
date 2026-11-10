@@ -272,7 +272,7 @@ Spalten `scanner_pin_hash` sind nie über eine öffentliche Funktion erreichbar.
    - Insert `pending`, `hold_expires_at = now() + hold_minutes`, Beträge aus settings, `amount_total_cents = price + fee`.
    - Unique-Verletzung → 409 „Dieser Termin wurde gerade gebucht. Bitte wähle einen anderen.“ → Frontend lädt Verfügbarkeit neu.
    - Stripe Checkout Session: `mode=payment`, `locale=de`, `currency=eur`, `customer_email`, `expires_at = hold_expires_at` (Stripe-Minimum 30 min beachten), `payment_method_types` = card + paypal (Apple/Google Pay über card), `metadata.booking_id`, success/cancel-URL über PUBLIC_SITE_URL.
-   - Positionen: „Weihnachtsmarkt-Lounge am [Datum], [Zeitfenster] – bis zu 10 Personen“ = price − taler (75,00 €) · „Freiverzehr: 100 Residenztaler“ = taler (100,00 €) · „Verarbeitungsgebühr“ = fee (3,50 €). Tax-Rates nur, wenn Secrets gesetzt (Lounge + Gebühr; Taler ohne).
+   - Positionen: „Weihnachtsmarkt-Lounge am [Datum], [Zeitfenster] – bis zu 10 Personen“ = price − taler (75,00 €) · „Freiverzehr: 100 Weihnachtsmarkt-Taler“ = taler (100,00 €) · „Verarbeitungsgebühr“ = fee (3,50 €). Tax-Rates nur, wenn Secrets gesetzt (Lounge + Gebühr; Taler ohne).
    - Bei Firma/Rechnungswunsch: Stripe-Customer (Name = Firma sonst Vor-/Nachname, E-Mail, Adresse, USt-ID als `eu_vat` Tax-ID), `invoice_creation.enabled = true`, Beschreibung mit Datum, Zeitfenster, Buchungscode.
    - Session-ID speichern, Redirect-URL zurückgeben.
 4. **Webhook** `stripe-webhook` (ohne JWT, Signatur prüfen):
@@ -610,7 +610,7 @@ Login, MFA, alle Admin-Seiten (4.7), Tagesliste-PDF, Anonymisierung.
 - 1 Taler = 1 €, keine Verarbeitungsgebühr, kein Rabatt. Geht vollständig an die Händler.
 - `create-checkout` prüft die Stufe, speichert `bookings.extra_taler_cents`; der Trigger
   `bookings_fill_amounts` rechnet sie auf `amount_total_cents` und `haendler_share_cents`.
-  Stripe-Position „Zusätzliche Residenztaler: N Taler“ (ohne Steuersatz, wie der Freiverzehr).
+  Stripe-Position „Zusätzliche Weihnachtsmarkt-Taler: N Taler“ (ohne Steuersatz, wie der Freiverzehr).
   Gewinn-Code (100 %) mit Extra-Taler: Stripe nur über die Extra-Taler.
 - Ticket (PDF, Mail, Wallet, Online-Ticket über `get_ticket_taler()`) und Scanner
   (`scanner_booking_json`: `taler_count`, `extra_taler_count`) zeigen die Gesamtzahl der Taler.

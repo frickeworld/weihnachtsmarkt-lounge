@@ -41,7 +41,7 @@ describe('Ticket-Mail', () => {
       'Hallo Anna, deine Lounge ist gebucht!',
       'HL-ABCD-EFGH',
       '17:30–19:30 Uhr',
-      '100 Residenztaler',
+      '100 Weihnachtsmarkt-Taler',
       'pro gekauftem Artikel 1 Taler',
       'Tischservice der Tanzschule Fricke',
       'dein Zeitfenster endet um 19:30 Uhr',

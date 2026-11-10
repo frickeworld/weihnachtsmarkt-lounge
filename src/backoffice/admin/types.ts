@@ -28,7 +28,7 @@ export interface Booking {
   newsletter_opt_in: boolean;
   price_cents: number;
   fee_cents: number;
-  /** Zusätzlich gebuchte Residenztaler in Cent (in Gesamtbetrag und Händler-Anteil enthalten) */
+  /** Zusätzlich gebuchte Weihnachtsmarkt-Taler in Cent (in Gesamtbetrag und Händler-Anteil enthalten) */
   extra_taler_cents?: number;
   haendler_share_cents: number;
   amount_total_cents: number;

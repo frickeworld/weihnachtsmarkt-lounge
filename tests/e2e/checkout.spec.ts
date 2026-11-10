@@ -58,7 +58,7 @@ test.describe('Checkout (Phase 3)', () => {
       await expect(summary).toContainText(/Lounge-Preis\s*99,00\s€/);
       await expect(summary).toContainText(/Extra-Taler \(200 Taler\)\s*200,00\s€/);
       await expect(summary).toContainText(/Zusammen\s*299,00\s€/);
-      await expect(summary).toContainText(/Residenztaler beim Einlass\s*250 Taler/);
+      await expect(summary).toContainText(/Weihnachtsmarkt-Taler beim Einlass\s*250 Taler/);
       await expect(summary).toContainText('die Extra-Taler sind gebührenfrei');
     });
     await page.waitForURL(FAKE_STRIPE_URL);

@@ -16,7 +16,7 @@ export function Highlights() {
     {
       value: `bis ${maxTalerCount(s)} €`,
       label: 'Freiverzehr inklusive',
-      note: 'in Residenztalern',
+      note: 'in Weihnachtsmarkt-Talern',
     },
     { value: String(s.maxPersons), label: 'Personen', note: 'Platz für deine Runde' },
     { value: '2 Std.', label: 'exklusiv', note: 'nur für euch' },

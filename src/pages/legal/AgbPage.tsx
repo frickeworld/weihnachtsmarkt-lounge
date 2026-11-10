@@ -25,16 +25,16 @@ export function AgbPage() {
         <li>die exklusive Nutzung der überdachten Lounge für 2 Stunden,</li>
         <li>Platz für bis zu {s.maxPersons} Personen,</li>
         <li>
-          Residenztaler im Wert von je 1 € als Freiverzehr – die Anzahl hängt vom gebuchten
+          Weihnachtsmarkt-Taler im Wert von je 1 € als Freiverzehr – die Anzahl hängt vom gebuchten
           Zeitfenster ab (siehe § 3) – zur Einlösung an den Ständen des Weihnachtsmarkts im
           Schlosspark, pro gekauftem Artikel ein Taler,
         </li>
         <li>Tischservice durch die Tanzschule Fricke.</li>
       </ul>
       <p>
-        Speisen und Getränke über den Wert der Residenztaler hinaus sind nicht enthalten. Die
-        Residenztaler werden nicht in Bargeld ausgezahlt und gelten [GÜLTIGKEIT DER TALER FESTLEGEN,
-        z. B. nur am Buchungstag].
+        Speisen und Getränke über den Wert der Weihnachtsmarkt-Taler hinaus sind nicht enthalten.
+        Die Weihnachtsmarkt-Taler werden nicht in Bargeld ausgezahlt und gelten [GÜLTIGKEIT DER
+        TALER FESTLEGEN, z. B. nur am Buchungstag].
       </p>
 
       <H2>{n(3)} Preise</H2>
@@ -65,11 +65,11 @@ export function AgbPage() {
       </p>
       {s.extraTalerOptions.length > 0 && (
         <p>
-          Zusätzlich zum Freiverzehr kannst du bei der Buchung weitere Residenztaler dazubuchen (
-          {s.extraTalerOptions.join(', ')} Taler). Jeder zusätzliche Taler kostet 1 €; darauf wird
-          keine Verarbeitungsgebühr erhoben. Für zusätzliche Taler gelten dieselben Bedingungen wie
-          für die Taler des Freiverzehrs (§ 2). Sie werden beim Einlass zusammen mit dem Freiverzehr
-          ausgegeben.
+          Zusätzlich zum Freiverzehr kannst du bei der Buchung weitere Weihnachtsmarkt-Taler
+          dazubuchen ({s.extraTalerOptions.join(', ')} Taler). Jeder zusätzliche Taler kostet 1 €;
+          darauf wird keine Verarbeitungsgebühr erhoben. Für zusätzliche Taler gelten dieselben
+          Bedingungen wie für die Taler des Freiverzehrs (§ 2). Sie werden beim Einlass zusammen mit
+          dem Freiverzehr ausgegeben.
         </p>
       )}
       <p>
