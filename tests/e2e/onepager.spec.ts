@@ -235,10 +235,11 @@ test.describe('Echte Verfügbarkeit (Phase 2)', () => {
     page,
     isMobile,
   }) => {
-    const tracked: { event_type: string; device: string }[] = [];
+    const tracked: { event_type: string; device: string; page?: string; source?: string }[] = [];
     await mockSupabase(page, { tracked });
-    await page.goto('/');
+    await page.goto('/?utm_source=instagram-story');
     await expect.poll(() => tracked.filter((t) => t.event_type === 'page_view').length).toBe(1);
+    expect(tracked[0]).toMatchObject({ page: 'start', source: 'instagram-story' });
     await page.locator('#start').getByRole('link', { name: 'Lounge buchen' }).click();
     await expect.poll(() => tracked.filter((t) => t.event_type === 'book_click').length).toBe(1);
     expect(tracked.every((t) => t.device === (isMobile ? 'mobile' : 'desktop'))).toBe(true);

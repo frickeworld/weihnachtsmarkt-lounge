@@ -127,6 +127,20 @@ export async function trackEvent(
   await rpc('track_event', { event_type: eventType, device }).catch(() => undefined);
 }
 
+/** Seitenaufruf mit Seite und Herkunft (ohne Cookies/IDs). Fällt auf track_event zurück. */
+export async function trackPageViewEvent(
+  device: 'mobile' | 'desktop',
+  page: string,
+  source: string,
+) {
+  if (!restConfigured()) return;
+  try {
+    await rpc('track_page_view', { p_device: device, p_page: page, p_source: source });
+  } catch {
+    await rpc('track_event', { event_type: 'page_view', device }).catch(() => undefined);
+  }
+}
+
 // ---------------------------------------------------------------------------------------
 // Edge Functions (Phase 3)
 // ---------------------------------------------------------------------------------------
@@ -172,7 +186,7 @@ export async function startCheckout(payload: {
   form: unknown;
   /** Persönlicher Code aus dem Gewinnspiel (optional) */
   discountCode?: string;
-  /** Zusätzliche Residenztaler (0 = keine); Preis rechnet der Server */
+  /** Zusätzliche Weihnachtsmarkt-Taler (0 = keine); Preis rechnet der Server */
   extraTaler?: number;
 }): Promise<CheckoutResult> {
   if (DEMO) {

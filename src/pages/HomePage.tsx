@@ -21,7 +21,7 @@ import { SpecialEvents } from '@/sections/SpecialEvents';
 import { trackPageView } from '@/lib/track';
 
 export function HomePage() {
-  useEffect(trackPageView, []);
+  useEffect(() => trackPageView('start'), []);
 
   // Direktlinks wie /#buchen: Der Browser springt vor dem Rendern ins Leere, daher hier nachholen.
   useEffect(() => {

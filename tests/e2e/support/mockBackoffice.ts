@@ -267,6 +267,29 @@ export async function mockBackoffice(page: Page, opts: BackofficeOptions = {}) {
       ],
     }),
   );
+  await page.route('**/rest/v1/rpc/admin_traffic*', (route) =>
+    route.fulfill({
+      json: {
+        page_views: 140,
+        today: 12,
+        last_hour: 3,
+        by_source: [
+          { key: 'instagram', count: 80 },
+          { key: 'direkt', count: 40 },
+          { key: 'plakat', count: 20 },
+        ],
+        by_page: [
+          { key: 'start', count: 120 },
+          { key: 'gewinnspiel', count: 20 },
+        ],
+        by_device: [
+          { key: 'mobile', count: 110 },
+          { key: 'desktop', count: 30 },
+        ],
+        by_hour: Array.from({ length: 24 }, (_, hour) => ({ hour, count: hour === 20 ? 30 : 4 })),
+      },
+    }),
+  );
   await page.route('**/rest/v1/rpc/admin_dashboard*', (route) => {
     const { p_from, p_to } = route.request().postDataJSON() as { p_from: string; p_to: string };
     const daily = [];

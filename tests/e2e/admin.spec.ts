@@ -71,6 +71,15 @@ test.describe('Admin', () => {
     await expect(
       page.getByLabel('Freitag 20:00 Uhr: 4 von 4 gebucht (100 %) · 796,00 €'),
     ).toBeVisible();
+    // Aufruf-Tracker: Herkunft, Seite, Gerät
+    const traffic = page
+      .locator('section')
+      .filter({ has: page.getByRole('heading', { name: 'Aufrufe der Website' }) });
+    await expect(traffic.getByText('Instagram')).toBeVisible();
+    await expect(traffic.getByText('80 · 57 %')).toBeVisible();
+    await expect(traffic.getByText('plakat', { exact: true })).toBeVisible();
+    await expect(traffic.getByText('Handy')).toBeVisible();
+    await expect(traffic.getByLabel(/meiste um 20 Uhr/)).toBeVisible();
     await page.getByText('Als Tabelle anzeigen').first().click();
     await expect(page.getByRole('table').first()).toBeVisible();
     // Keine waagerechte Scrollleiste

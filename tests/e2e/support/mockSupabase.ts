@@ -75,7 +75,7 @@ export interface MockOptions {
   /** Simuliert einen Serverfehler bei get_availability. */
   failAvailability?: boolean;
   /** Alle Aufrufe von track_event landen hier. */
-  tracked?: { event_type: string; device: string }[];
+  tracked?: { event_type: string; device: string; page?: string; source?: string }[];
   /** Antwort von create-checkout (Standard: Weiterleitung auf eine Test-Seite). */
   checkout?: { status: number; body: Record<string, unknown> };
   /** Alle Anfragen an create-checkout. */
@@ -132,6 +132,20 @@ export async function mockSupabase(page: Page, opts: MockOptions = {}) {
   await page.route('**/rest/v1/rpc/get_extra_taler_options*', (route) =>
     route.fulfill({ json: opts.extraTalerOptions ?? [100, 200, 300] }),
   );
+  await page.route('**/rest/v1/rpc/track_page_view*', async (route) => {
+    const b = route.request().postDataJSON() as {
+      p_device: string;
+      p_page: string;
+      p_source: string;
+    };
+    opts.tracked?.push({
+      event_type: 'page_view',
+      device: b.p_device,
+      page: b.p_page,
+      source: b.p_source,
+    });
+    await route.fulfill({ status: 204, body: '' });
+  });
   await page.route('**/rest/v1/rpc/track_event*', async (route) => {
     opts.tracked?.push(route.request().postDataJSON());
     await route.fulfill({ status: 204, body: '' });

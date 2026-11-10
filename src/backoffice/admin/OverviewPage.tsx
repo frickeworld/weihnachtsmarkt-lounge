@@ -9,6 +9,7 @@ import { BOOKING_COLUMNS } from './api';
 import { Kpi } from '../Kpi';
 import { OccupancyHeatmapPanel } from '../OccupancyHeatmap';
 import { DailyBars } from './DailyBars';
+import { TrafficPanel } from './TrafficPanel';
 import { hhmm, percent } from './format';
 import type { Booking, DashboardData } from './types';
 import { unwrap, useLoad } from './useLoad';
@@ -233,7 +234,7 @@ export function OverviewPage() {
                 value={d.no_shows}
                 sub="Zeitfenster vorbei, kein Check-in"
               />
-              <Kpi label="Residenztaler übergeben" value={d.taler_handed_out} />
+              <Kpi label="Weihnachtsmarkt-Taler übergeben" value={d.taler_handed_out} />
               <Kpi label="Offen / storniert" value={`${d.pending} / ${d.cancelled}`} />
             </div>
           </KpiGroup>
@@ -251,6 +252,7 @@ export function OverviewPage() {
               />
             </div>
           )}
+          {range && <TrafficPanel from={range.from} to={range.to} />}
           {range && <OccupancyHeatmapPanel from={range.from} to={range.to} />}
         </>
       )}

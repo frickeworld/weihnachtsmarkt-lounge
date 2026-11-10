@@ -18,6 +18,7 @@ import {
   type GiveawayJoinValues,
 } from '@/lib/giveawaySchema';
 import { maxTalerCount } from '@/lib/settings';
+import { trackPageView } from '@/lib/track';
 import { useSettings } from '@/lib/settingsContext';
 import { a11y } from '@/sections/booking/a11y';
 import { Field } from '@/sections/booking/fields';
@@ -35,6 +36,7 @@ export function GiveawayPage() {
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => trackPageView('gewinnspiel'), []);
   useEffect(() => {
     document.title = 'Gewinnspiel: Jede Woche einen Lounge-Abend gewinnen – Die Händler';
     let active = true;
