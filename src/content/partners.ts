@@ -1,4 +1,5 @@
 import badMeinberger from '@/assets/sponsoren/bad-meinberger.webp';
+import ecclesia from '@/assets/sponsoren/ecclesia.webp';
 import izd from '@/assets/sponsoren/IZD.webp';
 import llb from '@/assets/sponsoren/llb.webp';
 import sparkasse from '@/assets/sponsoren/sparkasse-dt.webp';
@@ -9,12 +10,13 @@ import volksbank from '@/assets/sponsoren/volksbank-dt.webp';
 import weidmueller from '@/assets/sponsoren/weidmueller.webp';
 import wortmann from '@/assets/sponsoren/wortmann-tamaris.webp';
 
-/** Sponsoren & Partner des Weihnachtsmarkts (Stand weihnachtsmarkt-detmold.de, 10/2026). */
+/** Sponsoren & Partner des Weihnachtsmarkts (Stand weihnachtsmarkt-detmold.de, 11/2026). */
 export const sponsors = [
   { name: 'Sparkasse Detmold', src: sparkasse },
   { name: 'Volksbank Detmold', src: volksbank },
   { name: 'Stadtwerke Detmold', src: stadtwerke },
   { name: 'Lippische Landesbrandversicherung', src: llb },
+  { name: 'Ecclesia Gruppe', src: ecclesia },
   { name: 'Weidmüller', src: weidmueller },
   { name: 'Wortmann / Tamaris', src: wortmann },
   { name: 'Stegelmann', src: stegelmann },
