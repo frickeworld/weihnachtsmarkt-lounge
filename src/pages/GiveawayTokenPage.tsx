@@ -72,8 +72,9 @@ export function GiveawayTokenPage({ mode }: { mode: 'confirm' | 'unsubscribe' })
                 Du bist im Lostopf{result.firstName ? `, ${result.firstName}` : ''}!
               </h1>
               <p className="mt-6 text-lg text-ink-soft">
-                Jeden Montag ziehen wir einen Gewinner. Wir melden uns per E-Mail – auch wenn es
-                diesmal nicht klappt, mit einem persönlichen Code für deinen Lounge-Abend.
+                Die erste Ziehung ist am Samstag, 28. November, um 20 Uhr, danach jeden Sonntag um
+                18 Uhr. Gewinnst du, melden wir uns per E-Mail – und du bist bei jeder weiteren
+                Ziehung bis zum Ende der Aktion wieder dabei.
               </p>
               {shareUrl && (
                 <div className="mt-10 rounded-2xl border border-line bg-sand/60 p-5 text-left">

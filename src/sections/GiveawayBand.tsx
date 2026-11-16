@@ -36,10 +36,8 @@ export function GiveawayBand() {
                   Jede Woche eine Lounge gewinnen
                 </h2>
                 <p className="mt-2 font-medium">
-                  {info.nextDrawAt
-                    ? `Nächste Ziehung: ${formatDrawTime(info.nextDrawAt)}`
-                    : 'Einmal mitmachen, jede Woche dabei'}{' '}
-                  · Alle anderen bekommen {info.discountPercent} % Rabatt
+                  {info.nextDrawAt && `Nächste Ziehung: ${formatDrawTime(info.nextDrawAt)} · `}
+                  Einmal mitmachen, jede Woche dabei
                 </p>
               </div>
               {info.nextDrawAt && <GiveawayCountdown target={info.nextDrawAt} />}

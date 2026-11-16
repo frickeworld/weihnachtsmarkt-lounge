@@ -103,7 +103,7 @@ export function GiveawayPage() {
               {[
                 'Einmal mitmachen – jede Woche neue Chance',
                 'Gewinner suchen sich einen freien Abend selbst aus',
-                `Nicht gewonnen? Du bekommst sofort einen persönlichen Code: ${info?.discountPercent ?? 25} % auf deinen Lounge-Abend, 48 Stunden einlösbar`,
+                `Ein ganzer Abend für bis zu ${s.maxPersons} Personen – mit Freiverzehr und Tischservice`,
                 'Freunde einladen = Extra-Los für dich',
               ].map((t) => (
                 <li key={t} className="flex gap-3">
@@ -127,14 +127,6 @@ export function GiveawayPage() {
                     </div>
                   )}
                 </div>
-                {info.participants >= 20 && (
-                  <div className="card px-5 py-3">
-                    <div className="text-xs text-ink-soft">Im Lostopf</div>
-                    <div className="font-display text-xl font-medium tabular-nums">
-                      {info.participants.toLocaleString('de-DE')}
-                    </div>
-                  </div>
-                )}
               </div>
             )}
             <p className="mt-8 text-sm text-ink-soft">

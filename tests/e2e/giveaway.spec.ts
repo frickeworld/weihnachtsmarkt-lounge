@@ -16,12 +16,15 @@ test.describe('Gewinnspiel', () => {
     await expect(page.getByRole('link', { name: /^Lounge gewinnen: Ziehung/ })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Lounge gewinnen', exact: true })).toBeVisible();
     await expect(page.getByLabel(/^Noch 3 Tage, 5 Stunden/)).toBeVisible();
-    await expect(
-      page.getByText('Alle anderen bekommen 10 % Rabatt', { exact: false }),
-    ).toBeVisible();
+    await expect(page.getByText(/Einmal mitmachen, jede Woche dabei/).first()).toBeVisible();
+    // Kein Hinweis auf Rabatt für Nicht-Gewinner (Entscheidung Louis, 16.11.2026)
+    await expect(page.getByText(/Rabatt/)).toHaveCount(0);
     await page.getByRole('link', { name: 'Jetzt mitmachen' }).click();
     await expect(page).toHaveURL(/\/gewinnspiel$/);
-    await expect(page.getByText(/48 Stunden einlösbar/)).toBeVisible();
+    await expect(page.getByText(/Ein ganzer Abend für bis zu 10 Personen/)).toBeVisible();
+    // Keine Teilnehmerzahl und kein Rabatt-Versprechen auf der Gewinnspiel-Seite
+    await expect(page.getByText('Im Lostopf', { exact: true })).toHaveCount(0);
+    await expect(page.getByText(/Nicht gewonnen\?|% auf deinen Lounge-Abend/)).toHaveCount(0);
   });
 
   test('Teilnahme mit Freunde-Link, Einwilligung Pflicht', async ({ page }) => {

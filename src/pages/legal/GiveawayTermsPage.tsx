@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import { useSettings } from '@/lib/settingsContext';
-import { useGiveawayInfo } from '@/lib/useGiveawayInfo';
 import { formatLongDate } from '@/lib/dates';
 import { LEGAL_SHORT as L } from '../../../supabase/functions/_shared/legal.ts';
 import { H2, LegalLayout } from './LegalLayout';
@@ -8,7 +7,6 @@ import { H2, LegalLayout } from './LegalLayout';
 /** Teilnahmebedingungen Gewinnspiel – Entwurf, vor dem Start anwaltlich prüfen. */
 export function GiveawayTermsPage() {
   const s = useSettings();
-  const info = useGiveawayInfo();
   return (
     <LegalLayout title="Teilnahmebedingungen Gewinnspiel">
       <p>„Jede Woche einen Abend in der Lounge gewinnen“</p>
@@ -57,15 +55,13 @@ export function GiveawayTermsPage() {
         selbst ist übertragbar.
       </p>
 
-      <H2>5. Code für alle anderen</H2>
+      <H2>5. Zusätzliche Vorteile</H2>
       <p>
-        Teilnehmende, die nicht gewonnen haben, erhalten nach jeder Ziehung per E-Mail einen
-        persönlichen, einmal einlösbaren Code über {info?.discountPercent ?? 25} % Preisnachlass auf
-        einen Lounge-Abend. Der Code muss innerhalb von 48 Stunden nach der Ziehung eingelöst, also
-        gebucht werden; der gebuchte Termin darf bis zum Saisonende liegen. Er gilt an allen Tagen
-        außer an Sonderveranstaltungen (Party-Abende am 22., 23., 29. und 30. Dezember sowie
-        Heiligabend). Der Freiverzehr bleibt in voller Höhe enthalten. Der Code ist nicht mit
-        anderen Aktionen kombinierbar.
+        Der Veranstalter kann Teilnehmenden, die nicht gewonnen haben, freiwillig zusätzliche
+        Vorteile per E-Mail anbieten, etwa einen zeitlich begrenzten, persönlichen Code für einen
+        Lounge-Abend. Ein Anspruch darauf besteht nicht. Für solche Codes gelten die in der E-Mail
+        genannten Bedingungen; Sonderveranstaltungen sind ausgenommen, der Freiverzehr bleibt in
+        voller Höhe enthalten.
       </p>
 
       <H2>6. Benachrichtigung</H2>
