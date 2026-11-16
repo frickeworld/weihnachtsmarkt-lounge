@@ -104,6 +104,45 @@ test.describe('Admin', () => {
     await expect(page.getByRole('link', { name: 'Woche danach →' })).toBeVisible();
   });
 
+  test('Zugänge: Zugangslink erneut senden, Händler ohne Zwei-Faktor-Hinweis', async ({ page }) => {
+    const adminRequests: Record<string, unknown>[] = [];
+    await mockBackoffice(page, { hasFactor: true, adminRequests });
+    await page.route('**/rest/v1/rpc/admin_list_access*', (route) =>
+      route.fulfill({
+        json: [
+          {
+            user_id: 'u-admin',
+            email: 'louis@example.de',
+            roles: ['studio_admin'],
+            last_sign_in_at: new Date().toISOString(),
+            invited_at: null,
+            has_2fa: true,
+          },
+          {
+            user_id: 'u-paul',
+            email: 'paul@example.de',
+            roles: ['haendler'],
+            last_sign_in_at: null,
+            invited_at: '2026-11-07T17:00:00Z',
+            has_2fa: false,
+          },
+        ],
+      }),
+    );
+    await enter(page, '/admin/zugaenge');
+    await expect(page.getByText('paul@example.de', { exact: true })).toBeVisible();
+    await expect(
+      page.getByText(/Händler melden sich nur mit E-Mail und Passwort an/),
+    ).toBeVisible();
+    await page.getByRole('button', { name: 'Zugangslink senden' }).click();
+    await expect(
+      page.getByText(/E-Mail mit Zugangslink an paul@example.de verschickt \(Rolle „Händler/),
+    ).toBeVisible();
+    expect(adminRequests).toEqual([
+      { action: 'invite_user', email: 'paul@example.de', role: 'haendler' },
+    ]);
+  });
+
   test('Gewinnspiel: Kennzahlen, Ziehung mit Rückfrage', async ({ page }) => {
     const adminRequests: Record<string, unknown>[] = [];
     await mockBackoffice(page, {

@@ -21,21 +21,27 @@ export function AccessPage() {
   const [busy, setBusy] = useState(false);
   const [confirmRevoke, setConfirmRevoke] = useState<string | null>(null);
 
-  const invite = async (e: FormEvent) => {
-    e.preventDefault();
+  /** Einladung bzw. neuer Zugangslink – die Mail geht in beiden Fällen über Brevo raus. */
+  const send = async (to: string, asRole: Role) => {
     setBusy(true);
     setMsg(null);
-    const r = await callAdmin<{ invited: boolean }>('invite_user', { email, role });
+    const r = await callAdmin<{ invited: boolean }>('invite_user', { email: to, role: asRole });
     setBusy(false);
-    if (!r.ok) return setMsg({ ok: false, text: r.message });
+    if (!r.ok) {
+      setMsg({ ok: false, text: r.message });
+      return false;
+    }
     setMsg({
       ok: true,
-      text: r.invited
-        ? `Einladung an ${email} verschickt. Der Link ist 24 Stunden gültig.`
-        : `${email} hat schon ein Konto und bekommt jetzt die Rolle „${ROLE_LABEL[role]}“.`,
+      text: `E-Mail mit Zugangslink an ${to} verschickt (Rolle „${ROLE_LABEL[asRole]}“). Der Link ist 24 Stunden gültig – bitte auch im Spam-Ordner nachsehen lassen.`,
     });
-    setEmail('');
     list.reload();
+    return true;
+  };
+
+  const invite = async (e: FormEvent) => {
+    e.preventDefault();
+    if (await send(email, role)) setEmail('');
   };
 
   const rpc = async (name: string, args: Record<string, unknown>, ok: string) => {
@@ -99,6 +105,16 @@ export function AccessPage() {
                             </option>
                           ))}
                         </select>
+                        {!self && (
+                          <button
+                            type="button"
+                            className={smallBtn}
+                            disabled={busy}
+                            onClick={() => void send(u.email, current)}
+                          >
+                            Zugangslink senden
+                          </button>
+                        )}
                         {!self && (
                           <button
                             type="button"
@@ -168,8 +184,9 @@ export function AccessPage() {
               </select>
             </label>
             <p className="text-sm text-ink-soft">
-              Admins müssen bei der ersten Anmeldung die Zwei-Faktor-Anmeldung einrichten. Händler
-              sehen keine Kontaktdaten der Gäste.
+              Händler melden sich nur mit E-Mail und Passwort an und sehen keine Kontaktdaten der
+              Gäste. Admins richten bei der ersten Anmeldung zusätzlich die Zwei-Faktor-Anmeldung
+              ein.
             </p>
             <button
               type="submit"
