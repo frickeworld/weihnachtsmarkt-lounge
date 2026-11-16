@@ -7,10 +7,10 @@ const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const FN = Deno.env.get('FN_DAILY_REPORT') ?? 'http://127.0.0.1:8113';
 const db = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
 
-// Ein Samstag in der Zukunft (Zeitfenster 15:30, 17:45, 20:00)
+// Ein Samstag weit in der Zukunft (Zeitfenster 15:30, 17:45, 20:00): fern der echten Saison mit
+// ihren Schließtagen und Händler-Sperren, damit „frei in den nächsten 7 Tagen“ stabil bleibt.
 const day = (() => {
-  const d = new Date();
-  d.setUTCDate(d.getUTCDate() + 30);
+  const d = new Date(Date.UTC(2098, 5, 1));
   while (d.getUTCDay() !== 6) d.setUTCDate(d.getUTCDate() + 1);
   return d.toISOString().slice(0, 10);
 })();
