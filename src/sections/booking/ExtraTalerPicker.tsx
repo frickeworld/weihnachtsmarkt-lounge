@@ -6,7 +6,7 @@ const GLUEHWEIN_TALER = 4.5;
 const EXAMPLE_PERSONS = 8;
 
 interface Props {
-  /** Stufen aus settings.extra_taler_options, z. B. [100, 200, 300] */
+  /** Stufen aus settings.extra_taler_options, z. B. [75, 100] */
   options: number[];
   value: number;
   onChange: (taler: number) => void;
@@ -28,7 +28,10 @@ export function ExtraTalerPicker({ options, value, onChange, baseTaler, persons 
   if (options.length === 0) return null;
   const n = persons && persons > 0 ? persons : EXAMPLE_PERSONS;
   const total = baseTaler + value;
-  const tip = options.length >= 3 ? options[1] : undefined;
+  // Tipp: bei drei und mehr Stufen die mittlere, bei zwei Stufen die größere.
+  const tip = options.length >= 2 ? options[1] : undefined;
+  // Drei Kacheln (Ohne + zwei Stufen) passen auch mobil nebeneinander.
+  const cols = options.length === 2 ? 'grid-cols-3' : 'grid-cols-2 sm:grid-cols-4';
 
   return (
     <fieldset className="rounded-2xl border border-gold bg-sand p-5 sm:p-6">
@@ -44,7 +47,7 @@ export function ExtraTalerPicker({ options, value, onChange, baseTaler, persons 
         ganzen Abend nicht mehr ans Portemonnaie.
       </p>
 
-      <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+      <div className={`mt-4 grid gap-2 ${cols}`}>
         {[0, ...options].map((t) => (
           <label key={t} className="cursor-pointer">
             <input

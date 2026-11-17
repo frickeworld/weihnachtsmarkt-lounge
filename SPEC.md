@@ -605,7 +605,7 @@ Login, MFA, alle Admin-Seiten (4.7), Tagesliste-PDF, Anonymisierung.
 ## Extra-Taler (Entscheidung Louis, 05.11.2026)
 
 - Im Buchungsformular „Mehr Taler für eure Runde“: Stufen aus `settings.extra_taler_options`
-  (Standard 100, 200, 300; öffentlich über `get_extra_taler_options()`, im Admin unter Einstellungen).
+  (Standard 75, 100 seit 17.11.2026, vorher 100, 200, 300; öffentlich über `get_extra_taler_options()`, im Admin unter Einstellungen).
   Rechenbeispiel pro Person (gewählte Personenzahl, sonst 8) mit Glühwein zu 4,50 Taler.
 - 1 Taler = 1 €, keine Verarbeitungsgebühr, kein Rabatt. Geht vollständig an die Händler.
 - `create-checkout` prüft die Stufe, speichert `bookings.extra_taler_cents`; der Trigger

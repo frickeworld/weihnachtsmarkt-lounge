@@ -109,7 +109,7 @@ export interface MockOptions {
   waitlistRequests?: unknown[];
   /** Alle Anfragen an das Kontaktformular. */
   contactRequests?: unknown[];
-  /** Extra-Taler-Stufen (Standard: 100, 200, 300). */
+  /** Extra-Taler-Stufen (Standard: 75, 100). */
   extraTalerOptions?: number[];
   /** Antwort von get_ticket (null = nicht gefunden). */
   ticket?: Record<string, unknown> | null;
@@ -130,7 +130,7 @@ export async function mockSupabase(page: Page, opts: MockOptions = {}) {
     route.fulfill({ json: [{ fee_percent: 5, fee_cents: 350 }] }),
   );
   await page.route('**/rest/v1/rpc/get_extra_taler_options*', (route) =>
-    route.fulfill({ json: opts.extraTalerOptions ?? [100, 200, 300] }),
+    route.fulfill({ json: opts.extraTalerOptions ?? [75, 100] }),
   );
   await page.route('**/rest/v1/rpc/track_page_view*', async (route) => {
     const b = route.request().postDataJSON() as {

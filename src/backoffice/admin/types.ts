@@ -103,7 +103,7 @@ export interface AdminSettings {
   taler_count: number;
   taler_cents: number;
   haendler_share_cents: number;
-  /** Extra-Taler-Stufen zum Dazubuchen, z. B. [100, 200, 300] */
+  /** Extra-Taler-Stufen zum Dazubuchen, z. B. [75, 100] */
   extra_taler_options?: number[] | null;
   max_persons: number;
   booking_cutoff_minutes: number;

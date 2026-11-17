@@ -29,7 +29,7 @@ export interface PublicSettings {
   /** Preisstaffel je Wochentag und Zeitfenster (aus get_price_list) */
   priceList: PriceTier[];
   /**
-   * Extra-Taler zum Dazubuchen (z. B. 100, 200, 300; 1 Taler = 1 €, ohne Gebühr und Rabatt).
+   * Extra-Taler zum Dazubuchen (z. B. 75, 100; 1 Taler = 1 €, ohne Gebühr und Rabatt).
    * Leer, bis die Datenbank antwortet – dann wird die Auswahl nicht angezeigt.
    */
   extraTalerOptions: number[];
