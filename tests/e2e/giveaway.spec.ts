@@ -121,3 +121,58 @@ test.describe('Gewinnspiel', () => {
     ).toBeVisible();
   });
 });
+
+test.describe('Gewinnspiel-Pop-up auf der Startseite', () => {
+  test('erscheint nach 5 Sekunden, Eintragen direkt im Pop-up', async ({ page }) => {
+    const opts: MockOptions = { giveawayActive: true, giveawayRequests: [] };
+    await mockSupabase(page, opts);
+    await page.goto('/');
+    const dialog = page.getByRole('dialog', { name: 'Jetzt Lounge gewinnen' });
+    await page.waitForTimeout(3000);
+    await expect(dialog).toHaveCount(0);
+    await expect(dialog).toBeVisible({ timeout: 5000 });
+    await expect(dialog.getByLabel(/^Noch \d+ Tage/)).toBeVisible();
+    await expect(dialog.getByText(/Rabatt/)).toHaveCount(0);
+    await dialog.getByLabel('Vorname').fill('Paula');
+    await dialog.getByLabel('Nachname').fill('Pop');
+    await dialog.getByLabel('E-Mail', { exact: true }).fill('paula@example.de');
+    await dialog.getByLabel(/Ich nehme am Gewinnspiel teil/).check();
+    await dialog.getByLabel('Ich bin mindestens 18 Jahre alt.').check();
+    await dialog.getByRole('button', { name: 'Jetzt teilnehmen' }).click();
+    await expect(dialog.getByRole('heading', { name: 'Fast geschafft!' })).toBeVisible();
+    expect(opts.giveawayRequests![0]).toMatchObject({
+      action: 'join',
+      email: 'paula@example.de',
+      consent: true,
+      adult: true,
+    });
+  });
+
+  test('schließen mit Escape, danach nicht noch einmal in derselben Sitzung', async ({ page }) => {
+    await mockSupabase(page, { giveawayActive: true });
+    await page.goto('/');
+    const dialog = page.getByRole('dialog', { name: 'Jetzt Lounge gewinnen' });
+    await expect(dialog).toBeVisible({ timeout: 8000 });
+    await page.keyboard.press('Escape');
+    await expect(dialog).toHaveCount(0);
+    await page.reload();
+    await page.waitForTimeout(6500);
+    await expect(dialog).toHaveCount(0);
+  });
+
+  test('nicht bei Direktlink zur Buchung und nicht ohne laufendes Gewinnspiel', async ({
+    page,
+  }) => {
+    await mockSupabase(page, { giveawayActive: true });
+    await page.goto('/#buchen');
+    await page.waitForTimeout(6500);
+    await expect(page.getByRole('dialog', { name: 'Jetzt Lounge gewinnen' })).toHaveCount(0);
+
+    await mockSupabase(page, { giveawayActive: false });
+    await page.goto('/gewinnspiel');
+    await page.evaluate(() => sessionStorage.clear());
+    await page.goto('/');
+    await page.waitForTimeout(6500);
+    await expect(page.getByRole('dialog', { name: 'Jetzt Lounge gewinnen' })).toHaveCount(0);
+  });
+});
