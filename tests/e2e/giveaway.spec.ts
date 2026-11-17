@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { pickDay } from './support/calendar';
 import { addDays, MOCK_SETTINGS, mockSupabase, type MockOptions } from './support/mockSupabase';
+import { submitBooking } from './support/booking';
 
 test.describe('Gewinnspiel', () => {
   test('Band nur bei aktivem Gewinnspiel', async ({ page }) => {
@@ -103,7 +104,7 @@ test.describe('Gewinnspiel', () => {
       .click();
     await expect(page.getByRole('radio', { name: '6 Personen' })).toBeChecked();
     await page.getByLabel(/Ich akzeptiere die/).check();
-    await page.getByRole('button', { name: 'Zahlungspflichtig buchen', exact: true }).click();
+    await submitBooking(page);
     await expect.poll(() => opts.checkoutRequests!.length).toBe(1);
     expect(opts.checkoutRequests![0]).toMatchObject({ discountCode: 'LOUNGE-ABC234' });
   });

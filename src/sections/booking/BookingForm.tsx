@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { startCheckout, type DiscountPreview } from '@/lib/api';
 import { useForm, useWatch } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
@@ -17,7 +17,7 @@ import { feeFor, feeLabel, totalCents } from '@/lib/settings';
 import { useSettings } from '@/lib/settingsContext';
 import { a11y } from './a11y';
 import { DiscountCodeField } from './DiscountCodeField';
-import { ExtraTalerPicker } from './ExtraTalerPicker';
+import { ExtraTalerStep } from './ExtraTalerStep';
 import { Field } from './fields';
 
 interface Props {
@@ -45,15 +45,19 @@ export function BookingForm({
   const schema = useMemo(() => createBookingSchema(settings.maxPersons), [settings.maxPersons]);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [discount, setDiscount] = useState<{ code: string; preview: DiscountPreview } | null>(null);
-  const [extraTaler, setExtraTaler] = useState(0);
+  // Ausgefüllte Angaben, solange die Extra-Taler-Seite offen ist (Entscheidung Louis, 17.11.2026)
+  const [pending, setPending] = useState<BookingFormValues | null>(null);
+  const [stepError, setStepError] = useState<string | null>(null);
+  const [redirecting, setRedirecting] = useState(false);
   const navigate = useNavigate();
+  const hasUpsell = settings.extraTalerOptions.length > 0;
 
   const {
     register,
     handleSubmit,
     control,
     setError,
-    formState: { errors, isSubmitting, isSubmitSuccessful },
+    formState: { errors, isSubmitting },
   } = useForm<BookingFormInput, unknown, BookingFormValues>({
     resolver: zodResolver(schema),
     defaultValues: BOOKING_FORM_DEFAULTS,
@@ -74,41 +78,89 @@ export function BookingForm({
   const loungeAfterDiscount = discount ? discount.preview.totalCents - fee : loungeValue;
   const won = discount?.preview.totalCents === 0;
   const taler = slotTaler ?? settings.talerCount;
-  // Extra-Taler: 1 Taler = 1 €, ohne Gebühr und ohne Rabatt (Betrag rechnet der Server)
-  const extraCents = settings.extraTalerOptions.includes(extraTaler) ? extraTaler * 100 : 0;
-  const payNothing = won && extraCents === 0;
+  const payNothing = won;
 
-  const onSubmit = async (values: BookingFormValues) => {
-    setSubmitError(null);
+  // Die Extra-Taler-Seite hat einen eigenen Verlaufseintrag: „Zurück“ im Browser führt zum
+  // Formular statt von der Seite weg.
+  useEffect(() => {
+    if (!pending) return;
+    const onPop = () => setPending(null);
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, [pending]);
+
+  const openStep = (values: BookingFormValues) => {
+    setStepError(null);
+    window.history.pushState({ ...window.history.state, extraTalerStep: true }, '');
+    setPending(values);
+  };
+  const closeStep = useCallback(() => {
+    if ((window.history.state as { extraTalerStep?: boolean } | null)?.extraTalerStep)
+      window.history.back();
+    setPending(null);
+  }, []);
+
+  /** Checkout starten. Extra-Taler: 1 Taler = 1 €, ohne Gebühr und Rabatt (Betrag rechnet der Server). */
+  const checkout = async (
+    values: BookingFormValues,
+    extraTaler: number,
+  ): Promise<string | null> => {
     const result = await startCheckout({
       date,
       startTime,
       form: values,
       discountCode: discount?.code,
-      extraTaler: extraCents / 100,
+      extraTaler,
     });
     if (result.ok) {
       // Weiter zu Stripe. Der Button bleibt gesperrt, bis die Seite wechselt.
+      setRedirecting(true);
       if (result.url.startsWith('/'))
         navigate(result.url); // nur Vorschau-Modus
       else window.location.assign(result.url);
-      return;
+      return null;
     }
     if (result.kind === 'slot') {
+      closeStep();
       onSlotUnavailable(result.message);
-      return;
+      return null;
     }
     if (result.kind === 'validation' && result.fields) {
+      closeStep();
       for (const [path, message] of Object.entries(result.fields)) {
         const field = path.replace(/^form\./, '') as keyof BookingFormInput;
         setError(field, { type: 'server', message }, { shouldFocus: true });
       }
+      setSubmitError(result.message);
+      return null;
     }
-    setSubmitError(result.message);
-    throw new Error(result.message); // markiert den Versand als fehlgeschlagen
+    return result.message;
   };
 
-  const busy = isSubmitting || isSubmitSuccessful;
+  const onSubmit = async (values: BookingFormValues) => {
+    setSubmitError(null);
+    if (hasUpsell) {
+      openStep(values);
+      return;
+    }
+    const message = await checkout(values, 0);
+    if (message) setSubmitError(message);
+  };
+
+  const [confirming, setConfirming] = useState(false);
+  const onConfirm = async (extraTaler: number) => {
+    if (!pending) return;
+    setStepError(null);
+    setConfirming(true);
+    const message = await checkout(
+      pending,
+      settings.extraTalerOptions.includes(extraTaler) ? extraTaler : 0,
+    );
+    setConfirming(false);
+    if (message) setStepError(message);
+  };
+
+  const busy = isSubmitting || redirecting;
 
   return (
     <form
@@ -306,14 +358,6 @@ export function BookingForm({
         />
       </Field>
 
-      <ExtraTalerPicker
-        options={settings.extraTalerOptions}
-        value={extraCents / 100}
-        onChange={setExtraTaler}
-        baseTaler={taler}
-        persons={persons ? Number(persons) : undefined}
-      />
-
       {/* Zusammenfassung */}
       <div
         className="rounded-2xl border border-gold bg-gold/10 p-5 sm:p-6"
@@ -355,42 +399,20 @@ export function BookingForm({
             </div>
           )}
           {won ? (
-            <div
-              className={`flex justify-between gap-4 pt-2 font-bold text-emerald-800 ${extraCents ? '' : 'text-xl'}`}
-            >
-              <dt>{extraCents ? 'Lounge (Gewinn)' : 'Gewinn – du zahlst nichts'}</dt>
+            <div className="flex justify-between gap-4 pt-2 text-xl font-bold text-emerald-800">
+              <dt>Gewinn – du zahlst nichts</dt>
               <dd>{formatCents(0)}</dd>
             </div>
           ) : (
-            <div
-              className={`flex justify-between gap-4 pt-2 text-ink ${extraCents ? 'font-semibold' : 'text-xl font-bold'}`}
-            >
+            <div className="flex justify-between gap-4 pt-2 text-xl font-bold text-ink">
               <dt>Lounge-Preis</dt>
               <dd>{formatCents(loungeAfterDiscount)}</dd>
             </div>
           )}
-          {extraCents > 0 && (
-            <>
-              <div className="flex justify-between gap-4">
-                <dt>Extra-Taler ({extraCents / 100} Taler)</dt>
-                <dd>{formatCents(extraCents)}</dd>
-              </div>
-              <div className="flex justify-between gap-4 pt-2 text-xl font-bold text-ink">
-                <dt>Zusammen</dt>
-                <dd>{formatCents((won ? 0 : loungeAfterDiscount) + extraCents)}</dd>
-              </div>
-              <div className="flex justify-between gap-4 text-sm text-ink-soft">
-                <dt>Weihnachtsmarkt-Taler beim Einlass</dt>
-                <dd>{taler + extraCents / 100} Taler</dd>
-              </div>
-            </>
-          )}
         </dl>
         {!won && (
           <p className="pt-1 text-sm text-ink-soft">
-            zzgl. {feeLabel(settings)} Verarbeitungsgebühr
-            {extraCents > 0 ? ' auf den Lounge-Preis' : ''}, die beim Bezahlen hinzugerechnet wird
-            {extraCents > 0 ? ' – die Extra-Taler sind gebührenfrei' : ''}
+            zzgl. {feeLabel(settings)} Verarbeitungsgebühr, die beim Bezahlen hinzugerechnet wird
           </p>
         )}
       </div>
@@ -462,15 +484,18 @@ export function BookingForm({
         aria-busy={busy}
         className="btn-gold w-full text-lg sm:w-auto sm:px-10"
       >
-        {busy
-          ? payNothing
-            ? 'Wird gebucht …'
-            : 'Weiter zur Zahlung …'
-          : payNothing
-            ? 'Gewinn einlösen – kostenlos buchen'
-            : 'Zahlungspflichtig buchen'}
+        {hasUpsell
+          ? 'Weiter'
+          : busy
+            ? payNothing
+              ? 'Wird gebucht …'
+              : 'Weiter zur Zahlung …'
+            : payNothing
+              ? 'Gewinn einlösen – kostenlos buchen'
+              : 'Zahlungspflichtig buchen'}
       </button>
       <p className="text-sm text-ink-soft">
+        {hasUpsell && 'Im nächsten Schritt kannst du Weihnachtsmarkt-Taler dazubuchen. '}
         Sichere Zahlung über Stripe mit Karte, Apple Pay, Google Pay oder PayPal. Dein Termin ist
         während der Zahlung 30 Minuten für dich reserviert.
       </p>
@@ -479,6 +504,24 @@ export function BookingForm({
         <div role="alert" className="rounded-xl border border-red-300 bg-red-50 p-4 text-red-900">
           {submitError}
         </div>
+      )}
+
+      {pending && (
+        <ExtraTalerStep
+          options={settings.extraTalerOptions}
+          baseTaler={taler}
+          persons={pending.persons}
+          date={date}
+          startTime={startTime}
+          endTime={endTime}
+          loungeCents={loungeAfterDiscount}
+          won={won}
+          feeText={won ? null : feeLabel(settings)}
+          busy={confirming || redirecting}
+          error={stepError}
+          onBack={closeStep}
+          onConfirm={(t) => void onConfirm(t)}
+        />
       )}
     </form>
   );
