@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Footer } from '@/components/Footer';
+import { GiveawayPopup } from '@/components/GiveawayPopup';
 import { Header } from '@/components/Header';
 import { MobileBookingBar } from '@/components/MobileBookingBar';
 import { StructuredData } from '@/components/StructuredData';
@@ -61,6 +62,7 @@ export function HomePage() {
       </main>
       <Footer />
       <MobileBookingBar />
+      <GiveawayPopup />
     </>
   );
 }
