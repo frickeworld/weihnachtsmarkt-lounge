@@ -29,6 +29,11 @@ const dayLabel = (date: string) =>
  * sichtbar (auch als Tag des Nachbarmonats, z. B. 30.11. in der Dezember-Ansicht), direkt klicken.
  */
 export async function pickDay(page: Page, date: string) {
+  await (await showDay(page, date)).click();
+}
+
+/** Blättert zum Monat von `date` und gibt den Tages-Knopf zurück (ohne zu klicken). */
+export async function showDay(page: Page, date: string) {
   const heading = page.locator('#buchen h3[aria-live]');
   const day = page.getByRole('button', { name: new RegExp(`^${dayLabel(date)}`) });
   const target = Number(date.slice(0, 4)) * 12 + Number(date.slice(5, 7)) - 1;
@@ -43,5 +48,5 @@ export async function pickDay(page: Page, date: string) {
       .click();
     await expect(heading).not.toHaveText(`${name} ${year}`);
   }
-  await day.click();
+  return day;
 }

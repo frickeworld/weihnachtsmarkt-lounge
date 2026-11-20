@@ -271,8 +271,14 @@ export async function mockBackoffice(page: Page, opts: BackofficeOptions = {}) {
     route.fulfill({
       json: {
         page_views: 140,
+        visitors: 95,
         today: 12,
+        visitors_today: 9,
         last_hour: 3,
+        daily: [
+          { date: '2026-11-18', page_views: 60, visitors: 41 },
+          { date: '2026-11-19', page_views: 80, visitors: 54 },
+        ],
         by_source: [
           { key: 'instagram', count: 80 },
           { key: 'direkt', count: 40 },

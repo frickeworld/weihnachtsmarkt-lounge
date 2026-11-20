@@ -212,7 +212,7 @@ export function OverviewPage() {
           </KpiGroup>
           <KpiGroup title="Website">
             <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-              <Kpi label="Seitenaufrufe" value={d.page_views} />
+              <Kpi label="Seitenaufrufe" value={d.page_views} sub="im Zeitraum oben" />
               <Kpi label="Klicks „Lounge buchen“" value={d.book_clicks} />
               <Kpi
                 label="Abschlussquote"
@@ -252,7 +252,7 @@ export function OverviewPage() {
               />
             </div>
           )}
-          {range && <TrafficPanel from={range.from} to={range.to} />}
+          <TrafficPanel />
           {range && <OccupancyHeatmapPanel from={range.from} to={range.to} />}
         </>
       )}

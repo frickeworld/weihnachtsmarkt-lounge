@@ -74,7 +74,10 @@ test.describe('Admin', () => {
     // Aufruf-Tracker: Herkunft, Seite, Gerät
     const traffic = page
       .locator('section')
-      .filter({ has: page.getByRole('heading', { name: 'Aufrufe der Website' }) });
+      .filter({ has: page.getByRole('heading', { name: 'Besucher und Aufrufe der Website' }) });
+    await expect(traffic.getByText('Besucher heute')).toBeVisible();
+    await expect(traffic.getByText('95', { exact: true })).toBeVisible();
+    await expect(traffic.getByText('Besucher pro Tag', { exact: true })).toBeVisible();
     await expect(traffic.getByText('Instagram')).toBeVisible();
     await expect(traffic.getByText('80 · 57 %')).toBeVisible();
     await expect(traffic.getByText('plakat', { exact: true })).toBeVisible();

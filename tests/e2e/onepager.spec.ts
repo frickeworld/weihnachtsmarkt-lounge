@@ -1,3 +1,4 @@
+import { showDay } from './support/calendar';
 import { expect, test, type Page } from '@playwright/test';
 import {
   addDays,
@@ -194,9 +195,7 @@ test.describe('Echte Verfügbarkeit (Phase 2)', () => {
       ),
     });
     await page.goto('/#buchen');
-    const btn = page
-      .locator('#buchen table button', { hasText: new RegExp(`^${Number(d.slice(8))}$`) })
-      .first();
+    const btn = await showDay(page, d);
     await expect(btn).toHaveAccessibleName(/nur noch 1 Zeitfenster/);
     await btn.click();
     await expect(slots(page).nth(0)).toBeDisabled();

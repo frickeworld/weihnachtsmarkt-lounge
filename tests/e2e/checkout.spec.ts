@@ -8,9 +8,10 @@ import {
   type MockOptions,
 } from './support/mockSupabase';
 
-async function fillAndSubmit(page: Page, extra?: (p: Page) => Promise<void>) {
+async function fillAndSubmit(page: Page, extra?: (p: Page) => Promise<void>, day?: string) {
   await page.goto('/#buchen');
-  await page.locator('#buchen table button:not([disabled])').first().click();
+  if (day) await pickDay(page, day);
+  else await page.locator('#buchen table button:not([disabled])').first().click();
   await page.getByRole('group', { name: 'Zeitfenster' }).locator('button').first().click();
   await page.getByLabel('Vorname').fill('Anna');
   await page.getByLabel('Nachname').fill('Muster');
@@ -43,24 +44,31 @@ test.describe('Checkout (Phase 3)', () => {
   test('Extra-Taler: Auswahl, Rechenbeispiel, Summe und Menge an den Server', async ({ page }) => {
     const opts: MockOptions = { checkoutRequests: [] };
     await mockSupabase(page, opts);
-    await fillAndSubmit(page, async (p) => {
-      const picker = p.getByRole('group', { name: 'Extra-Taler dazubuchen (optional)' });
-      await expect(picker).toContainText('Ein Glühwein kostet 4,50 Taler');
-      await expect(picker).toContainText('Bei 8 Personen sind 50 Taler rund 6 Taler pro Person');
-      await picker
-        .locator('label')
-        .filter({ has: p.getByRole('radio', { name: '200 Extra-Taler für 200 Euro' }) })
-        .click();
-      await expect(picker).toContainText(
-        'Mit 250 Talern habt ihr bei 8 Personen rund 31 Taler pro Person',
-      );
-      const summary = p.getByLabel('Zusammenfassung');
-      await expect(summary).toContainText(/Lounge-Preis\s*99,00\s€/);
-      await expect(summary).toContainText(/Extra-Taler \(200 Taler\)\s*200,00\s€/);
-      await expect(summary).toContainText(/Zusammen\s*299,00\s€/);
-      await expect(summary).toContainText(/Weihnachtsmarkt-Taler beim Einlass\s*250 Taler/);
-      await expect(summary).toContainText('die Extra-Taler sind gebührenfrei');
-    });
+    // Ein Montag in der Saison: 14:30 mit 99 € Lounge-Preis und 50 Talern
+    let monday = MOCK_SETTINGS.season_start;
+    while (new Date(`${monday}T00:00:00Z`).getUTCDay() !== 1) monday = addDays(monday, 1);
+    await fillAndSubmit(
+      page,
+      async (p) => {
+        const picker = p.getByRole('group', { name: 'Extra-Taler dazubuchen (optional)' });
+        await expect(picker).toContainText('Ein Glühwein kostet 4,50 Taler');
+        await expect(picker).toContainText('Bei 8 Personen sind 50 Taler rund 6 Taler pro Person');
+        await picker
+          .locator('label')
+          .filter({ has: p.getByRole('radio', { name: '200 Extra-Taler für 200 Euro' }) })
+          .click();
+        await expect(picker).toContainText(
+          'Mit 250 Talern habt ihr bei 8 Personen rund 31 Taler pro Person',
+        );
+        const summary = p.getByLabel('Zusammenfassung');
+        await expect(summary).toContainText(/Lounge-Preis\s*99,00\s€/);
+        await expect(summary).toContainText(/Extra-Taler \(200 Taler\)\s*200,00\s€/);
+        await expect(summary).toContainText(/Zusammen\s*299,00\s€/);
+        await expect(summary).toContainText(/Weihnachtsmarkt-Taler beim Einlass\s*250 Taler/);
+        await expect(summary).toContainText('die Extra-Taler sind gebührenfrei');
+      },
+      monday,
+    );
     await page.waitForURL(FAKE_STRIPE_URL);
     expect(opts.checkoutRequests![0]).toMatchObject({ extraTaler: 200 });
   });

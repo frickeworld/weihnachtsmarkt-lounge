@@ -30,8 +30,13 @@ export function DatenschutzPage() {
       <H3>Reichweitenmessung ohne Cookies</H3>
       <p>
         Wir zählen Seitenaufrufe und Klicks auf „Lounge buchen“ zusammen mit der Angabe „Handy“ oder
-        „Computer“. Dabei speichern wir keine IP-Adresse, keine Kennung und setzen keine Cookies;
-        ein Rückschluss auf dich ist nicht möglich.
+        „Computer“, der aufgerufenen Seite und der groben Herkunft (z. B. „Instagram“ oder der
+        Kampagnen-Angabe im Link). Um Besucher pro Tag zu zählen, bilden wir aus IP-Adresse,
+        Browser-Angabe und einem täglich neuen Zufallswert eine gekürzte Prüfsumme (Hash). Wir
+        speichern nur diese Prüfsumme, nie die IP-Adresse; der Zufallswert wird nach einem Tag
+        gelöscht, danach ist keine Zuordnung mehr möglich – auch nicht über mehrere Tage. Wir setzen
+        keine Cookies und speichern nichts auf deinem Gerät. Rechtsgrundlage ist unser berechtigtes
+        Interesse an einer datensparsamen Reichweitenmessung (Art. 6 Abs. 1 lit. f DSGVO).
       </p>
 
       <H2>4. Buchung</H2>

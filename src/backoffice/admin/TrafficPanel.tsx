@@ -1,7 +1,10 @@
+import { useState } from 'react';
+import { addDays, todayInBerlin } from '@/lib/dates';
 import { requireClient } from '../authClient';
 import { errorText } from '../errors';
 import { Kpi } from '../Kpi';
 import { ErrorBox, Loading, Panel } from '../ui';
+import { DailyBars } from './DailyBars';
 import { unwrap, useLoad } from './useLoad';
 
 interface Count {
@@ -11,8 +14,12 @@ interface Count {
 
 export interface TrafficData {
   page_views: number;
+  /** Besucher: je Tag eindeutig (Hash ohne Cookies), über den Zeitraum aufsummiert */
+  visitors?: number;
   today: number;
+  visitors_today?: number;
   last_hour: number;
+  daily?: { date: string; page_views: number; visitors: number }[];
   by_source: Count[];
   by_page: Count[];
   by_device: Count[];
@@ -38,15 +45,61 @@ const DEVICE_LABEL: Record<string, string> = { mobile: 'Handy', desktop: 'Comput
  * Aufruf-Tracker (Entscheidung Louis, 10.11.2026): Woher die Besucher kommen, welche Seite, welches
  * Gerät, zu welcher Uhrzeit. Ohne Cookies und ohne IDs – jeder Seitenaufruf zählt einzeln.
  */
-export function TrafficPanel({ from, to }: { from: string; to: string }) {
+/** Seit diesem Tag ist die Seite live (05.11.2026). */
+const LIVE_SINCE = '2026-11-05';
+type Period = 'heute' | '7' | '30' | 'alles';
+const PERIODS: [Period, string][] = [
+  ['heute', 'Heute'],
+  ['7', '7 Tage'],
+  ['30', '30 Tage'],
+  ['alles', 'Seit Start'],
+];
+
+/** Eigener Zeitraum, unabhängig von „Saison“ oben – die Website läuft schon vor der Saison. */
+export function TrafficPanel() {
+  const today = todayInBerlin();
+  const [period, setPeriod] = useState<Period>('30');
+  const from =
+    period === 'heute'
+      ? today
+      : period === '7'
+        ? addDays(today, -6)
+        : period === '30'
+          ? addDays(today, -29)
+          : LIVE_SINCE < today
+            ? LIVE_SINCE
+            : today;
   const data = useLoad(
     async () =>
-      unwrap(await requireClient().rpc('admin_traffic', { p_from: from, p_to: to })) as TrafficData,
-    [from, to],
+      unwrap(
+        await requireClient().rpc('admin_traffic', { p_from: from, p_to: today }),
+      ) as TrafficData,
+    [from, today],
   );
 
   return (
-    <Panel title="Aufrufe der Website" className="mt-6">
+    <Panel title="Besucher und Aufrufe der Website" className="mt-6">
+      <div
+        className="mb-4 flex flex-wrap gap-2"
+        role="group"
+        aria-label="Zeitraum der Website-Zahlen"
+      >
+        {PERIODS.map(([p, label]) => (
+          <button
+            key={p}
+            type="button"
+            aria-pressed={period === p}
+            onClick={() => setPeriod(p)}
+            className={`min-h-11 rounded-full border px-4 text-sm font-semibold transition-colors ${
+              period === p
+                ? 'border-gold-deep bg-gold text-ink'
+                : 'border-line bg-surface hover:border-gold'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
       {data.error != null && <ErrorBox>{errorText(data.error)}</ErrorBox>}
       {data.loading && <Loading />}
       {data.data && <TrafficView d={data.data} />}
@@ -58,11 +111,31 @@ function TrafficView({ d }: { d: TrafficData }) {
   const maxHour = Math.max(1, ...d.by_hour.map((h) => h.count));
   return (
     <>
-      <div className="grid grid-cols-3 gap-3">
-        <Kpi label="Im Zeitraum" value={d.page_views} />
-        <Kpi label="Heute" value={d.today} />
-        <Kpi label="Letzte Stunde" value={d.last_hour} />
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <Kpi
+          label="Besucher heute"
+          value={d.visitors_today ?? d.today}
+          sub="verschiedene Personen"
+        />
+        <Kpi label="Besucher im Zeitraum" value={d.visitors ?? d.page_views} sub="je Tag gezählt" />
+        <Kpi label="Seitenaufrufe im Zeitraum" value={d.page_views} />
+        <Kpi label="Aufrufe letzte Stunde" value={d.last_hour} />
       </div>
+
+      {d.daily && d.daily.length > 1 && (
+        <div className="mt-6 grid gap-4 lg:grid-cols-2">
+          <DailyBars
+            title="Besucher pro Tag"
+            unit="Besucher"
+            points={d.daily.map((x) => ({ date: x.date, value: x.visitors }))}
+          />
+          <DailyBars
+            title="Seitenaufrufe pro Tag"
+            unit="Aufrufe"
+            points={d.daily.map((x) => ({ date: x.date, value: x.page_views }))}
+          />
+        </div>
+      )}
 
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
         <Bars title="Woher kommen die Besucher?" rows={d.by_source} labels={SOURCE_LABEL} />
@@ -96,9 +169,11 @@ function TrafficView({ d }: { d: TrafficData }) {
       </div>
 
       <p className="mt-5 text-sm text-ink-soft">
-        Gezählt wird jeder Aufruf der Startseite und der Gewinnspiel-Seite, ohne Cookies und ohne
-        Wiedererkennung – lädt jemand die Seite zweimal, zählt das zweimal. Tipp: Links mit Herkunft
-        versehen, z. B. <code>?utm_source=plakat</code> für den QR-Code auf dem Plakat oder{' '}
+        „Besucher“ zählt jede Person einmal pro Tag, auch wenn sie die Seite mehrmals lädt – ohne
+        Cookies und ohne gespeicherte IP-Adresse (Zählung seit 20.11.; davor zählt jeder Aufruf).
+        Wer an zwei Tagen kommt, zählt an beiden Tagen. „Seitenaufrufe“ zählt jedes Laden der
+        Startseite und der Gewinnspiel-Seite. Tipp: Links mit Herkunft versehen, z. B.{' '}
+        <code>?utm_source=plakat</code> für den QR-Code auf dem Plakat oder{' '}
         <code>?utm_source=newsletter</code>, dann erscheint die Quelle hier mit eigenem Namen.
       </p>
     </>
