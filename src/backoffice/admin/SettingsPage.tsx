@@ -138,7 +138,7 @@ function SettingsForm({ initial, onSaved }: { initial: AdminSettings; onSaved: (
       .filter(Boolean)
       .map((x) => (/^\d+$/.test(x) ? Number(x) : NaN));
     if (extra.some((x) => Number.isNaN(x) || x < 1 || x > 1000) || extra.length > 6)
-      return 'Extra-Taler: bis zu 6 ganze Zahlen von 1 bis 1000, z. B. 100, 200, 300 (leer = aus).';
+      return 'Extra-Taler: bis zu 6 ganze Zahlen von 1 bis 1000, z. B. 75, 100 (leer = aus).';
     return {
       extra_taler_options: [...new Set(extra)].sort((a, b) => a - b),
       season_start: v.season_start,
@@ -220,7 +220,7 @@ function SettingsForm({ initial, onSaved }: { initial: AdminSettings; onSaved: (
           {input('taler', 'Standard: Wert der Taler', { suffix: '€' })}
           {input('max_persons', 'Max. Personen', { suffix: 'Pers.' })}
           {input('extra_taler', 'Extra-Taler zum Dazubuchen', {
-            hint: 'Stufen kommagetrennt, z. B. 100, 200, 300. 1 Taler = 1 €, ohne Gebühr, voll an die Händler. Leer = Auswahl aus.',
+            hint: 'Stufen kommagetrennt, z. B. 75, 100. 1 Taler = 1 €, ohne Gebühr, voll an die Händler. Leer = Auswahl aus.',
           })}
           {input('cutoff', 'Online-Buchungsschluss vor Beginn', { suffix: 'Min.' })}
           {input('hold', 'Reservierung beim Checkout', { suffix: 'Min.' })}

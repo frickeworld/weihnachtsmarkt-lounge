@@ -7,8 +7,8 @@ update public.settings set season_start = '2026-11-30', season_end = '2026-12-30
 
 select is((select giveaway_discount_percent from public.settings where id = 1), 10,
   'Trostpreis im Gewinnspiel: 10 %');
-select is(public.get_extra_taler_options(), array[100, 200, 300],
-  'Standard-Stufen 100, 200, 300');
+select is(public.get_extra_taler_options(), array[75, 100],
+  'Standard-Stufen 75, 100');
 
 -- Dienstag 15.12. 16:45: 156,45 € (149 € + 7,45 €), 75 Taler, Händler 107,28 €
 insert into public.bookings (id, date, start_time, end_time, status, source, payment_method,

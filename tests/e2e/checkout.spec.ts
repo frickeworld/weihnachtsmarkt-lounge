@@ -7,8 +7,14 @@ import {
   mockSupabase,
   type MockOptions,
 } from './support/mockSupabase';
+import { extraTalerStep, submitBooking } from './support/booking';
 
-async function fillAndSubmit(page: Page, extra?: (p: Page) => Promise<void>, day?: string) {
+async function fillAndSubmit(
+  page: Page,
+  extra?: (p: Page) => Promise<void>,
+  submit = true,
+  day?: string,
+) {
   await page.goto('/#buchen');
   if (day) await pickDay(page, day);
   else await page.locator('#buchen table button:not([disabled])').first().click();
@@ -23,8 +29,9 @@ async function fillAndSubmit(page: Page, extra?: (p: Page) => Promise<void>, day
     .click();
   await expect(page.getByRole('radio', { name: '8 Personen' })).toBeChecked();
   if (extra) await extra(page);
+  if (!submit) return;
   await page.getByLabel(/Ich akzeptiere die/).check();
-  await page.getByRole('button', { name: 'Zahlungspflichtig buchen', exact: true }).click();
+  await submitBooking(page);
 }
 
 test.describe('Checkout (Phase 3)', () => {
@@ -41,44 +48,84 @@ test.describe('Checkout (Phase 3)', () => {
     expect(JSON.stringify(req)).not.toMatch(/price|amount|cents/i);
   });
 
-  test('Extra-Taler: Auswahl, Rechenbeispiel, Summe und Menge an den Server', async ({ page }) => {
+  test('Extra-Taler: eigene Seite vor der Zahlung, Auswahl, Summe und Menge an den Server', async ({
+    page,
+  }) => {
     const opts: MockOptions = { checkoutRequests: [] };
     await mockSupabase(page, opts);
-    // Ein Montag in der Saison: 14:30 mit 99 € Lounge-Preis und 50 Talern
+    // Ein Montag in der Saison: 14:30 mit 99 € Lounge-Preis und 50 Talern (unabhängig vom Testtag)
     let monday = MOCK_SETTINGS.season_start;
     while (new Date(`${monday}T00:00:00Z`).getUTCDay() !== 1) monday = addDays(monday, 1);
     await fillAndSubmit(
       page,
       async (p) => {
-        const picker = p.getByRole('group', { name: 'Extra-Taler dazubuchen (optional)' });
-        await expect(picker).toContainText('Ein Glühwein kostet 4,50 Taler');
-        await expect(picker).toContainText('Bei 8 Personen sind 50 Taler rund 6 Taler pro Person');
-        await picker
+        await p.getByLabel(/Ich akzeptiere die/).check();
+        await p.getByRole('button', { name: 'Weiter', exact: true }).click();
+        const step = extraTalerStep(p);
+        await expect(step).toContainText('Mehr Taler für euren Weihnachtsmarkt');
+        await expect(step).toContainText('Auf dem ganzen Weihnachtsmarkt');
+        await expect(step).toContainText('Was übrig bleibt, behaltet ihr');
+        // Nichts vorausgewählt
+        await expect(p.getByRole('radio', { name: 'Keine Extra-Taler' })).toBeChecked();
+        const summary = step.getByLabel('Zusammenfassung');
+        await expect(summary).toContainText(/Zusammen\s*99,00\s€/);
+        // Zurück zum Formular und wieder vor (auch mit dem Zurück-Knopf des Browsers)
+        await p.goBack();
+        await expect(step).toHaveCount(0);
+        await expect(p.getByLabel('Vorname')).toHaveValue('Anna');
+        await p.getByRole('button', { name: 'Weiter', exact: true }).click();
+        await expect(step).toBeVisible();
+        await expect(step).toContainText('rund 19 Taler pro Kopf'); // 150 Taler / 8 Personen
+        await step
           .locator('label')
-          .filter({ has: p.getByRole('radio', { name: '200 Extra-Taler für 200 Euro' }) })
+          .filter({ has: p.getByRole('radio', { name: '100 Extra-Taler für 100 Euro' }) })
           .click();
-        await expect(picker).toContainText(
-          'Mit 250 Talern habt ihr bei 8 Personen rund 31 Taler pro Person',
-        );
-        const summary = p.getByLabel('Zusammenfassung');
         await expect(summary).toContainText(/Lounge-Preis\s*99,00\s€/);
-        await expect(summary).toContainText(/Extra-Taler \(200 Taler\)\s*200,00\s€/);
-        await expect(summary).toContainText(/Zusammen\s*299,00\s€/);
-        await expect(summary).toContainText(/Weihnachtsmarkt-Taler beim Einlass\s*250 Taler/);
+        await expect(summary).toContainText(/Extra-Taler \(100 Taler\)\s*100,00\s€/);
+        await expect(summary).toContainText(/Zusammen\s*199,00\s€/);
+        await expect(summary).toContainText(/Weihnachtsmarkt-Taler beim Einlass\s*150 Taler/);
         await expect(summary).toContainText('die Extra-Taler sind gebührenfrei');
+        await step.getByRole('button', { name: 'Zahlungspflichtig buchen', exact: true }).click();
       },
+      false,
       monday,
     );
     await page.waitForURL(FAKE_STRIPE_URL);
-    expect(opts.checkoutRequests![0]).toMatchObject({ extraTaler: 200 });
+    expect(opts.checkoutRequests).toHaveLength(1);
+    expect(opts.checkoutRequests![0]).toMatchObject({ extraTaler: 100 });
   });
 
-  test('ohne Extra-Taler-Stufen keine Auswahl', async ({ page }) => {
+  test('große Runde: deutlicherer Upsell', async ({ page }) => {
+    await mockSupabase(page, { checkoutRequests: [] });
+    await fillAndSubmit(
+      page,
+      async (p) => {
+        await p
+          .locator('label')
+          .filter({ has: p.getByRole('radio', { name: '10 Personen' }) })
+          .click();
+        await p.getByLabel(/Ich akzeptiere die/).check();
+        await p.getByRole('button', { name: 'Weiter', exact: true }).click();
+        const step = extraTalerStep(p);
+        await expect(step).toContainText('Ihr seid 10');
+        await expect(step).toContainText('Für große Runden');
+      },
+      false,
+    );
+  });
+
+  test('ohne Extra-Taler-Stufen keine Extra-Seite', async ({ page }) => {
     const opts: MockOptions = { checkoutRequests: [], extraTalerOptions: [] };
     await mockSupabase(page, opts);
-    await fillAndSubmit(page, async (p) => {
-      await expect(p.getByText('Mehr Taler für eure Runde')).toHaveCount(0);
-    });
+    await fillAndSubmit(
+      page,
+      async (p) => {
+        await expect(p.getByRole('button', { name: 'Weiter', exact: true })).toHaveCount(0);
+        await p.getByLabel(/Ich akzeptiere die/).check();
+        await p.getByRole('button', { name: 'Zahlungspflichtig buchen', exact: true }).click();
+      },
+      false,
+    );
     await page.waitForURL(FAKE_STRIPE_URL);
     expect(opts.checkoutRequests![0]).toMatchObject({ extraTaler: 0 });
   });
@@ -108,9 +155,7 @@ test.describe('Checkout (Phase 3)', () => {
     // Auf unserer Seite nur der Lounge-Preis; die 5 % rechnet erst Stripe dazu
     const summary = page.getByLabel('Zusammenfassung');
     await expect(summary).toContainText(/Lounge-Preis\s*237,00\s€/); // 249 € Endpreis
-    await expect(
-      page.getByRole('button', { name: 'Zahlungspflichtig buchen', exact: true }),
-    ).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Weiter', exact: true })).toBeVisible();
     await slots.nth(1).click();
     await expect(summary).toContainText(/Lounge inkl\. 75 € Freiverzehr\s*149,00\s€/);
     await expect(summary).toContainText(/Lounge-Preis\s*149,00\s€/);
@@ -157,7 +202,7 @@ test.describe('Checkout (Phase 3)', () => {
       await p.getByLabel('USt-ID (optional)').fill('DE999');
     });
     await expect(page.getByText('Bitte prüfe die USt-ID (z. B. DE123456789).')).toBeVisible();
-    await expect(page.getByRole('button', { name: /Zahlungspflichtig buchen/ })).toBeEnabled();
+    await expect(page.getByRole('button', { name: 'Weiter', exact: true })).toBeEnabled();
   });
 
   test('Netzwerk- oder Stripe-Fehler: freundliche Meldung, erneut versuchen möglich', async ({

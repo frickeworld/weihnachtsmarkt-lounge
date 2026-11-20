@@ -78,7 +78,7 @@ test.describe('One-Pager', () => {
     await firstFreeDay(page).click();
     await slots(page).first().click();
 
-    const submit = page.getByRole('button', { name: 'Zahlungspflichtig buchen', exact: true });
+    const submit = page.getByRole('button', { name: 'Weiter', exact: true });
     await submit.click();
     await expect(page.getByText('Bitte gib deinen Vornamen an.')).toBeVisible();
     await expect(page.getByText('Bitte bestätige die AGB und die Verbindlichkeit.')).toBeVisible();
@@ -104,6 +104,7 @@ test.describe('One-Pager', () => {
     await expect(page.getByLabel(/STUDIO\/F-Newsletter/)).not.toBeChecked();
     await page.getByLabel(/Ich akzeptiere die/).check();
     await submit.click();
+    await page.getByRole('button', { name: 'Zahlungspflichtig buchen', exact: true }).click();
     await page.waitForURL(/checkout\.stripe\.com/);
   });
 

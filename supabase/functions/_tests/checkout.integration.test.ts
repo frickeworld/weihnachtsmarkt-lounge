@@ -159,13 +159,13 @@ Deno.test({
       await post(FN.release, { bookingId: r.body.bookingId });
     });
 
-    await t.step('Extra-Taler +200: ohne Gebühr, voll an die Händler', async () => {
-      const r = await post(FN.checkout, { date: day, startTime: '14:30', form, extraTaler: 200 });
+    await t.step('Extra-Taler +75: ohne Gebühr, voll an die Händler', async () => {
+      const r = await post(FN.checkout, { date: day, startTime: '14:30', form, extraTaler: 75 });
       assertEquals(r.status, 200, JSON.stringify(r.body));
       const b = await booking(r.body.bookingId);
       assertEquals(
         [b.amount_total_cents, b.fee_cents, b.extra_taler_cents, b.haendler_share_cents],
-        [10395 + 20000, 495, 20000, 7128 + 20000],
+        [10395 + 7500, 495, 7500, 7128 + 7500],
       );
       await post(FN.release, { bookingId: r.body.bookingId });
     });

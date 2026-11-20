@@ -33,8 +33,10 @@ export function AgbPage() {
       </ul>
       <p>
         Speisen und Getränke über den Wert der Weihnachtsmarkt-Taler hinaus sind nicht enthalten.
-        Die Weihnachtsmarkt-Taler werden nicht in Bargeld ausgezahlt und gelten [GÜLTIGKEIT DER
-        TALER FESTLEGEN, z. B. nur am Buchungstag].
+        Die Weihnachtsmarkt-Taler werden nicht in Bargeld ausgezahlt. Sie gelten an allen Ständen
+        des Weihnachtsmarkts im Schlosspark; nicht verbrauchte Taler können auch nach dem
+        Lounge-Besuch auf dem Weihnachtsmarkt eingelöst werden [ENDE DER GÜLTIGKEIT BESTÄTIGEN, z.
+        B. letzter Markttag].
       </p>
 
       <H2>{n(3)} Preise</H2>
